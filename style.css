@@ -1,0 +1,130 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, Arial, sans-serif;
+}
+body {
+  background: radial-gradient(#23313d,#0d1418);
+  color: #e9f2f8;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+h1,h2 {
+  margin: .3em 0;
+  font-weight: 600;
+}
+.hud {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.stat {
+  font-size: 14px;
+  margin: 2px 0;
+}
+.instructions {
+  font-size: 12px;
+  max-width: 260px;
+  line-height: 1.3;
+}
+.instructions ul {
+  padding-left: 18px;
+  margin: 4px 0;
+}
+button {
+  background: linear-gradient(#3272b8,#1d4a78);
+  color: #fff;
+  border: 1px solid #4079b3;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 6px 4px;
+  transition: background .2s;
+}
+button:hover {
+  background: linear-gradient(#3c85d6,#225a90);
+}
+button:active {
+  transform: translateY(1px);
+}
+#gameCanvas {
+  display: block;
+  margin: 8px auto 24px;
+  background: linear-gradient(#75b2e4,#bfe2ff 270px,#6ca143 270px,#5a8d32 100%);
+  border: 2px solid #173648;
+  border-radius: 8px;
+  box-shadow: 0 0 16px #0007;
+}
+.powerBarContainer {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 18px;
+  border: 1px solid #3f6f90;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #10222c;
+}
+.powerBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#1fa94d,#f2c430,#e64545);
+  transition: width .05s linear;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.overlay.hidden {
+  display: none;
+}
+.panel {
+  background: #162830;
+  padding: 26px 34px;
+  border-radius: 16px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 4px 18px #000a;
+}
+.panel h2 {
+  margin-top: 0;
+  color: #5cc2ff;
+}
+#overlayMessage {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  white-space: pre-line;
+}
+.hud-right {
+  text-align: right;
+}
+@media (max-width: 1050px) {
+  .hud {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hud-right {
+    text-align: left;
+  }
+  #gameCanvas {
+    width: 96vw;
+    height: 48vh;
+  }
+  .powerBarContainer {
+    width: 70vw;
+  }
+}
