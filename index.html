@@ -1,359 +1,662 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Archery Challenge - All In One</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%;
-      background: radial-gradient(circle at 25% 20%, #1c3147, #0d161b 80%);
-      color: #e9f4fa; font-family: system-ui, Arial, sans-serif;
-    }
-    body { min-height:100vh; }
-    #hud {
-      display: flex; flex-wrap: wrap; align-items: center;
-      gap: 12px; padding: 12px 16px; background: #0d1f26cc;
-      backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10;
-    }
-    #hud strong { color: #3fa2ff; margin-right: 2px; }
-    #hud .stat { font-size: 13px; min-width: 60px; }
-    #helpTip {
-      position: fixed; top: 64px; left: 14px; background: #16303aee;
-      padding: 7px 12px; border-radius: 6px; font-size: 13px;
-      max-width: 250px; backdrop-filter: blur(4px); z-index: 20;
-    }
-    #powerBar {
-      position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: 22px; width: 340px; max-width: 80vw; height: 18px;
-      background: #132831; border: 1px solid #2d5566; border-radius: 12px;
-      overflow: hidden; z-index: 20; box-shadow: 0 2px 8px #0008 inset;
-    }
-    #powerFill {
-      width: 0%; height: 100%; background: linear-gradient(90deg,#29c277,#f2c430,#e55252);
-      transition: width .07s linear;
-    }
-    #overlay {
-      position: fixed; inset: 0; background: #000a;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 50; font-size: 15px;
-    }
-    #overlay.hidden { display: none; }
-    #panel {
-      background: #14252c; padding: 28px 34px; border-radius: 18px;
-      width: min(440px,92vw); box-shadow: 0 6px 28px #0009; text-align: center;
-    }
-    #panel h2 { margin:0 0 12px; font-size: 22px; color: #3fa2ff; }
-    #panel button {
-      background: linear-gradient(90deg,#1f6fb2,#2991da);
-      color: #fff; border: 1px solid #1f6fb2; border-radius: 6px;
-      margin: 12px 0 0 0; padding: 8px 24px; font-size: 15px; cursor: pointer;
-    }
-    #gameCanvas {
-      display: block; margin: 0 auto; width: 100vw; height: 60vh;
-      background: linear-gradient(#6db0e1 0 36%, #9fd4f3 36% 46%, #68a243 46% 100%);
-      touch-action: none;
-      border: 0;
-    }
-    @media (max-width:650px) {
-      #hud { flex-direction: column; align-items: flex-start; }
-      #helpTip { top:auto; bottom:72px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Orb - The Ultimate Physics Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .score-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .game-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 60vh;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mobile-controls {
+            display: none;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .start-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .score-display {
+                font-size: 1.2rem;
+            }
+            
+            .mobile-controls {
+                display: flex;
+            }
+            
+            .controls p {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .game-canvas-container {
+                height: 50vh;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="hud">
-    <strong>Archery Challenge</strong>
-    <div class="stat">Level: <span id="levelNum">1</span></div>
-    <div class="stat">Arrows: <span id="arrowsLeft">0</span></div>
-    <div class="stat">Score: <span id="score">0</span></div>
-    <div class="stat">Accuracy: <span id="accuracy">0%</span></div>
-    <div class="stat">Wind: <span id="windDisplay">0</span></div>
-    <button id="startBtn">Start / Next</button>
-    <button id="resetBtn">Reset</button>
-  </div>
-  <div id="helpTip">Aim with pointer/touch. Hold to draw. Release to shoot. Space also works.</div>
-  <canvas id="gameCanvas"></canvas>
-  <div id="powerBar"><div id="powerFill"></div></div>
-  <div id="overlay" class="hidden">
-    <div id="panel">
-      <h2 id="ovTitle">Level Complete</h2>
-      <div id="ovMsg"></div>
-      <button id="ovBtn">Continue</button>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="game-header">
+            <h1>GRAVITY ORB</h1>
+            <div class="score-display" id="score">Score: 0</div>
+        </div>
+        
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            
+            <div class="start-screen" id="startScreen">
+                <h2>Welcome to Gravity Orb!</h2>
+                <p>Tilt your device or use arrow keys to navigate through the cosmic obstacles.</p>
+                <p>Survive as long as possible and set a new high score!</p>
+                <button class="btn" onclick="startGame()">Start Game</button>
+            </div>
+            
+            <div class="game-over" id="gameOver">
+                <h2>Game Over!</h2>
+                <p>Your Score: <span id="finalScore">0</span></p>
+                <p>High Score: <span id="highScore">0</span></p>
+                <button class="btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <p>Use arrow keys or tilt your device to control the orb</p>
+            <div class="mobile-controls">
+                <button class="control-btn" id="leftBtn">←</button>
+                <button class="control-btn" id="upBtn">↑</button>
+                <button class="control-btn" id="rightBtn">→</button>
+                <button class="control-btn" id="downBtn">↓</button>
+            </div>
+        </div>
     </div>
-  </div>
-  <script>
-    // --- CONFIG ---
-    const LEVELS = [
-      {name:"Warm Up", arrows:10, dist:.60, radius:.10, goal:80, moving:false, wind:.25},
-      {name:"Light Breeze", arrows:10, dist:.65, radius:.09, goal:150, moving:false, wind:.7},
-      {name:"Gusty Meadow", arrows:10, dist:.70, radius:.09, goal:230, moving:true, moveAmp:.07, moveSpeed:.7, wind:1.2},
-      {name:"Highland Draft", arrows:9, dist:.74, radius:.085, goal:340, moving:true, moveAmp:.10, moveSpeed:1.0, wind:2.0},
-      {name:"Storm Edge", arrows:9, dist:.78, radius:.08, goal:470, moving:true, moveAmp:.13, moveSpeed:1.2, wind:2.7},
-      {name:"Final Trial", arrows:8, dist:.82, radius:.075, goal:610, moving:true, moveAmp:.16, moveSpeed:1.4, wind:3.4}
-    ];
-    const RING_SCORES = [50,30,20,10,5];
-    const RING_COLORS = ["#ffd700","#ff4e3c","#26b168","#2d6ae8","#444"];
-    const BASE_SPEED = 1100, GRAVITY = 950, MAX_POWER = 1600;
-    // --- STATE ---
-    let levelIdx=0, arrowsLeft=0, totalScore=0, arrowsShot=0, hits=0;
-    let wind=0, windTime=Math.random()*1000;
-    let playing=false, charging=false, chargeStart=0;
-    let arrows=[], target=null;
-    let pointer={x:400, y:250, active:false};
-    // --- DOM ---
-    const c=document.getElementById("gameCanvas"), ctx=c.getContext("2d");
-    const levelNum=document.getElementById("levelNum"), arrowsLeftEl=document.getElementById("arrowsLeft"),
-      scoreEl=document.getElementById("score"), accuracyEl=document.getElementById("accuracy"),
-      windDisplay=document.getElementById("windDisplay"), startBtn=document.getElementById("startBtn"),
-      resetBtn=document.getElementById("resetBtn"), powerFill=document.getElementById("powerFill"),
-      overlay=document.getElementById("overlay"), ovTitle=document.getElementById("ovTitle"),
-      ovMsg=document.getElementById("ovMsg"), ovBtn=document.getElementById("ovBtn");
-    // --- RESIZE ---
-    function resize() {
-      c.width=window.innerWidth; c.height=Math.max(window.innerHeight*0.6,350);
-    }
-    window.addEventListener("resize",resize); resize();
-    // --- TARGET ---
-    function Target(cfg) {
-      this.cfg=cfg; this.birth=performance.now();
-      this.base=function(){ return {x:cfg.dist*c.width, y:c.height*0.55}; };
-      this.center=function(t){
-        let b=this.base();
-        if(!cfg.moving) return b;
-        let amp=(cfg.moveAmp||.08)*c.height, sp=cfg.moveSpeed||1;
-        return {x:b.x, y:b.y+Math.sin(t*0.001*sp)*amp};
-      };
-      this.radius=function(){ return cfg.radius*Math.min(c.width,c.height); };
-      this.draw=function(t){
-        let {x,y}=this.center(t), r=this.radius();
-        ctx.strokeStyle="#594c32"; ctx.lineWidth=Math.max(6,r*0.08);
-        ctx.beginPath(); ctx.moveTo(x,y+r); ctx.lineTo(x,y+r+r*1.3); ctx.stroke();
-        for(let i=0;i<RING_SCORES.length;i++){
-          let rf=1-i/RING_SCORES.length;
-          ctx.beginPath(); ctx.fillStyle=RING_COLORS[i]; ctx.arc(x,y,r*rf,0,2*Math.PI); ctx.fill();
-          ctx.strokeStyle="#0006"; ctx.lineWidth=1; ctx.stroke();
+
+    <script>
+        // Game variables
+        let canvas, ctx;
+        let gameRunning = false;
+        let score = 0;
+        let highScore = 0;
+        let lastTime = 0;
+        
+        // Orb properties
+        const orb = {
+            x: 0,
+            y: 0,
+            radius: 20,
+            velocityX: 0,
+            velocityY: 0,
+            color: '#ff6b6b'
+        };
+        
+        // Obstacles
+        let obstacles = [];
+        let particles = [];
+        
+        // Control variables
+        let tiltX = 0;
+        let tiltY = 0;
+        let keys = {
+            ArrowLeft: false,
+            ArrowRight: false,
+            ArrowUp: false,
+            ArrowDown: false
+        };
+        
+        // Initialize game
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Initialize particles
+            createParticles();
+            
+            // Load high score
+            highScore = localStorage.getItem('gravityOrbHighScore') || 0;
+            document.getElementById('highScore').textContent = highScore;
         }
-        ctx.beginPath(); ctx.fillStyle="#000"; ctx.arc(x,y,r*0.07,0,2*Math.PI); ctx.fill();
-      };
-    }
-    function Arrow(x,y,vx,vy) {
-      this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.rot=Math.atan2(vy,vx);
-      this.stuck=false; this.scored=false; this.score=0; this.impactDist=0;
-      this.update=function(dt){
-        if(this.stuck) return;
-        this.vx+=wind*dt; this.vy+=GRAVITY*dt; this.x+=this.vx*dt; this.y+=this.vy*dt;
-        this.rot=Math.atan2(this.vy,this.vx);
-        let center=target.center(performance.now()), r=target.radius();
-        let dx=this.x-center.x, dy=this.y-center.y, dist=Math.hypot(dx,dy);
-        if(dist<=r && !this.scored){
-          this.stuck=true; this.scored=true; this.impactDist=dist;
-          let ringThick=r/RING_SCORES.length, ringIdx=Math.floor(dist/ringThick);
-          ringIdx=Math.max(0,Math.min(RING_SCORES.length-1,ringIdx));
-          this.score=RING_SCORES[ringIdx];
-          if(this.score>0)hits++;
-          totalScore+=this.score;
-          this.x+=Math.cos(this.rot)*8; this.y+=Math.sin(this.rot)*8;
-          updateHUD();
+        
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Reset orb position
+            orb.x = canvas.width / 2;
+            orb.y = canvas.height / 2;
         }
-        if(this.y>c.height+200||this.x>c.width+200||this.y<-300) this.stuck=true;
-      };
-      this.draw=function(){
-        ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.rot);
-        ctx.lineWidth=2; ctx.strokeStyle="#e5ecf3";
-        ctx.beginPath(); ctx.moveTo(-22,0); ctx.lineTo(24,0); ctx.stroke();
-        ctx.fillStyle="#ff4838"; ctx.beginPath(); ctx.moveTo(-22,0); ctx.lineTo(-28,5); ctx.lineTo(-28,-5); ctx.closePath(); ctx.fill();
-        ctx.fillStyle="#ffd24a"; ctx.beginPath(); ctx.moveTo(24,0); ctx.lineTo(30,4); ctx.lineTo(30,-4); ctx.closePath(); ctx.fill();
-        ctx.restore();
-        if(this.scored&&this.score>0){
-          ctx.fillStyle="#fff"; ctx.font="bold 14px system-ui";
-          ctx.fillText("+"+this.score,this.x+10,this.y-10);
+        
+        function setupEventListeners() {
+            // Keyboard controls
+            window.addEventListener('keydown', (e) => {
+                if (keys.hasOwnProperty(e.key)) {
+                    keys[e.key] = true;
+                    e.preventDefault();
+                }
+            });
+            
+            window.addEventListener('keyup', (e) => {
+                if (keys.hasOwnProperty(e.key)) {
+                    keys[e.key] = false;
+                    e.preventDefault();
+                }
+            });
+            
+            // Mobile touch controls
+            const leftBtn = document.getElementById('leftBtn');
+            const rightBtn = document.getElementById('rightBtn');
+            const upBtn = document.getElementById('upBtn');
+            const downBtn = document.getElementById('downBtn');
+            
+            const setKeyState = (key, state) => {
+                keys[key] = state;
+            };
+            
+            leftBtn.addEventListener('touchstart', () => setKeyState('ArrowLeft', true));
+            leftBtn.addEventListener('touchend', () => setKeyState('ArrowLeft', false));
+            
+            rightBtn.addEventListener('touchstart', () => setKeyState('ArrowRight', true));
+            rightBtn.addEventListener('touchend', () => setKeyState('ArrowRight', false));
+            
+            upBtn.addEventListener('touchstart', () => setKeyState('ArrowUp', true));
+            upBtn.addEventListener('touchend', () => setKeyState('ArrowUp', false));
+            
+            downBtn.addEventListener('touchstart', () => setKeyState('ArrowDown', true));
+            downBtn.addEventListener('touchend', () => setKeyState('ArrowDown', false));
+            
+            // Device orientation
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
         }
-      };
-    }
-    // --- INPUT ---
-    c.addEventListener("pointerdown",e=>{
-      let r=c.getBoundingClientRect();
-      pointer.x=e.clientX-r.left; pointer.y=e.clientY-r.top; pointer.active=true;
-      if(!playing||arrowsLeft<=0||charging)return;
-      charging=true; chargeStart=performance.now();
-    },{passive:false});
-    window.addEventListener("pointermove",e=>{
-      let r=c.getBoundingClientRect();
-      pointer.x=e.clientX-r.left; pointer.y=e.clientY-r.top;
-    },{passive:false});
-    window.addEventListener("pointerup",e=>{
-      pointer.active=false;
-      if(charging)releaseShot();
-    },{passive:false});
-    window.addEventListener("keydown",e=>{
-      if(e.code==="Space"&&!charging&&playing&&arrowsLeft>0){
-        charging=true; chargeStart=performance.now();
-      }
-    });
-    window.addEventListener("keyup",e=>{
-      if(e.code==="Space"&&charging)releaseShot();
-    });
-    startBtn.onclick=()=>{ if(!playing)startLevel(levelIdx); };
-    resetBtn.onclick=()=>resetGame();
-    ovBtn.onclick=()=>{ overlay.classList.add("hidden"); if(!playing)startLevel(levelIdx); };
-    // --- GAME FLOW ---
-    function resetGame(){
-      levelIdx=0; arrowsLeft=0; totalScore=0; arrowsShot=0; hits=0;
-      arrows=[]; playing=false; charging=false; target=null;
-      updateHUD(); showOverlay("Game Reset","Press Start to begin.");
-    }
-    function startLevel(i){
-      if(i>=LEVELS.length){
-        showOverlay("All Levels Complete",`Score: ${totalScore}\nAccuracy: ${accuracyString()}\nReset to play again.`);
-        return;
-      }
-      let cfg=LEVELS[i];
-      target=new Target(cfg); arrowsLeft=cfg.arrows; arrows=[]; playing=true; charging=false; wind=0;
-      updateHUD(); overlay.classList.add("hidden");
-    }
-    function endLevel(success){
-      playing=false;
-      let cfg=LEVELS[levelIdx];
-      if(success){
-        levelIdx++;
-        if(levelIdx>=LEVELS.length){
-          showOverlay("Victory!",`Final Score: ${totalScore}\nAccuracy: ${accuracyString()}\nReset to play again.`);
-        }else{
-          let next=LEVELS[levelIdx];
-          showOverlay("Level Complete",`Score: ${totalScore}\nAccuracy: ${accuracyString()}\nNext: ${next.name}\nContinue when ready.`);
+        
+        function handleOrientation(event) {
+            tiltX = event.gamma / 45; // -1 to 1
+            tiltY = event.beta / 45;  // -1 to 1
+            
+            // Clamp values
+            tiltX = Math.max(-1, Math.min(1, tiltX));
+            tiltY = Math.max(-1, Math.min(1, tiltY));
         }
-      }else{
-        showOverlay("Level Failed",`Needed: ${cfg.goal}\nYour Score: ${totalScore}\nAccuracy: ${accuracyString()}\nContinue to retry.`);
-      }
-    }
-    function releaseShot(){
-      if(!charging)return;
-      let pct=Math.max(0,Math.min(1,(performance.now()-chargeStart)/MAX_POWER));
-      shootArrow(pct); charging=false;
-    }
-    function shootArrow(power){
-      if(arrowsLeft<=0)return;
-      let bowX=120, bowY=c.height*.5;
-      let dx=pointer.x-bowX, dy=pointer.y-bowY, ang=Math.atan2(dy,dx);
-      let sp=BASE_SPEED*(.35+.65*power), vx=Math.cos(ang)*sp, vy=Math.sin(ang)*sp;
-      arrows.push(new Arrow(bowX,bowY,vx,vy));
-      arrowsLeft--; arrowsShot++; updateHUD();
-    }
-    function updateWind(dt){
-      let cfg=LEVELS[levelIdx]||LEVELS[LEVELS.length-1];
-      windTime+=dt*.18;
-      let n=(valueNoise(windTime))*2-1;
-      let tgt=n*cfg.wind;
-      wind+= (tgt-wind)*.55*dt;
-    }
-    function valueNoise(t){
-      let i=Math.floor(t),f=t-i;
-      let a=hash(i),b=hash(i+1),u=f*f*(3-2*f);
-      return a*(1-u)+b*u;
-    }
-    function hash(x){ let h=x*374761393;h=(h<<13)^h;return(1+((h*(h*h*15731+789221)+1376312589)&0x7fffffff)/2147483647)*.5;}
-    function updateHUD(){
-      levelNum.textContent=playing?(levelIdx+1):"--";
-      arrowsLeftEl.textContent=arrowsLeft;
-      scoreEl.textContent=totalScore;
-      accuracyEl.textContent=accuracyString();
-      windDisplay.textContent=wind.toFixed(2);
-    }
-    function accuracyString(){
-      if(!arrowsShot)return"0%";
-      return((hits/arrowsShot*100).toFixed(1)+"%");
-    }
-    function showOverlay(title,msg){
-      ovTitle.textContent=title; ovMsg.textContent=msg; overlay.classList.remove("hidden");
-    }
-    // --- DRAWING ---
-    function drawBow(){
-      let bowX=120, bowY=c.height*.5, angle=Math.atan2(pointer.y-bowY,pointer.x-bowX);
-      ctx.save(); ctx.translate(bowX,bowY); ctx.rotate(angle);
-      // Bow arc
-      ctx.strokeStyle="#c48a3a"; ctx.lineWidth=10;
-      ctx.beginPath(); ctx.arc(0,0,48,-Math.PI/2,Math.PI/2, angle<0); ctx.stroke();
-      // String
-      ctx.strokeStyle="#e5e5e5"; ctx.lineWidth=2;
-      let top={x:Math.cos(-Math.PI/2)*48, y:Math.sin(-Math.PI/2)*48};
-      let bottom={x:Math.cos(Math.PI/2)*48, y:Math.sin(Math.PI/2)*48};
-      let pull=charging?10+25*Math.max(0,Math.min(1,(performance.now()-chargeStart)/MAX_POWER)):0;
-      ctx.beginPath(); ctx.moveTo(top.x,top.y); ctx.lineTo(-pull,0); ctx.lineTo(bottom.x,bottom.y); ctx.stroke();
-      ctx.restore();
-    }
-    function drawTrajectory(){
-      if(!charging||arrowsLeft<=0)return;
-      let pct=Math.max(0,Math.min(1,(performance.now()-chargeStart)/MAX_POWER));
-      let bowX=120, bowY=c.height*.5, ang=Math.atan2(pointer.y-bowY,pointer.x-bowX);
-      let sp=BASE_SPEED*(.35+.65*pct), vx=Math.cos(ang)*sp, vy=Math.sin(ang)*sp;
-      let x=bowX, y=bowY, dt=.045;
-      for(let i=0;i<40;i++){
-        vx+=wind*dt; vy+=GRAVITY*dt; x+=vx*dt; y+=vy*dt;
-        ctx.fillStyle=`rgba(255,255,255,${(1-i/40)*.8})`;
-        ctx.beginPath(); ctx.arc(x,y,4-i*.05,0,2*Math.PI); ctx.fill();
-        if(y>c.height)break;
-      }
-    }
-    function drawScene(){
-      // Ground
-      let hGrass=c.height*.46;
-      let grd=ctx.createLinearGradient(0,hGrass,0,c.height);
-      grd.addColorStop(0,"#68a243"); grd.addColorStop(1,"#4d7e32");
-      ctx.fillStyle=grd; ctx.fillRect(0,hGrass,c.width,c.height-hGrass);
-      ctx.fillStyle="#5b8f3d";
-      for(let i=0;i<c.width;i+=160)ctx.fillRect(i,hGrass,80,c.height-hGrass);
-      // Target
-      if(target)target.draw(performance.now());
-      // Arrows
-      for(let a of arrows)a.draw();
-      // Bow
-      drawBow();
-      // Trajectory
-      drawTrajectory();
-      // Level header
-      if(playing){
-        let cfg=LEVELS[levelIdx];
-        ctx.save();
-        ctx.fillStyle="#fff"; ctx.font="16px Arial"; ctx.textAlign="center";
-        ctx.fillText(cfg.name,c.width/2,28);
-        ctx.font="12px Arial"; ctx.fillStyle="#bfe9ff";
-        ctx.fillText("Goal: "+cfg.goal+" (Current: "+totalScore+")",c.width/2,46);
-        ctx.restore();
-      }else{
-        ctx.save();
-        ctx.fillStyle="#fff"; ctx.font="24px Arial"; ctx.textAlign="center";
-        ctx.fillText("Press Start to Begin",c.width/2,c.height/2);
-        ctx.restore();
-      }
-    }
-    function update(dt){
-      // Wind
-      updateWind(dt);
-      // Arrows
-      for(let a of arrows)a.update(dt);
-      // Level end?
-      if(playing&&arrowsLeft===0&&arrows.every(a=>a.stuck)){
-        let cfg=LEVELS[levelIdx], success=totalScore>=cfg.goal;
-        endLevel(success);
-      }
-    }
-    function drawPowerBar(){
-      if(!charging){ powerFill.style.width="0%"; return;}
-      let pct=Math.max(0,Math.min(1,(performance.now()-chargeStart)/MAX_POWER));
-      powerFill.style.width=(pct*100).toFixed(1)+"%";
-    }
-    // --- MAIN LOOP ---
-    let last=performance.now();
-    function loop(){
-      let now=performance.now(), dt=(now-last)/1000; last=now;
-      ctx.clearRect(0,0,c.width,c.height);
-      update(dt);
-      drawScene();
-      drawPowerBar();
-      requestAnimationFrame(loop);
-    }
-    resetGame(); loop();
-  </script>
+        
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameRunning = true;
+            score = 0;
+            obstacles = [];
+            particles = [];
+            
+            orb.x = canvas.width / 2;
+            orb.y = canvas.height / 2;
+            orb.velocityX = 0;
+            orb.velocityY = 0;
+            
+            updateScore();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+            
+            const deltaTime = timestamp - lastTime || 0;
+            lastTime = timestamp;
+            
+            update(deltaTime);
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function update(deltaTime) {
+            // Apply controls
+            let controlX = 0;
+            let controlY = 0;
+            
+            if (keys.ArrowLeft) controlX -= 1;
+            if (keys.ArrowRight) controlX += 1;
+            if (keys.ArrowUp) controlY -= 1;
+            if (keys.ArrowDown) controlY += 1;
+            
+            // Use device orientation if available and no keyboard input
+            if (controlX === 0 && controlY === 0) {
+                controlX = tiltX;
+                controlY = tiltY;
+            }
+            
+            // Apply acceleration
+            const acceleration = 0.0005 * deltaTime;
+            orb.velocityX += controlX * acceleration;
+            orb.velocityY += controlY * acceleration;
+            
+            // Apply friction
+            const friction = 0.98;
+            orb.velocityX *= friction;
+            orb.velocityY *= friction;
+            
+            // Update position
+            orb.x += orb.velocityX * deltaTime;
+            orb.y += orb.velocityY * deltaTime;
+            
+            // Boundary check
+            if (orb.x - orb.radius < 0) {
+                orb.x = orb.radius;
+                orb.velocityX *= -0.8;
+            }
+            if (orb.x + orb.radius > canvas.width) {
+                orb.x = canvas.width - orb.radius;
+                orb.velocityX *= -0.8;
+            }
+            if (orb.y - orb.radius < 0) {
+                orb.y = orb.radius;
+                orb.velocityY *= -0.8;
+            }
+            if (orb.y + orb.radius > canvas.height) {
+                orb.y = canvas.height - orb.radius;
+                orb.velocityY *= -0.8;
+            }
+            
+            // Generate obstacles
+            if (Math.random() < 0.02) {
+                createObstacle();
+            }
+            
+            // Update obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obstacle = obstacles[i];
+                obstacle.y += obstacle.speed * deltaTime * 0.05;
+                
+                // Remove obstacles that are off screen
+                if (obstacle.y - obstacle.radius > canvas.height) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                    updateScore();
+                }
+                
+                // Check collision
+                if (checkCollision(orb, obstacle)) {
+                    gameOver();
+                    return;
+                }
+            }
+            
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life--;
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Create trail particles
+            if (gameRunning && Math.random() < 0.3) {
+                createParticle(orb.x, orb.y, orb.velocityX * 0.5, orb.velocityY * 0.5);
+            }
+        }
+        
+        function createObstacle() {
+            const types = ['circle', 'triangle', 'square'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            const obstacle = {
+                x: Math.random() * (canvas.width - 100) + 50,
+                y: -50,
+                radius: 15 + Math.random() * 20,
+                speed: 1 + Math.random() * 2,
+                type: type,
+                color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                rotation: Math.random() * Math.PI * 2
+            };
+            
+            obstacles.push(obstacle);
+        }
+        
+        function checkCollision(orb, obstacle) {
+            const dx = orb.x - obstacle.x;
+            const dy = orb.y - obstacle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            return distance < orb.radius + obstacle.radius;
+        }
+        
+        function createParticle(x, y, vx, vy) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: vx + (Math.random() - 0.5) * 0.5,
+                vy: vy + (Math.random() - 0.5) * 0.5,
+                radius: 2 + Math.random() * 3,
+                color: `hsla(${Math.random() * 60 + 180}, 100%, 70%, ${0.5 + Math.random() * 0.5})`,
+                life: 30 + Math.random() * 40
+            });
+        }
+        
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2,
+                    radius: 1 + Math.random() * 2,
+                    color: `hsla(${Math.random() * 360}, 70%, 60%, ${0.2 + Math.random() * 0.3})`,
+                    life: Infinity
+                });
+            }
+        }
+        
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = 'rgba(15, 12, 41, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background particles
+            particles.forEach(particle => {
+                ctx.globalAlpha = particle.life === Infinity ? 0.3 : particle.life / 70;
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
+            // Draw obstacles
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
+                ctx.save();
+                ctx.translate(obstacle.x, obstacle.y);
+                ctx.rotate(obstacle.rotation);
+                
+                switch (obstacle.type) {
+                    case 'circle':
+                        ctx.beginPath();
+                        ctx.arc(0, 0, obstacle.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'triangle':
+                        ctx.beginPath();
+                        ctx.moveTo(0, -obstacle.radius);
+                        ctx.lineTo(obstacle.radius * 0.866, obstacle.radius * 0.5);
+                        ctx.lineTo(-obstacle.radius * 0.866, obstacle.radius * 0.5);
+                        ctx.closePath();
+                        ctx.fill();
+                        break;
+                    case 'square':
+                        ctx.fillRect(-obstacle.radius, -obstacle.radius, obstacle.radius * 2, obstacle.radius * 2);
+                        break;
+                }
+                
+                ctx.restore();
+                
+                // Glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = obstacle.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw orb with glow
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = orb.color;
+            ctx.fillStyle = orb.color;
+            ctx.beginPath();
+            ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Draw orb inner glow
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.arc(orb.x - orb.radius * 0.3, orb.y - orb.radius * 0.3, orb.radius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('gravityOrbHighScore', highScore);
+            }
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('highScore').textContent = highScore;
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Create explosion particles
+            for (let i = 0; i < 50; i++) {
+                createParticle(
+                    orb.x,
+                    orb.y,
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 3
+                );
+            }
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            startGame();
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', init);
+        
+        // Background particles animation
+        function animateBackgroundParticles() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 4 + 1 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = `hsla(${Math.random() * 360}, 70%, 60%, ${Math.random() * 0.3})`;
+                particle.style.borderRadius = '50%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animation = `float ${5 + Math.random() * 10}s infinite ease-in-out`;
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes float {
+                    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                    25% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
+                    50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
+                    75% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize background particles
+        animateBackgroundParticles();
+    </script>
 </body>
 </html>
+
