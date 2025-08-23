@@ -1,662 +1,844 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gravity Orb - The Ultimate Physics Challenge</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            min-height: 100vh;
-            overflow: hidden;
-            touch-action: none;
-        }
-        
-        .container {
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .game-header {
-            text-align: center;
-            margin-bottom: 20px;
-            z-index: 10;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .score-display {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .game-canvas-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            height: 60vh;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        
-        .controls {
-            margin-top: 20px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .mobile-controls {
-            display: none;
-            margin-top: 20px;
-            gap: 10px;
-        }
-        
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-        
-        .control-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
-        }
-        
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            display: none;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .start-screen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .score-display {
-                font-size: 1.2rem;
-            }
-            
-            .mobile-controls {
-                display: flex;
-            }
-            
-            .controls p {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .game-canvas-container {
-                height: 50vh;
-            }
-            
-            .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="particles" id="particles"></div>
+  <meta charset="UTF-8">
+  <title>Play 2048 with Powerups | Aesthetic Responsive 2048 Game</title>
+  <meta name="description" content="Play an enhanced, aesthetic, mobile-friendly 2048 game with themes, powerups (undo, shuffle, double, spawn), dark mode, and smooth animations. Challenge yourself now!">
+  <meta name="keywords" content="2048 game, play 2048, online puzzle game, powerups 2048, responsive 2048, dark mode 2048, strategy game, casual game">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <link rel="canonical" href="https://aniketxraj.me/">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Aniket">
+  <meta name="theme-color" content="#222831">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Play 2048 with Powerups | Aesthetic, Fast & Mobile Friendly">
+  <meta property="og:description" content="Enjoy a beautiful version of 2048 featuring custom themes, powerups, animations, and full mobile support. Can you reach 4096?">
+  <meta property="og:url" content="https://aniketxraj.me/">
+  <meta property="og:image" content="https://aniketxraj.me/banner.jpg">
+  <meta property="og:site_name" content="Aesthetic 2048">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Play 2048 with Powerups | Aesthetic Game">
+  <meta name="twitter:description" content="Modern 2048 with themes, powerups & smooth animations.">
+  <meta name="twitter:image" content="https://aniketxraj.me/banner.jpg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preload" href="https://aniketxraj.me/banner.jpg" as="image">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Game","name":"Aesthetic 2048 with Powerups","genre":"Puzzle","applicationCategory":"Game","operatingSystem":"Any","playMode":"SinglePlayer","author":{"@type":"Person","name":"Aniket"},"description":"An enhanced online 2048 puzzle game featuring powerups, themes, animations, and mobile-friendly controls.","image":"https://aniketxraj.me/banner.jpg","inLanguage":"en","url":"https://aniketxraj.me/"}</script>
+  <style>
+    /* Basic 2048 styles */
+    :root {
+      --bg: #0f1115;
+      --card: #171b21;
+      --text: #e8edf2;
+      --text-dim: #b5c0cc;
+      --accent: #5aa9ff;
+      --border: #2a3441;
+      --gap: 8px;
+      --radius: 8px;
+      --tile-empty: #1f252d;
+    }
     
-    <div class="container">
-        <div class="game-header">
-            <h1>GRAVITY ORB</h1>
-            <div class="score-display" id="score">Score: 0</div>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin: 0;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--text-dim);
+      margin-left: 0.5rem;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    .stat-box {
+      background: var(--card);
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      text-align: center;
+      min-width: 80px;
+    }
+    
+    .stat-box h4 {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-box .value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-weight: 500;
+    }
+    
+    .btn:hover {
+      background: #4a9aef;
+      transform: translateY(-1px);
+    }
+    
+    .btn.primary {
+      background: var(--accent);
+    }
+    
+    .board-wrapper {
+      position: relative;
+      margin: 2rem auto;
+    }
+    
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--gap);
+      background: var(--card);
+      padding: var(--gap);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1;
+    }
+    
+    .tile {
+      background: var(--tile-empty);
+      border-radius: calc(var(--radius) * 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--text);
+      transition: all 0.25s;
+    }
+    
+    .tile[data-value="2"] { background: #eee4da; color: #776e65; }
+    .tile[data-value="4"] { background: #ede0c8; color: #776e65; }
+    .tile[data-value="8"] { background: #f2b179; color: #f9f6f2; }
+    .tile[data-value="16"] { background: #f59563; color: #f9f6f2; }
+    .tile[data-value="32"] { background: #f67c5f; color: #f9f6f2; }
+    .tile[data-value="64"] { background: #f65e3b; color: #f9f6f2; }
+    .tile[data-value="128"] { background: #edcf72; color: #f9f6f2; font-size: 1rem; }
+    .tile[data-value="256"] { background: #edcc61; color: #f9f6f2; font-size: 1rem; }
+    .tile[data-value="512"] { background: #edc850; color: #f9f6f2; font-size: 1rem; }
+    .tile[data-value="1024"] { background: #edc53f; color: #f9f6f2; font-size: 0.9rem; }
+    .tile[data-value="2048"] { background: #edc22e; color: #f9f6f2; font-size: 0.9rem; }
+    .tile[data-value="4096"] { background: #3c3a32; color: #f9f6f2; font-size: 0.9rem; }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+    
+    .overlay.active {
+      display: flex;
+    }
+    
+    .overlay h2 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    
+    /* Custom Setup Styles */
+    .custom-setup-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--gap);
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 1/1;
+      margin: 0 auto 1rem;
+    }
+    
+    .custom-cell {
+      position: relative;
+      background: var(--tile-empty);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: calc(var(--radius) * 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--text);
+      user-select: none;
+      transition: 0.25s background, 0.25s border-color;
+    }
+    
+    .custom-cell:hover,
+    .custom-cell:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .custom-cell.empty {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 1rem;
+    }
+    
+    .custom-setup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .custom-setup-actions .btn {
+      flex: 1 1 auto;
+      min-width: 110px;
+    }
+    
+    .custom-help {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-top: 0.35rem;
+      line-height: 1.3;
+    }
+    
+    @media (max-width: 520px) {
+      .custom-setup-actions .btn {
+        flex: 1 1 45%;
+      }
+      .top-bar {
+        flex-direction: column;
+        align-items: center;
+      }
+      .stats {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body data-theme="neon">
+  <main>
+    <div>
+      <div class="top-bar" aria-label="Game header">
+        <div>
+          <h1>Aesthetic 2048 <span class="badge">Powerups</span></h1>
+          <button class="btn" id="customSetupBtn" style="margin-top: 0.6rem; font-size: 0.7rem;">Custom Setup</button>
+        </div>
+        <div class="stats">
+          <div class="stat-box" aria-live="polite">
+            <h4>Score</h4>
+            <div class="value" id="score">0</div>
+          </div>
+          <div class="stat-box">
+            <h4>Best</h4>
+            <div class="value" id="best">0</div>
+          </div>
+          <div class="stat-box">
+            <h4>Moves</h4>
+            <div class="value" id="moves">0</div>
+          </div>
+          <div class="stat-box">
+            <h4>Highest</h4>
+            <div class="value" id="highestTile">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="board-wrapper" id="boardWrapper">
+        <div id="gameBoard" class="board" aria-label="2048 game board" role="application"></div>
+        
+        <!-- Start Overlay -->
+        <div id="startOverlay" class="overlay active" role="dialog" aria-modal="true">
+          <h2>Welcome to 2048!</h2>
+          <p>Use arrow keys to move tiles. Combine tiles with the same number to reach 2048!</p>
+          <button class="btn primary" onclick="startGame()">Start Game</button>
         </div>
         
-        <div class="game-canvas-container">
-            <canvas id="gameCanvas"></canvas>
-            
-            <div class="start-screen" id="startScreen">
-                <h2>Welcome to Gravity Orb!</h2>
-                <p>Tilt your device or use arrow keys to navigate through the cosmic obstacles.</p>
-                <p>Survive as long as possible and set a new high score!</p>
-                <button class="btn" onclick="startGame()">Start Game</button>
-            </div>
-            
-            <div class="game-over" id="gameOver">
-                <h2>Game Over!</h2>
-                <p>Your Score: <span id="finalScore">0</span></p>
-                <p>High Score: <span id="highScore">0</span></p>
-                <button class="btn" onclick="restartGame()">Play Again</button>
-            </div>
+        <!-- Game Over Overlay -->
+        <div id="gameOverOverlay" class="overlay" role="dialog" aria-modal="true">
+          <h2>Game Over!</h2>
+          <p>Your Score: <span id="finalScore">0</span></p>
+          <button class="btn primary" onclick="restartGame()">Try Again</button>
         </div>
         
-        <div class="controls">
-            <p>Use arrow keys or tilt your device to control the orb</p>
-            <div class="mobile-controls">
-                <button class="control-btn" id="leftBtn">←</button>
-                <button class="control-btn" id="upBtn">↑</button>
-                <button class="control-btn" id="rightBtn">→</button>
-                <button class="control-btn" id="downBtn">↓</button>
-            </div>
+        <!-- Win Overlay -->
+        <div id="winOverlay" class="overlay" role="dialog" aria-modal="true">
+          <h2>You Win!</h2>
+          <p>Congratulations! You reached 2048!</p>
+          <button class="btn primary" onclick="continueGame()">Continue</button>
+          <button class="btn" onclick="restartGame()">New Game</button>
         </div>
+        
+        <!-- Custom Setup Overlay -->
+        <div id="customSetupOverlay" class="overlay custom-setup-overlay" role="dialog" aria-modal="true" aria-labelledby="customSetupTitle">
+          <h2 id="customSetupTitle">Custom Setup</h2>
+          <div class="custom-setup-grid" id="customSetupGrid" aria-label="Editable starting grid"></div>
+          <div class="custom-setup-actions">
+            <button class="btn" id="csClearBtn">Clear</button>
+            <button class="btn" id="csRandomBtn">Random Pair</button>
+            <button class="btn" id="csBalanceBtn">Balance</button>
+            <button class="btn primary" id="csStartBtn">Start Game</button>
+            <button class="btn" id="csCancelBtn">Cancel</button>
+          </div>
+          <div class="custom-help">Click or press Enter/Space to cycle: empty→2→4→...→4096. Shift+Click or Shift+Enter cycles backward. Need at least 2 tiles to begin.</div>
+        </div>
+      </div>
     </div>
+  </main>
 
-    <script>
-        // Game variables
-        let canvas, ctx;
-        let gameRunning = false;
-        let score = 0;
-        let highScore = 0;
-        let lastTime = 0;
+  <script>
+    // Game constants
+    const SIZE = 4;
+    
+    // Game state
+    let board = [];
+    let score = 0;
+    let moves = 0;
+    let highestTile = 0;
+    let hasWon = false;
+    let suppressWinUntilNew2048 = false;
+    let milestoneTiles = new Set();
+    
+    // DOM elements
+    const gameBoard = document.getElementById('gameBoard');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const movesEl = document.getElementById('moves');
+    const highestTileEl = document.getElementById('highestTile');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const winOverlay = document.getElementById('winOverlay');
+    const customSetupOverlay = document.getElementById('customSetupOverlay');
+    const customSetupGridEl = document.getElementById('customSetupGrid');
+    const customSetupBtn = document.getElementById('customSetupBtn');
+    const csClearBtn = document.getElementById('csClearBtn');
+    const csRandomBtn = document.getElementById('csRandomBtn');
+    const csBalanceBtn = document.getElementById('csBalanceBtn');
+    const csStartBtn = document.getElementById('csStartBtn');
+    const csCancelBtn = document.getElementById('csCancelBtn');
+    
+    // Custom setup state
+    let customBoardData = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
+    
+    // Initialize game
+    function init() {
+      initBoard();
+      renderBoard();
+      updateStats();
+      loadBestScore();
+      setupEventListeners();
+    }
+    
+    function initBoard() {
+      board = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
+    }
+    
+    function setupEventListeners() {
+      document.addEventListener('keydown', handleKeyPress);
+      
+      // Custom setup button
+      customSetupBtn.addEventListener('click', openCustomSetup);
+      csClearBtn.addEventListener('click', clearCustomBoard);
+      csRandomBtn.addEventListener('click', randomPairCustom);
+      csBalanceBtn.addEventListener('click', balanceCustom);
+      csStartBtn.addEventListener('click', applyCustomSetup);
+      csCancelBtn.addEventListener('click', () => {
+        closeCustomSetup();
+        startOverlay.classList.add('active');
+      });
+      
+      // ESC to close custom setup
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && customSetupOverlay.classList.contains('active')) {
+          closeCustomSetup();
+          startOverlay.classList.add('active');
+        }
+      });
+    }
+    
+    function handleKeyPress(e) {
+      if (startOverlay.classList.contains('active') || 
+          gameOverOverlay.classList.contains('active') || 
+          winOverlay.classList.contains('active') ||
+          customSetupOverlay.classList.contains('active')) {
+        return;
+      }
+      
+      switch(e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          move('up');
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          move('down');
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          move('left');
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          move('right');
+          break;
+      }
+    }
+    
+    function startGame() {
+      hideOverlays();
+      initBoard();
+      addRandomTile();
+      addRandomTile();
+      score = 0;
+      moves = 0;
+      hasWon = false;
+      suppressWinUntilNew2048 = false;
+      milestoneTiles.clear();
+      highestTile = Math.max(...board.flat());
+      renderBoard();
+      updateStats();
+      saveStateForUndo();
+    }
+    
+    function restartGame() {
+      startGame();
+    }
+    
+    function continueGame() {
+      hideOverlays();
+    }
+    
+    function hideOverlays() {
+      startOverlay.classList.remove('active');
+      gameOverOverlay.classList.remove('active');
+      winOverlay.classList.remove('active');
+      customSetupOverlay.classList.remove('active');
+    }
+    
+    function addRandomTile() {
+      const emptyCells = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (board[r][c] === 0) {
+            emptyCells.push({r, c});
+          }
+        }
+      }
+      
+      if (emptyCells.length > 0) {
+        const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        board[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
+      }
+    }
+    
+    function renderBoard() {
+      gameBoard.innerHTML = '';
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          const value = board[r][c];
+          if (value > 0) {
+            tile.textContent = value;
+            tile.setAttribute('data-value', value);
+          }
+          gameBoard.appendChild(tile);
+        }
+      }
+    }
+    
+    function updateStats() {
+      scoreEl.textContent = score;
+      movesEl.textContent = moves;
+      highestTileEl.textContent = highestTile;
+      
+      const best = localStorage.getItem('best2048Score') || 0;
+      bestEl.textContent = best;
+    }
+    
+    function loadBestScore() {
+      const best = localStorage.getItem('best2048Score') || 0;
+      bestEl.textContent = best;
+    }
+    
+    function saveStateForUndo() {
+      // Placeholder for undo functionality
+    }
+    
+    function move(direction) {
+      const prevBoard = board.map(row => row.slice());
+      let moved = false;
+      let newMergedScore = 0;
+      let new2048Created = false;
+      
+      if (direction === 'left') {
+        for (let r = 0; r < SIZE; r++) {
+          const result = slideRow(board[r]);
+          board[r] = result.row;
+          newMergedScore += result.mergedScore;
+          if (result.new2048Created) new2048Created = true;
+        }
+      } else if (direction === 'right') {
+        for (let r = 0; r < SIZE; r++) {
+          const reversed = board[r].slice().reverse();
+          const result = slideRow(reversed);
+          board[r] = result.row.reverse();
+          newMergedScore += result.mergedScore;
+          if (result.new2048Created) new2048Created = true;
+        }
+      } else if (direction === 'up') {
+        for (let c = 0; c < SIZE; c++) {
+          const column = [];
+          for (let r = 0; r < SIZE; r++) {
+            column.push(board[r][c]);
+          }
+          const result = slideRow(column);
+          for (let r = 0; r < SIZE; r++) {
+            board[r][c] = result.row[r];
+          }
+          newMergedScore += result.mergedScore;
+          if (result.new2048Created) new2048Created = true;
+        }
+      } else if (direction === 'down') {
+        for (let c = 0; c < SIZE; c++) {
+          const column = [];
+          for (let r = 0; r < SIZE; r++) {
+            column.push(board[r][c]);
+          }
+          const reversed = column.reverse();
+          const result = slideRow(reversed);
+          const finalColumn = result.row.reverse();
+          for (let r = 0; r < SIZE; r++) {
+            board[r][c] = finalColumn[r];
+          }
+          newMergedScore += result.mergedScore;
+          if (result.new2048Created) new2048Created = true;
+        }
+      }
+      
+      // Check if board changed
+      for (let r = 0; r < SIZE && !moved; r++) {
+        for (let c = 0; c < SIZE && !moved; c++) {
+          if (board[r][c] !== prevBoard[r][c]) {
+            moved = true;
+          }
+        }
+      }
+      
+      if (moved) {
+        score += newMergedScore;
+        moves++;
+        highestTile = Math.max(highestTile, ...board.flat());
+        addRandomTile();
+        renderBoard();
+        updateStats();
+        saveStateForUndo();
         
-        // Orb properties
-        const orb = {
-            x: 0,
-            y: 0,
-            radius: 20,
-            velocityX: 0,
-            velocityY: 0,
-            color: '#ff6b6b'
-        };
-        
-        // Obstacles
-        let obstacles = [];
-        let particles = [];
-        
-        // Control variables
-        let tiltX = 0;
-        let tiltY = 0;
-        let keys = {
-            ArrowLeft: false,
-            ArrowRight: false,
-            ArrowUp: false,
-            ArrowDown: false
-        };
-        
-        // Initialize game
-        function init() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Initialize particles
-            createParticles();
-            
-            // Load high score
-            highScore = localStorage.getItem('gravityOrbHighScore') || 0;
-            document.getElementById('highScore').textContent = highScore;
+        // Check win condition
+        if (new2048Created) {
+          suppressWinUntilNew2048 = false;
+          checkWin();
+        } else if (highestTile >= 2048 && !hasWon) {
+          suppressWinUntilNew2048 = true;
         }
         
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            
-            // Reset orb position
-            orb.x = canvas.width / 2;
-            orb.y = canvas.height / 2;
+        // Save best score
+        const currentBest = localStorage.getItem('best2048Score') || 0;
+        if (score > currentBest) {
+          localStorage.setItem('best2048Score', score);
         }
         
-        function setupEventListeners() {
-            // Keyboard controls
-            window.addEventListener('keydown', (e) => {
-                if (keys.hasOwnProperty(e.key)) {
-                    keys[e.key] = true;
-                    e.preventDefault();
-                }
-            });
-            
-            window.addEventListener('keyup', (e) => {
-                if (keys.hasOwnProperty(e.key)) {
-                    keys[e.key] = false;
-                    e.preventDefault();
-                }
-            });
-            
-            // Mobile touch controls
-            const leftBtn = document.getElementById('leftBtn');
-            const rightBtn = document.getElementById('rightBtn');
-            const upBtn = document.getElementById('upBtn');
-            const downBtn = document.getElementById('downBtn');
-            
-            const setKeyState = (key, state) => {
-                keys[key] = state;
-            };
-            
-            leftBtn.addEventListener('touchstart', () => setKeyState('ArrowLeft', true));
-            leftBtn.addEventListener('touchend', () => setKeyState('ArrowLeft', false));
-            
-            rightBtn.addEventListener('touchstart', () => setKeyState('ArrowRight', true));
-            rightBtn.addEventListener('touchend', () => setKeyState('ArrowRight', false));
-            
-            upBtn.addEventListener('touchstart', () => setKeyState('ArrowUp', true));
-            upBtn.addEventListener('touchend', () => setKeyState('ArrowUp', false));
-            
-            downBtn.addEventListener('touchstart', () => setKeyState('ArrowDown', true));
-            downBtn.addEventListener('touchend', () => setKeyState('ArrowDown', false));
-            
-            // Device orientation
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
-        }
-        
-        function handleOrientation(event) {
-            tiltX = event.gamma / 45; // -1 to 1
-            tiltY = event.beta / 45;  // -1 to 1
-            
-            // Clamp values
-            tiltX = Math.max(-1, Math.min(1, tiltX));
-            tiltY = Math.max(-1, Math.min(1, tiltY));
-        }
-        
-        function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            gameRunning = true;
-            score = 0;
-            obstacles = [];
-            particles = [];
-            
-            orb.x = canvas.width / 2;
-            orb.y = canvas.height / 2;
-            orb.velocityX = 0;
-            orb.velocityY = 0;
-            
-            updateScore();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        function gameLoop(timestamp) {
-            if (!gameRunning) return;
-            
-            const deltaTime = timestamp - lastTime || 0;
-            lastTime = timestamp;
-            
-            update(deltaTime);
-            render();
-            
-            requestAnimationFrame(gameLoop);
-        }
-        
-        function update(deltaTime) {
-            // Apply controls
-            let controlX = 0;
-            let controlY = 0;
-            
-            if (keys.ArrowLeft) controlX -= 1;
-            if (keys.ArrowRight) controlX += 1;
-            if (keys.ArrowUp) controlY -= 1;
-            if (keys.ArrowDown) controlY += 1;
-            
-            // Use device orientation if available and no keyboard input
-            if (controlX === 0 && controlY === 0) {
-                controlX = tiltX;
-                controlY = tiltY;
-            }
-            
-            // Apply acceleration
-            const acceleration = 0.0005 * deltaTime;
-            orb.velocityX += controlX * acceleration;
-            orb.velocityY += controlY * acceleration;
-            
-            // Apply friction
-            const friction = 0.98;
-            orb.velocityX *= friction;
-            orb.velocityY *= friction;
-            
-            // Update position
-            orb.x += orb.velocityX * deltaTime;
-            orb.y += orb.velocityY * deltaTime;
-            
-            // Boundary check
-            if (orb.x - orb.radius < 0) {
-                orb.x = orb.radius;
-                orb.velocityX *= -0.8;
-            }
-            if (orb.x + orb.radius > canvas.width) {
-                orb.x = canvas.width - orb.radius;
-                orb.velocityX *= -0.8;
-            }
-            if (orb.y - orb.radius < 0) {
-                orb.y = orb.radius;
-                orb.velocityY *= -0.8;
-            }
-            if (orb.y + orb.radius > canvas.height) {
-                orb.y = canvas.height - orb.radius;
-                orb.velocityY *= -0.8;
-            }
-            
-            // Generate obstacles
-            if (Math.random() < 0.02) {
-                createObstacle();
-            }
-            
-            // Update obstacles
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                const obstacle = obstacles[i];
-                obstacle.y += obstacle.speed * deltaTime * 0.05;
-                
-                // Remove obstacles that are off screen
-                if (obstacle.y - obstacle.radius > canvas.height) {
-                    obstacles.splice(i, 1);
-                    score += 10;
-                    updateScore();
-                }
-                
-                // Check collision
-                if (checkCollision(orb, obstacle)) {
-                    gameOver();
-                    return;
-                }
-            }
-            
-            // Update particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const particle = particles[i];
-                particle.x += particle.vx;
-                particle.y += particle.vy;
-                particle.life--;
-                
-                if (particle.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-            
-            // Create trail particles
-            if (gameRunning && Math.random() < 0.3) {
-                createParticle(orb.x, orb.y, orb.velocityX * 0.5, orb.velocityY * 0.5);
-            }
-        }
-        
-        function createObstacle() {
-            const types = ['circle', 'triangle', 'square'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            
-            const obstacle = {
-                x: Math.random() * (canvas.width - 100) + 50,
-                y: -50,
-                radius: 15 + Math.random() * 20,
-                speed: 1 + Math.random() * 2,
-                type: type,
-                color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-                rotation: Math.random() * Math.PI * 2
-            };
-            
-            obstacles.push(obstacle);
-        }
-        
-        function checkCollision(orb, obstacle) {
-            const dx = orb.x - obstacle.x;
-            const dy = orb.y - obstacle.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            return distance < orb.radius + obstacle.radius;
-        }
-        
-        function createParticle(x, y, vx, vy) {
-            particles.push({
-                x: x,
-                y: y,
-                vx: vx + (Math.random() - 0.5) * 0.5,
-                vy: vy + (Math.random() - 0.5) * 0.5,
-                radius: 2 + Math.random() * 3,
-                color: `hsla(${Math.random() * 60 + 180}, 100%, 70%, ${0.5 + Math.random() * 0.5})`,
-                life: 30 + Math.random() * 40
-            });
-        }
-        
-        function createParticles() {
-            for (let i = 0; i < 50; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.2,
-                    vy: (Math.random() - 0.5) * 0.2,
-                    radius: 1 + Math.random() * 2,
-                    color: `hsla(${Math.random() * 360}, 70%, 60%, ${0.2 + Math.random() * 0.3})`,
-                    life: Infinity
-                });
-            }
-        }
-        
-        function render() {
-            // Clear canvas
-            ctx.fillStyle = 'rgba(15, 12, 41, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background particles
-            particles.forEach(particle => {
-                ctx.globalAlpha = particle.life === Infinity ? 0.3 : particle.life / 70;
-                ctx.fillStyle = particle.color;
-                ctx.beginPath();
-                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-            
-            // Draw obstacles
-            obstacles.forEach(obstacle => {
-                ctx.fillStyle = obstacle.color;
-                ctx.save();
-                ctx.translate(obstacle.x, obstacle.y);
-                ctx.rotate(obstacle.rotation);
-                
-                switch (obstacle.type) {
-                    case 'circle':
-                        ctx.beginPath();
-                        ctx.arc(0, 0, obstacle.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
-                    case 'triangle':
-                        ctx.beginPath();
-                        ctx.moveTo(0, -obstacle.radius);
-                        ctx.lineTo(obstacle.radius * 0.866, obstacle.radius * 0.5);
-                        ctx.lineTo(-obstacle.radius * 0.866, obstacle.radius * 0.5);
-                        ctx.closePath();
-                        ctx.fill();
-                        break;
-                    case 'square':
-                        ctx.fillRect(-obstacle.radius, -obstacle.radius, obstacle.radius * 2, obstacle.radius * 2);
-                        break;
-                }
-                
-                ctx.restore();
-                
-                // Glow effect
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = obstacle.color;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
-            
-            // Draw orb with glow
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = orb.color;
-            ctx.fillStyle = orb.color;
-            ctx.beginPath();
-            ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Draw orb inner glow
-            ctx.fillStyle = 'white';
-            ctx.globalAlpha = 0.3;
-            ctx.beginPath();
-            ctx.arc(orb.x - orb.radius * 0.3, orb.y - orb.radius * 0.3, orb.radius * 0.4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-        
-        function updateScore() {
-            document.getElementById('score').textContent = `Score: ${score}`;
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('gravityOrbHighScore', highScore);
-            }
-            
+        // Check game over
+        if (isGameOver()) {
+          setTimeout(() => {
             document.getElementById('finalScore').textContent = score;
-            document.getElementById('highScore').textContent = highScore;
-            document.getElementById('gameOver').style.display = 'block';
-            
-            // Create explosion particles
-            for (let i = 0; i < 50; i++) {
-                createParticle(
-                    orb.x,
-                    orb.y,
-                    (Math.random() - 0.5) * 3,
-                    (Math.random() - 0.5) * 3
-                );
+            gameOverOverlay.classList.add('active');
+            speakStatus('Game over');
+          }, 300);
+        }
+      }
+    }
+    
+    function slideRow(row) {
+      let arr = row.filter(v => v);
+      let mergedScore = 0;
+      let new2048Created = false;
+      
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i + 1]) {
+          arr[i] *= 2;
+          mergedScore += arr[i];
+          if (arr[i] === 2048 && !hasWon) {
+            new2048Created = true;
+          }
+          arr[i + 1] = 0;
+          highestTile = Math.max(highestTile, arr[i]);
+        }
+      }
+      
+      arr = arr.filter(v => v);
+      while (arr.length < SIZE) {
+        arr.push(0);
+      }
+      
+      return {row: arr, mergedScore, new2048Created};
+    }
+    
+    function checkWin() {
+      if (suppressWinUntilNew2048) return;
+      if (highestTile >= 2048 && !hasWon) {
+        hasWon = true;
+        winOverlay.classList.add('active');
+        speakStatus('You reached 2048!');
+      }
+    }
+    
+    function isGameOver() {
+      // Check for empty cells
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (board[r][c] === 0) return false;
+        }
+      }
+      
+      // Check for possible merges
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const current = board[r][c];
+          if ((r < SIZE - 1 && board[r + 1][c] === current) ||
+              (c < SIZE - 1 && board[r][c + 1] === current)) {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    }
+    
+    function speakStatus(message) {
+      // Accessibility feature
+      console.log(message);
+    }
+    
+    // Custom Setup Functions
+    function openCustomSetup() {
+      hideOverlays();
+      customSetupOverlay.classList.add('active');
+      initCustomSetupGrid();
+      setTimeout(() => {
+        const first = customSetupGridEl.querySelector('.custom-cell');
+        if (first) first.focus();
+      }, 50);
+    }
+    
+    function closeCustomSetup() {
+      customSetupOverlay.classList.remove('active');
+    }
+    
+    function initCustomSetupGrid() {
+      customSetupGridEl.innerHTML = '';
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'custom-cell empty';
+          cell.tabIndex = 0;
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          updateCustomCellVisual(cell);
+          
+          cell.addEventListener('click', e => {
+            cycleCellValue(r, c, e.shiftKey ? -1 : 1);
+            updateCustomCellVisual(cell);
+          });
+          
+          cell.addEventListener('keydown', e => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              cycleCellValue(r, c, e.shiftKey ? -1 : 1);
+              updateCustomCellVisual(cell);
             }
+          });
+          
+          customSetupGridEl.appendChild(cell);
         }
-        
-        function restartGame() {
-            document.getElementById('gameOver').style.display = 'none';
-            startGame();
+      }
+    }
+    
+    const cycleValues = [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+    
+    function cycleCellValue(r, c, dir = 1) {
+      const cur = customBoardData[r][c];
+      let idx = cycleValues.indexOf(cur);
+      idx = (idx + dir + cycleValues.length) % cycleValues.length;
+      customBoardData[r][c] = cycleValues[idx];
+    }
+    
+    function updateCustomCellVisual(cell) {
+      const r = +cell.dataset.r;
+      const c = +cell.dataset.c;
+      const val = customBoardData[r][c];
+      cell.textContent = val ? val : '+';
+      cell.classList.toggle('empty', !val);
+      cell.setAttribute('aria-label', `Cell ${r + 1},${c + 1} value ${val || 'empty'}`);
+      
+      // Apply tile styling
+      if (val > 0) {
+        cell.setAttribute('data-value', val);
+        cell.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--tile-${val}`) || 
+                               getComputedStyle(document.querySelector(`[data-value="${val}"]`))?.backgroundColor || 
+                               '#eee4da';
+      } else {
+        cell.removeAttribute('data-value');
+        cell.style.background = 'var(--tile-empty)';
+      }
+    }
+    
+    function clearCustomBoard() {
+      customBoardData.forEach(row => row.fill(0));
+      initCustomSetupGrid();
+    }
+    
+    function randomPairCustom() {
+      clearCustomBoard();
+      let placed = 0;
+      while (placed < 2) {
+        const r = Math.floor(Math.random() * SIZE);
+        const c = Math.floor(Math.random() * SIZE);
+        if (!customBoardData[r][c]) {
+          customBoardData[r][c] = Math.random() < 0.9 ? 2 : 4;
+          placed++;
         }
-        
-        // Initialize game when page loads
-        window.addEventListener('load', init);
-        
-        // Background particles animation
-        function animateBackgroundParticles() {
-            const particlesContainer = document.getElementById('particles');
-            particlesContainer.innerHTML = '';
-            
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.style.position = 'absolute';
-                particle.style.width = Math.random() * 4 + 1 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.background = `hsla(${Math.random() * 360}, 70%, 60%, ${Math.random() * 0.3})`;
-                particle.style.borderRadius = '50%';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animation = `float ${5 + Math.random() * 10}s infinite ease-in-out`;
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                particlesContainer.appendChild(particle);
-            }
-            
-            // Add CSS animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes float {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                    25% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                    50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                    75% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                }
-            `;
-            document.head.appendChild(style);
+      }
+      initCustomSetupGrid();
+    }
+    
+    function balanceCustom() {
+      const count = customBoardData.flat().filter(v => v).length;
+      if (count < 2) {
+        for (let i = count; i < 2; i++) {
+          const cell = randomEmptyCustom();
+          if (cell) customBoardData[cell.r][cell.c] = 2;
         }
-        
-        // Initialize background particles
-        animateBackgroundParticles();
-    </script>
+        initCustomSetupGrid();
+      }
+    }
+    
+    function randomEmptyCustom() {
+      const arr = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!customBoardData[r][c]) arr.push({r, c});
+        }
+      }
+      return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+    }
+    
+    function validateCustomBoard(bd) {
+      const nonEmpty = bd.flat().filter(v => v > 0);
+      if (nonEmpty.length < 2) return {ok: false, reason: 'Need at least two tiles'};
+      if (isBoardStuck(bd)) return {ok: false, reason: 'No possible moves — adjust tiles'};
+      return {ok: true};
+    }
+    
+    function isBoardStuck(bd) {
+      const empties = bd.some(row => row.includes(0));
+      if (empties) return false;
+      
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (r + 1 < SIZE && bd[r][c] === bd[r + 1][c]) return false;
+          if (c + 1 < SIZE && bd[r][c] === bd[r][c + 1]) return false;
+        }
+      }
+      return true;
+    }
+    
+    function applyCustomSetup() {
+      const val = validateCustomBoard(customBoardData);
+      if (!val.ok) {
+        alert(val.reason);
+        return;
+      }
+      
+      board = customBoardData.map(r => r.slice());
+      score = 0;
+      moves = 0;
+      highestTile = Math.max(...board.flat());
+      hasWon = false;
+      suppressWinUntilNew2048 = highestTile >= 2048;
+      milestoneTiles = new Set();
+      [128, 256, 512, 1024, 2048, 4096].forEach(m => {
+        if (board.flat().includes(m)) milestoneTiles.add(m);
+      });
+      
+      hideOverlays();
+      customSetupOverlay.classList.remove('active');
+      renderBoard();
+      updateStats();
+      saveStateForUndo();
+      speakStatus('Custom game started');
+    }
+    
+    // Initialize the game when page loads
+    window.addEventListener('load', init);
+  </script>
 </body>
 </html>
 
