@@ -1,662 +1,1097 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gravity Orb - The Ultimate Physics Challenge</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            min-height: 100vh;
-            overflow: hidden;
-            touch-action: none;
-        }
-        
-        .container {
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .game-header {
-            text-align: center;
-            margin-bottom: 20px;
-            z-index: 10;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .score-display {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .game-canvas-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            height: 60vh;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        
-        .controls {
-            margin-top: 20px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .mobile-controls {
-            display: none;
-            margin-top: 20px;
-            gap: 10px;
-        }
-        
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-        
-        .control-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
-        }
-        
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            display: none;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .start-screen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .score-display {
-                font-size: 1.2rem;
-            }
-            
-            .mobile-controls {
-                display: flex;
-            }
-            
-            .controls p {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .game-canvas-container {
-                height: 50vh;
-            }
-            
-            .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Play 2048 with Powerups | Aesthetic Responsive 2048 Game</title>
+<meta name="description" content="Play an enhanced, mobile-friendly 2048 with themes, powerups, custom starting layouts, smooth animations, strategy guide & dark mode. Reach 2048 faster with pro tips.">
+<meta name="keywords" content="2048 game, play 2048, 2048 strategy, corner tactic, fastest way to get 2048, custom 2048 board, powerups 2048, high score 2048">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<link rel="canonical" href="https://aniketxraj.me/">
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="robots" content="index,follow">
+<meta name="author" content="Aniket">
+<meta name="theme-color" content="#222831">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Play 2048 with Powerups | Aesthetic, Fast & Mobile Friendly">
+<meta property="og:description" content="Beautiful 2048 with themes, powerups, custom layout builder, smooth animations & strategy guide. Can you reach 4096+?">
+<meta property="og:url" content="https://aniketxraj.me/">
+<meta property="og:image" content="https://aniketxraj.me/banner.jpg">
+<meta property="og:site_name" content="Aesthetic 2048">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Play 2048 with Powerups | Aesthetic Game">
+<meta name="twitter:description" content="Modern 2048 with themes, powerups, custom layouts, pro tips & smooth animations.">
+<meta name="twitter:image" content="https://aniketxraj.me/banner.jpg">
+<link rel="icon" href="/favicon.ico">
+<link rel="preload" href="https://aniketxraj.me/banner.jpg" as="image">
+
+<!-- Game Schema -->
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"Game",
+ "name":"Aesthetic 2048 with Powerups",
+ "genre":"Puzzle",
+ "applicationCategory":"Game",
+ "playMode":"SinglePlayer",
+ "author":{"@type":"Person","name":"Aniket"},
+ "description":"An enhanced online 2048 puzzle game featuring powerups, themes, custom layouts, animations, mobile-friendly controls and strategy guide.",
+ "image":"https://aniketxraj.me/banner.jpg",
+ "inLanguage":"en",
+ "url":"https://aniketxraj.me/"
+}
+</script>
+<!-- FAQ / Strategy Structured Data -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "What is the fastest way to reach 2048?",
+   "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Fix a corner for your highest tile, avoid pulling it out, chain merges by staging values in order, force spawns to the opposite side, and minimize direction oscillation."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What is the corner tactic in 2048?",
+   "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Choose one corner and keep the largest tile there. Build descending tiles along the edge toward the corner so merges feed inward without dislodging the max."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What is the highest possible tile in classic 4x4 2048?",
+   "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "The theoretical maximum tile is 131072, though reaching even 65536 legitimately is extremely rare."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Are there official 2048 world records?",
+   "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "There is no single official authority. Commonly shown high tiles include 32768, 65536, and occasionally 131072 by expert players."
+   }
+  }
+ ]
+}
+</script>
+
+<style>
+/* --- (All styles from previous working smooth-animation build plus strategy section) --- */
+:root {
+  --font-stack:"Segoe UI",system-ui,-apple-system,"Roboto","Oxygen","Ubuntu","Cantarell","Noto Sans",sans-serif;
+  --bg:#090b10;
+  --bg-accent:radial-gradient(circle at 50% 50%,#131b29,#090b10 70%);
+  --panel-bg:rgba(255,255,255,0.05);
+  --panel-border:rgba(255,255,255,0.12);
+  --board-bg:#121b25;
+  --tile-empty:rgba(255,255,255,0.05);
+  --text:#f5f7fa;
+  --text-dim:#a9b3c2;
+  --accent:#8f6fff;
+  --accent-gradient:linear-gradient(135deg,#8f6fff,#22d3ee);
+  --focus:#ffd86b;
+  --gap:14px;
+  --radius:18px;
+  --move-duration:140ms;
+  --merge-duration:170ms;
+}
+body[data-theme="light"] {
+  --bg:#fafafa;--bg-accent:linear-gradient(135deg,#f5f7fa,#e4ebf5);
+  --board-bg:#eceff4;--panel-bg:rgba(0,0,0,0.05);--panel-border:rgba(0,0,0,0.08);
+  --text:#1f2430;--text-dim:#596273;--accent:#ff7e4f;
+  --accent-gradient:linear-gradient(135deg,#ff7e4f,#ffbf78);--focus:#1e90ff;
+  --tile-empty:rgba(0,0,0,0.06);
+}
+body[data-theme="dark"] {
+  --bg:#0d0f12;--bg-accent:radial-gradient(circle at 30% 30%,#1c2530,#0d0f12 60%);
+  --board-bg:#161d24;--panel-bg:rgba(255,255,255,0.045);--tile-empty:rgba(255,255,255,0.06);
+  --accent:#ff9867;--accent-gradient:linear-gradient(135deg,#ff9867,#ffc36a);--focus:#71e6d6;
+}
+body[data-theme="sunset"] {
+  --bg:#1d1327;--bg-accent:linear-gradient(145deg,#311738,#52204a,#813b57);
+  --board-bg:#35213f;--tile-empty:rgba(255,255,255,0.07);
+  --accent:#ffb26b;--accent-gradient:linear-gradient(135deg,#ff758c,#ff7eb3);--focus:#ffdf6b;
+}
+body[data-theme="aqua"] {
+  --bg:#062029;--bg-accent:radial-gradient(circle at 70% 30%,#103a47,#062029 60%);
+  --board-bg:#0d2f38;--tile-empty:rgba(255,255,255,0.06);
+  --accent:#4ecdc4;--accent-gradient:linear-gradient(135deg,#36d1dc,#5b86e5);--focus:#ffd66b;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{font-family:var(--font-stack);background:var(--bg);background-image:var(--bg-accent);color:var(--text);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1{font-size:clamp(1.9rem,4vw,3rem);margin:0;font-weight:700;letter-spacing:.5px;background:var(--accent-gradient);-webkit-background-clip:text;color:transparent;display:flex;gap:.55rem}
+h1 span.badge{font-size:.65em;padding:.35em .55em;border-radius:.75em;background:var(--panel-bg);border:1px solid var(--panel-border);color:var(--text-dim);letter-spacing:.5px}
+main{width:100%;max-width:1180px;margin:clamp(1rem,3vh,2rem) auto 1.5rem;padding:0 clamp(.9rem,1.6vw,1.6rem);display:grid;grid-template-columns:1fr 340px;gap:clamp(1.2rem,2.5vw,2rem)}
+@media (max-width:900px){main{grid-template-columns:100%}.side-panels{order:-1;display:flex;flex-wrap:wrap;gap:1rem}.panel.compact-grow{flex:1 1 300px}}
+.top-bar{display:flex;flex-wrap:wrap;gap:1.25rem;align-items:flex-start;justify-content:space-between;margin-bottom:1.2rem}
+.stats{display:flex;gap:.75rem;flex-wrap:wrap}
+.stat-box{background:var(--panel-bg);border:1px solid var(--panel-border);backdrop-filter:blur(14px);padding:.7rem .9rem;border-radius:.9rem;min-width:100px;text-align:center}
+.stat-box h4{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .2rem;color:var(--text-dim)}
+.stat-box .value{font-size:1.15rem;font-weight:700;line-height:1.1}
+.board-wrapper{position:relative;width:100%;max-width:540px;margin:0 auto 1.2rem}
+.board{position:relative;width:100%;aspect-ratio:1/1;background:var(--board-bg);border-radius:var(--radius);box-shadow:0 10px 40px -10px rgba(0,0,0,0.6);overflow:hidden;user-select:none}
+.grid-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:var(--gap);padding:var(--gap)}
+.grid-bg .cell{background:var(--tile-empty);border-radius:calc(var(--radius)*0.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02)}
+.tiles-layer{position:absolute;inset:0;padding:var(--gap);pointer-events:none}
+.tile{position:absolute;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(1.4rem,4.1vw,2.6rem);line-height:1;color:#fff;border-radius:calc(var(--radius)*0.55);box-shadow:0 6px 14px -6px rgba(0,0,0,.55),0 3px 8px -4px rgba(0,0,0,.4);background:linear-gradient(145deg,#455765,#2d3945);transition:left var(--move-duration) cubic-bezier(.25,.8,.45,1), top var(--move-duration) cubic-bezier(.25,.8,.45,1), background .35s;transform:scale(.95);will-change:left,top}
+.tile.new{animation:tileAppear .32s cubic-bezier(.35,1.6,.45,1) both}
+.tile.merge{animation:tileMerge var(--merge-duration) cubic-bezier(.4,1.55,.5,1) both}
+@keyframes tileAppear{0%{transform:scale(.3);opacity:0;filter:blur(4px)}55%{opacity:1;filter:blur(0)}100%{transform:scale(.95)}}
+@keyframes tileMerge{0%{transform:scale(.95)}40%{transform:scale(1.13)}100%{transform:scale(.95)}}
+.tile[data-v="2"]{background:linear-gradient(135deg,#445566,#2f3b46)}
+.tile[data-v="4"]{background:linear-gradient(135deg,#556470,#384752)}
+.tile[data-v="8"]{background:linear-gradient(135deg,#ff8a5c,#ff6b3d)}
+.tile[data-v="16"]{background:linear-gradient(135deg,#ff9966,#ff5e62)}
+.tile[data-v="32"]{background:linear-gradient(135deg,#f83600,#f9d423)}
+.tile[data-v="64"]{background:linear-gradient(135deg,#ff4e50,#f9d423)}
+.tile[data-v="128"]{background:linear-gradient(135deg,#d76d77,#ffaf7b);font-size:clamp(1.15rem,3.8vw,2.1rem)}
+.tile[data-v="256"]{background:linear-gradient(135deg,#b24592,#f15f79);font-size:clamp(1.15rem,3.8vw,2.1rem)}
+.tile[data-v="512"]{background:linear-gradient(135deg,#8e2de2,#4a00e0);font-size:clamp(1.1rem,3.6vw,1.9rem)}
+.tile[data-v="1024"]{background:linear-gradient(135deg,#4776e6,#8e54e9);font-size:clamp(.9rem,3.2vw,1.6rem)}
+.tile[data-v="2048"]{background:linear-gradient(135deg,#0cebeb,#20e3b2,#29ffc6);font-size:clamp(.85rem,3vw,1.5rem)}
+.tile[data-v="4096"]{background:linear-gradient(135deg,#ff512f,#dd2476);font-size:clamp(.78rem,2.7vw,1.4rem)}
+.tile[data-v="8192"]{background:linear-gradient(135deg,#141e30,#243b55);font-size:clamp(.72rem,2.5vw,1.3rem)}
+.overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,12,14,.85),rgba(10,12,14,.55));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.4rem;text-align:center;backdrop-filter:blur(10px);border-radius:var(--radius);z-index:10;opacity:0;pointer-events:none;transition:.45s}
+.overlay.active{opacity:1;pointer-events:auto}
+.overlay h2{margin:0;font-size:clamp(1.55rem,4vw,2.4rem);background:var(--accent-gradient);-webkit-background-clip:text;color:transparent}
+.overlay p{margin:0;color:var(--text-dim);max-width:420px;font-size:.9rem;line-height:1.4}
+.btn{background:var(--panel-bg);color:var(--text);border:1px solid var(--panel-border);font-weight:600;padding:.65rem 1rem;font-size:.75rem;letter-spacing:.4px;border-radius:.75rem;cursor:pointer;transition:.3s;display:inline-flex;align-items:center;gap:.4rem}
+.btn.primary{background:var(--accent-gradient);color:#fff;border:none;box-shadow:0 4px 18px -4px rgba(0,0,0,.45)}
+.btn:hover:not(:disabled){background:rgba(255,255,255,0.12)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.panel{background:var(--panel-bg);border:1px solid var(--panel-border);backdrop-filter:blur(16px);padding:1rem 1.1rem 1.2rem;border-radius:1.05rem}
+.panel h3{margin:.1rem 0 .7rem;font-size:.92rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--text-dim);display:flex;gap:.5rem}
+.panel h3 span{background:var(--accent-gradient);-webkit-background-clip:text;color:transparent;font-weight:800;font-size:.85rem}
+.panel small{display:block;margin-top:.4rem;line-height:1.35;color:var(--text-dim);font-size:.65rem}
+.settings-grid{display:grid;gap:.6rem}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:.6rem;background:rgba(255,255,255,0.04);border:1px solid var(--panel-border);padding:.5rem .7rem;border-radius:.7rem;font-size:.7rem}
+select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:1px solid var(--panel-border);padding:.4rem .55rem;border-radius:.55rem;cursor:pointer;font-size:.7rem}
+.powerups-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.powerup-btn{position:relative;background:rgba(255,255,255,.05);border:1px solid var(--panel-border);padding:.55rem .5rem .5rem;border-radius:.75rem;display:flex;flex-direction:column;gap:.35rem;font-size:.58rem;font-weight:600;letter-spacing:.5px;min-height:80px;cursor:pointer;transition:.3s;text-align:left}
+.powerup-btn strong{font-size:.62rem;background:var(--accent-gradient);-webkit-background-clip:text;color:transparent}
+.powerup-btn .count{position:absolute;top:.4rem;right:.45rem;background:var(--accent-gradient);color:#fff;font-size:.5rem;padding:.25em .5em;border-radius:1em;font-weight:700}
+.powerup-btn:hover:not(:disabled){background:rgba(255,255,255,.12)}
+.powerup-btn:disabled{opacity:.35;cursor:not-allowed}
+.content-seo{max-width:820px;margin:0 auto;padding:0 1rem 1.5rem;line-height:1.55;font-size:.88rem;color:var(--text-dim)}
+.content-seo h2{font-size:1.3rem;margin:2.1rem 0 .75rem;background:var(--accent-gradient);-webkit-background-clip:text;color:transparent}
+.content-seo h3{margin:1.6rem 0 .5rem;font-size:1.08rem;color:var(--text)}
+.content-seo ul{margin:.5rem 0 .8rem 1.15rem;padding:0}
+.content-seo li{margin:.35rem 0}
+.content-seo code{background:rgba(255,255,255,.08);padding:.15rem .35rem;border-radius:.4rem;font-size:.75rem}
+.content-seo .inline-badge{background:var(--accent-gradient);-webkit-background-clip:text;color:transparent;font-weight:600}
+.inline-nav{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0 1.4rem}
+.inline-nav a{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;background:var(--panel-bg);border:1px solid var(--panel-border);padding:.4rem .6rem;border-radius:.6rem;text-decoration:none;color:var(--text-dim);transition:.25s}
+.inline-nav a:hover{color:var(--text);background:rgba(255,255,255,.12)}
+.highlight-tip{background:rgba(255,255,255,0.06);border:1px solid var(--panel-border);padding:.75rem .9rem;border-radius:.8rem;margin:.85rem 0;font-size:.78rem;color:var(--text);line-height:1.45}
+.inline-grid-diagram{display:grid;grid-template-columns:repeat(4,30px);gap:4px;margin:.6rem 0}
+.inline-grid-diagram span{display:flex;align-items:center;justify-content:center;font-size:.6rem;height:30px;border-radius:6px;background:var(--tile-empty);color:var(--text-dim)}
+.inline-grid-diagram span.max{background:linear-gradient(135deg,#ffb347,#ff6b6b);color:#fff;font-weight:600}
+.inline-grid-diagram span.chain{background:linear-gradient(135deg,#384a5a,#2a3744);color:#d6e2ec}
+.footer{margin-top:auto;padding:2.2rem 1rem 2.6rem;text-align:center;font-size:.76rem;color:var(--text-dim)}
+.footer a.cta{display:inline-block;margin-top:.75rem;font-weight:600;font-size:.78rem;padding:.6rem .95rem;border-radius:.7rem;background:var(--accent-gradient);color:#fff;text-decoration:none;box-shadow:0 6px 20px -8px rgba(0,0,0,.7);transition:.35s}
+.footer a.cta:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.toast{position:fixed;bottom:1.15rem;left:50%;transform:translateX(-50%) translateY(120%);background:rgba(0,0,0,.75);color:#fff;padding:.65rem .95rem;font-size:.68rem;border-radius:.7rem;backdrop-filter:blur(8px);display:flex;gap:.55rem;align-items:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.7);z-index:60;opacity:0;transition:.5s}
+.toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+.custom-setup-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto 1rem}
+.custom-cell{background:var(--tile-empty);border:1px dashed rgba(255,255,255,0.18);border-radius:calc(var(--radius)*0.6);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.05rem;cursor:pointer;color:var(--text);user-select:none;transition:.25s}
+.custom-cell.empty{color:var(--text-dim);font-weight:400;font-size:1rem}
+.custom-cell:hover,.custom-cell:focus-visible{background:rgba(255,255,255,0.08);outline:none;border-color:var(--accent)}
+.custom-setup-actions{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;width:100%;max-width:480px}
+.custom-setup-actions .btn{flex:1 1 auto;min-width:110px}
+.custom-help{font-size:.58rem;color:var(--text-dim);margin-top:.4rem;line-height:1.25;max-width:440px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0}
+</style>
 </head>
-<body>
-    <div class="particles" id="particles"></div>
-    
-    <div class="container">
-        <div class="game-header">
-            <h1>GRAVITY ORB</h1>
-            <div class="score-display" id="score">Score: 0</div>
+<body data-theme="neon">
+<noscript><div style="padding:1rem;text-align:center;background:#222;color:#fff;">This 2048 game needs JavaScript to run.</div></noscript>
+
+<main>
+  <div>
+    <div class="top-bar" aria-label="Game header">
+      <div>
+        <h1>Aesthetic 2048 <span class="badge">Powerups</span></h1>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem;">
+          <button class="btn primary" id="startBtnTop">Quick Start</button>
+          <button class="btn" id="customSetupBtn">Custom Setup</button>
+          <button class="btn" id="howBtn">How To</button>
         </div>
-        
-        <div class="game-canvas-container">
-            <canvas id="gameCanvas"></canvas>
-            
-            <div class="start-screen" id="startScreen">
-                <h2>Welcome to Gravity Orb!</h2>
-                <p>Tilt your device or use arrow keys to navigate through the cosmic obstacles.</p>
-                <p>Survive as long as possible and set a new high score!</p>
-                <button class="btn" onclick="startGame()">Start Game</button>
-            </div>
-            
-            <div class="game-over" id="gameOver">
-                <h2>Game Over!</h2>
-                <p>Your Score: <span id="finalScore">0</span></p>
-                <p>High Score: <span id="highScore">0</span></p>
-                <button class="btn" onclick="restartGame()">Play Again</button>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <p>Use arrow keys or tilt your device to control the orb</p>
-            <div class="mobile-controls">
-                <button class="control-btn" id="leftBtn">←</button>
-                <button class="control-btn" id="upBtn">↑</button>
-                <button class="control-btn" id="rightBtn">→</button>
-                <button class="control-btn" id="downBtn">↓</button>
-            </div>
-        </div>
+      </div>
+      <div class="stats">
+        <div class="stat-box"><h4>Score</h4><div class="value" id="score">0</div></div>
+        <div class="stat-box"><h4>Best</h4><div class="value" id="best">0</div></div>
+        <div class="stat-box"><h4>Moves</h4><div class="value" id="moves">0</div></div>
+        <div class="stat-box"><h4>Highest</h4><div class="value" id="highestTile">0</div></div>
+      </div>
     </div>
 
-    <script>
-        // Game variables
-        let canvas, ctx;
-        let gameRunning = false;
-        let score = 0;
-        let highScore = 0;
-        let lastTime = 0;
-        
-        // Orb properties
-        const orb = {
-            x: 0,
-            y: 0,
-            radius: 20,
-            velocityX: 0,
-            velocityY: 0,
-            color: '#ff6b6b'
-        };
-        
-        // Obstacles
-        let obstacles = [];
-        let particles = [];
-        
-        // Control variables
-        let tiltX = 0;
-        let tiltY = 0;
-        let keys = {
-            ArrowLeft: false,
-            ArrowRight: false,
-            ArrowUp: false,
-            ArrowDown: false
-        };
-        
-        // Initialize game
-        function init() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Initialize particles
-            createParticles();
-            
-            // Load high score
-            highScore = localStorage.getItem('gravityOrbHighScore') || 0;
-            document.getElementById('highScore').textContent = highScore;
+    <div class="board-wrapper">
+      <div id="board" class="board">
+        <div class="grid-bg" id="gridBg"></div>
+        <div class="tiles-layer" id="tilesLayer"></div>
+      </div>
+
+      <!-- Overlays -->
+      <div id="startOverlay" class="overlay active">
+        <h2>Start Game</h2>
+        <p>Swipe or use arrow keys / WASD to merge tiles & reach 2048. Try powerups and custom setups!</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;">
+          <button class="btn primary" id="startBtn">Play Now</button>
+          <button class="btn" id="openCustomFromStart">Custom Setup</button>
+          <button class="btn" id="howBtn2">How To</button>
+        </div>
+      </div>
+      <div id="gameOverOverlay" class="overlay" role="alertdialog" aria-modal="true">
+        <h2>Game Over</h2>
+        <p id="finalScoreText">You scored 0.</p>
+        <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
+          <button class="btn primary" id="retryBtn">Try Again</button>
+          <button class="btn" id="continueBtn">Close</button>
+        </div>
+      </div>
+      <div id="winOverlay" class="overlay">
+        <h2>2048 Achieved!</h2>
+        <p>Continue for a higher score or restart a new run.</p>
+        <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
+          <button class="btn primary" id="keepGoingBtn">Keep Going</button>
+          <button class="btn" id="restartFromWinBtn">Restart</button>
+        </div>
+      </div>
+      <div id="customSetupOverlay" class="overlay">
+        <h2>Custom Setup</h2>
+        <div class="custom-setup-grid" id="customSetupGrid"></div>
+        <div class="custom-setup-actions">
+          <button class="btn" id="csClearBtn">Clear</button>
+          <button class="btn" id="csRandomBtn">Random Pair</button>
+          <button class="btn" id="csBalanceBtn">Balance</button>
+          <button class="btn primary" id="csStartBtn">Start Game</button>
+          <button class="btn" id="csCancelBtn">Cancel</button>
+        </div>
+        <div class="custom-help">Click / Enter / Space to cycle values (Shift = reverse). Need at least 2 tiles. ESC cancels.</div>
+      </div>
+    </div>
+
+    <div aria-live="polite" id="liveRegion" class="sr-only"></div>
+
+    <div class="content-seo" id="howToSection" hidden>
+      <h2>How to Play 2048</h2>
+      <p>Slide numbered tiles to combine them and reach the highest value you can. Each move spawns a new tile (2 or 4). Plan ahead to avoid filling the grid.</p>
+      <h2>Custom Setup</h2>
+      <p>Design your own starting layout to practice or test strategies.</p>
+    </div>
+  </div>
+
+  <div class="side-panels">
+    <div class="panel compact-grow">
+      <h3><span>Powerups</span></h3>
+      <div class="powerups-grid" id="powerupsGrid"></div>
+      <small>Earn powerups at milestone tiles, big merges or every 1000 score.</small>
+    </div>
+    <div class="panel">
+      <h3><span>Settings</span></h3>
+      <div class="settings-grid">
+        <div class="setting-row"><label for="themeSelect">Theme</label><select id="themeSelect"><option value="neon">Neon</option><option value="dark">Dark</option><option value="light">Light</option><option value="sunset">Sunset</option><option value="aqua">Aqua</option></select></div>
+        <div class="setting-row"><label>Animations</label><button class="toggle" id="animationsToggle" data-state="on" aria-pressed="true">On</button></div>
+        <div class="setting-row"><label>Hints</label><button class="toggle" id="hintsToggle" data-state="on" aria-pressed="true">On</button></div>
+        <div class="setting-row"><label>Reset</label><button class="btn" id="confirmResetBtn" style="font-size:.55rem;padding:.3rem .5rem;">Reset</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3><span>Keyboard</span></h3>
+      <small>Move: Arrows / WASD<br>Undo: U | Shuffle: H<br>Double: D | Spawn: S<br>Restart: R | Custom: C</small>
+    </div>
+  </div>
+</main>
+
+<div class="content-seo">
+  <h2>Why This 2048 Version Stands Out</h2>
+  <p>Custom starting boards, theme variety, smart powerups and smooth pixel‑perfect motion make this more strategic and polished than the classic clone.</p>
+</div>
+
+<!-- STRATEGY / INFO SECTION START -->
+<div class="content-seo" id="strategyGuide">
+  <h2>Strategy Guide: Get 2048 Faster</h2>
+  <div class="inline-nav">
+    <a href="#fast-checklist">Fast Checklist</a>
+    <a href="#corner-tactic">Corner Tactic</a>
+    <a href="#merge-flow">Merge Flow</a>
+    <a href="#world-records">High Tiles</a>
+    <a href="#max-theory">Max Tile</a>
+    <a href="#efficiency">Efficiency</a>
+    <a href="#common-mistakes">Mistakes</a>
+  </div>
+
+  <h3 id="fast-checklist">Quick Checklist for Speed</h3>
+  <ul>
+    <li>Pick a permanent corner for your largest tile (never move it out).</li>
+    <li>Maintain descending chain along the corner edge.</li>
+    <li>Avoid back-and-forth oscillations.</li>
+    <li>Plan two moves ahead to preserve merge flow.</li>
+    <li>Control spawn region by keeping one side looser.</li>
+    <li>Delay merges if they would break chain staging.</li>
+    <li>Use powerups only to recover structure—not for tiny gains.</li>
+  </ul>
+  <div class="highlight-tip">Pro Tip: Losses usually begin 6–8 moves before the “bad spawn.” Protect empty cells.</div>
+
+  <h3 id="corner-tactic">Corner Tactic (Detailed)</h3>
+  <p>Keep the maximum tile glued to a chosen corner; feed it with a descending row/column so merges are directional & predictable.</p>
+  <div class="inline-grid-diagram" aria-label="Corner tactic example">
+    <span class="max">512</span><span class="chain">256</span><span class="chain">128</span><span class="chain">64</span>
+    <span class="chain">32</span><span class="chain">16</span><span class="chain">8</span><span class="chain">4</span>
+    <span class="chain">2</span><span class="chain">2</span><span class="chain">4</span><span class="chain">8</span>
+    <span class="chain">16</span><span class="chain">32</span><span class="chain">64</span><span class="chain">128</span>
+  </div>
+  <ol>
+    <li>Pick a corner; only use the two directions that push toward it by default.</li>
+    <li>Build descending values along the corner edge.</li>
+    <li>Shepherd small tiles inward with controlled perpendicular moves.</li>
+    <li>Never pull the max out unless you can re-seat it instantly.</li>
+  </ol>
+  <ul>
+    <li>Avoid popping the max out to chase a single merge.</li>
+    <li>Don’t leave interior gaps: they invite disruptive spawns.</li>
+    <li>Don’t over-merge early: keep sequence integrity.</li>
+  </ul>
+
+  <h3 id="merge-flow">Creating Merge Flow (Chaining)</h3>
+  <p>Line up successive powers so one sweep triggers multiple merges.</p>
+  <ul>
+    <li>Stage low tiles behind higher ones in order.</li>
+    <li>Avoid merging prematurely if it breaks staging.</li>
+    <li>Think in zones: stable chain zone vs staging zone.</li>
+  </ul>
+  <div class="highlight-tip">If you average ≥1 merge every ~1.4 moves pre‑1024 you’re on a strong pace.</div>
+
+  <h3 id="world-records">High Tiles & “World Records”</h3>
+  <p>No official central authority. Common high tiles: 32768, 65536, occasionally 131072 (extreme). Treat huge screenshots skeptically.</p>
+  <ul>
+    <li>First 2048: ~800–1300 moves typical.</li>
+    <li>4096 chase: improved chain discipline required.</li>
+    <li>65536: requires near flawless spawn control.</li>
+  </ul>
+
+  <h3 id="max-theory">Maximum Theoretical Tile</h3>
+  <p>The 4×4 theoretical max is 131072 (needs two 65536, etc.). Practical runs seldom exceed 65536 without automation.</p>
+
+  <h3 id="efficiency">Efficiency Metrics</h3>
+  <ul>
+    <li>Merges per move (early): target 0.65–0.75.</li>
+    <li>Dead move rate &lt; 20% pre‑512.</li>
+    <li>Edge disorder incidents &lt; 3 before 2048.</li>
+    <li>Undo usage only to restore chain or corner control.</li>
+  </ul>
+
+  <h3 id="common-mistakes">Common Mistakes</h3>
+  <ul>
+    <li>Chasing every small merge (breaks structure).</li>
+    <li>Changing max corner mid-game.</li>
+    <li>Stacking two large equals too early.</li>
+    <li>Panic alternating when space is low.</li>
+  </ul>
+
+  <h3>Powerup Strategy</h3>
+  <ul>
+    <li><strong>Undo:</strong> Fix chain/ corner mistakes only.</li>
+    <li><strong>Shuffle:</strong> Use on near-full, no-merge boards.</li>
+    <li><strong>Double:</strong> Apply to the smallest feeder tile to accelerate growth.</li>
+    <li><strong>Spawn:</strong> Complete a pair to keep chain intact—avoid clogging.</li>
+  </ul>
+  <div class="highlight-tip">Space is a currency. Spend it deliberately to funnel spawns.</div>
+</div>
+<!-- STRATEGY / INFO SECTION END -->
+
+<div class="footer">
+  <p>Made with strategy, math, and a bit of glow ✨</p>
+  <a class="cta" href="https://aniketxraj.me/Things-to-do-when-bored.html" target="_blank" rel="noopener">Bored? check this out</a>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===============================
+   FULL GAME LOGIC (working start)
+   =============================== */
+
+/* Config */
+const SIZE=4;
+const POWERUP_TYPES=["undo","shuffle","double","spawn"];
+const POWERUP_INFO={
+  undo:{name:"Undo",desc:"Revert last move",icon:"↶"},
+  shuffle:{name:"Shuffle",desc:"Rearrange tiles",icon:"🔀"},
+  double:{name:"Double",desc:"Double a lowest tile",icon:"✖2"},
+  spawn:{name:"Spawn",desc:"Add a tile",icon:"➕"}
+};
+const MILESTONE_TILES=[128,256,512,1024,2048,4096];
+
+/* State */
+let tiles=[];              // {id,value,row,col,merged,new,mergedFrom}
+let grid=[];               // 2D map (ids or null)
+let tileIdCounter=1;
+let score=0,bestScore=0,moves=0,highestTile=0;
+let hasWon=false,allowContinueAfterWin=false;
+let previousState=null;
+let powerups={undo:0,shuffle:0,double:0,spawn:0};
+let animationsEnabled=true,hintsEnabled=true;
+let milestoneTiles=new Set();
+let achievementScoreMilestone=0;
+let customBoardData=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+
+/* DOM */
+const boardEl=document.getElementById("board");
+const tilesLayer=document.getElementById("tilesLayer");
+const gridBg=document.getElementById("gridBg");
+const scoreEl=document.getElementById("score");
+const bestEl=document.getElementById("best");
+const movesEl=document.getElementById("moves");
+const highestTileEl=document.getElementById("highestTile");
+const startOverlay=document.getElementById("startOverlay");
+const gameOverOverlay=document.getElementById("gameOverOverlay");
+const winOverlay=document.getElementById("winOverlay");
+const finalScoreText=document.getElementById("finalScoreText");
+const toastEl=document.getElementById("toast");
+const howToSection=document.getElementById("howToSection");
+const liveRegion=document.getElementById("liveRegion");
+const powerupsGrid=document.getElementById("powerupsGrid");
+const themeSelect=document.getElementById("themeSelect");
+const animationsToggle=document.getElementById("animationsToggle");
+const hintsToggle=document.getElementById("hintsToggle");
+const confirmResetBtn=document.getElementById("confirmResetBtn");
+/* Buttons */
+const startBtn=document.getElementById("startBtn");
+const startBtnTop=document.getElementById("startBtnTop");
+const openCustomFromStartBtn=document.getElementById("openCustomFromStart");
+const howBtn=document.getElementById("howBtn");
+const howBtn2=document.getElementById("howBtn2");
+const retryBtn=document.getElementById("retryBtn");
+const continueBtn=document.getElementById("continueBtn");
+const keepGoingBtn=document.getElementById("keepGoingBtn");
+const restartFromWinBtn=document.getElementById("restartFromWinBtn");
+const customSetupBtn=document.getElementById("customSetupBtn");
+
+/* Custom setup */
+const customSetupOverlay=document.getElementById("customSetupOverlay");
+const customSetupGridEl=document.getElementById("customSetupGrid");
+const csClearBtn=document.getElementById("csClearBtn");
+const csRandomBtn=document.getElementById("csRandomBtn");
+const csBalanceBtn=document.getElementById("csBalanceBtn");
+const csStartBtn=document.getElementById("csStartBtn");
+const csCancelBtn=document.getElementById("csCancelBtn");
+
+/* Helpers */
+function speakStatus(msg){ liveRegion.textContent=msg; }
+function showToast(msg,time=2300){
+  toastEl.textContent=msg;
+  toastEl.classList.add("visible");
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>toastEl.classList.remove("visible"),time);
+}
+function inside(r,c){ return r>=0 && c>=0 && r<SIZE && c<SIZE; }
+
+function initGrid(){
+  grid=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
+  if(gridBg.childElementCount!==SIZE*SIZE){
+    gridBg.innerHTML="";
+    for(let i=0;i<SIZE*SIZE;i++){
+      const cell=document.createElement("div");
+      cell.className="cell";
+      gridBg.appendChild(cell);
+    }
+  }
+}
+
+function createTile(value,row,col){
+  const tile={id:tileIdCounter++,value,row,col,merged:false,new:true,mergedFrom:null};
+  tiles.push(tile);
+  grid[row][col]=tile.id;
+  highestTile=Math.max(highestTile,value);
+  return tile;
+}
+function getTile(id){ return tiles.find(t=>t.id===id); }
+
+function cloneState(){
+  return {
+    tiles:tiles.map(t=>({...t})),
+    grid:grid.map(r=>r.slice()),
+    score,moves,highestTile,hasWon,allowContinueAfterWin,
+    powerups:{...powerups}
+  };
+}
+function restoreState(state){
+  tiles=state.tiles.map(t=>({...t}));
+  grid=state.grid.map(r=>r.slice());
+  score=state.score;
+  moves=state.moves;
+  highestTile=state.highestTile;
+  hasWon=state.hasWon;
+  allowContinueAfterWin=state.allowContinueAfterWin;
+  powerups={...state.powerups};
+  renderTiles(true);
+  updateStats();
+}
+function saveStateForUndo(){ previousState=cloneState(); }
+
+function randomEmptyCell(){
+  const empty=[];
+  for(let r=0;r<SIZE;r++)
+    for(let c=0;c<SIZE;c++)
+      if(grid[r][c]==null) empty.push({r,c});
+  return empty.length? empty[Math.random()*empty.length|0]:null;
+}
+function spawnRandomTile(){
+  const spot=randomEmptyCell();
+  if(!spot) return false;
+  createTile(Math.random()<0.9?2:4,spot.r,spot.c);
+  return true;
+}
+
+/* Rendering */
+function computeCellMetrics(){
+  const gap=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap"))||14;
+  const size=tilesLayer.clientWidth;
+  const inner=size - gap*2;
+  const tileSize=(inner - (SIZE-1)*gap)/SIZE;
+  return {gap,tileSize};
+}
+function renderTiles(skipAnim=false){
+  const {gap,tileSize}=computeCellMetrics();
+  const existing=new Map([...tilesLayer.querySelectorAll(".tile")].map(el=>[+el.dataset.id,el]));
+  const frag=document.createDocumentFragment();
+
+  tiles.forEach(t=>{
+    let el=existing.get(t.id);
+    const x=gap + t.col*(tileSize+gap);
+    const y=gap + t.row*(tileSize+gap);
+    if(!el){
+      el=document.createElement("div");
+      el.className="tile";
+      el.dataset.id=t.id;
+      el.dataset.v=t.value;
+      el.textContent=t.value;
+      el.style.width=tileSize+"px";
+      el.style.height=tileSize+"px";
+      el.style.left=x+"px";
+      el.style.top=y+"px";
+      if(animationsEnabled && !skipAnim && t.new) el.classList.add("new");
+      frag.appendChild(el);
+    } else {
+      existing.delete(t.id);
+      if(+el.dataset.v!==t.value){
+        el.dataset.v=t.value;
+        el.textContent=t.value;
+        if(animationsEnabled && t.merged){
+          el.classList.add("merge");
+          setTimeout(()=>el.classList.remove("merge"),250);
         }
-        
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            
-            // Reset orb position
-            orb.x = canvas.width / 2;
-            orb.y = canvas.height / 2;
+      }
+      el.style.width=tileSize+"px";
+      el.style.height=tileSize+"px";
+      if(skipAnim || !animationsEnabled){
+        el.style.transition="none";
+        requestAnimationFrame(()=>{
+          el.style.left=x+"px";
+          el.style.top=y+"px";
+          el.style.transition="";
+        });
+      } else {
+        el.style.left=x+"px";
+        el.style.top=y+"px";
+      }
+    }
+  });
+  existing.forEach(el=>el.remove());
+  tilesLayer.appendChild(frag);
+  tiles.forEach(t=>t.new=false);
+}
+window.addEventListener("resize",()=>renderTiles(true));
+
+/* Game Flow */
+function hideOverlays(){ [startOverlay,gameOverOverlay,winOverlay,customSetupOverlay].forEach(o=>o.classList.remove("active")); }
+function newGame(){
+  initGrid();
+  tiles=[];
+  score=0;moves=0;highestTile=0;hasWon=false;allowContinueAfterWin=false;
+  milestoneTiles=new Set();achievementScoreMilestone=0;
+  spawnRandomTile();spawnRandomTile();
+  saveStateForUndo();
+  hideOverlays();
+  renderTiles(true);
+  updateStats();
+  speakStatus("Game started");
+}
+function showGameOver(){
+  finalScoreText.textContent=`You scored ${score}.`;
+  gameOverOverlay.classList.add("active");
+  speakStatus("Game over");
+}
+function updateStats(){
+  highestTileEl.textContent=highestTile;
+  scoreEl.textContent=score;
+  if(score>bestScore){ bestScore=score; persist(); }
+  bestEl.textContent=bestScore;
+  movesEl.textContent=moves;
+  updatePowerupButtons();
+}
+
+function move(dir){
+  if(gameOverOverlay.classList.contains("active")) return;
+  if(winOverlay.classList.contains("active") && !allowContinueAfterWin) return;
+
+  saveStateForUndo();
+
+  const vector = {
+    left:{r:0,c:-1}, right:{r:0,c:1},
+    up:{r:-1,c:0},  down:{r:1,c:0}
+  }[dir];
+  if(!vector) return;
+
+  const rows=[...Array(SIZE).keys()];
+  const cols=[...Array(SIZE).keys()];
+  if(vector.r>0) rows.reverse();
+  if(vector.c>0) cols.reverse();
+
+  let moved=false;
+  let mergedScore=0;
+  let created2048=false;
+
+  tiles.forEach(t=>{t.merged=false; t.mergedFrom=null;});
+
+  rows.forEach(r=>{
+    cols.forEach(c=>{
+      const id=grid[r][c];
+      if(id==null) return;
+      const tile=getTile(id);
+      let nr=r, nc=c;
+      while(true){
+        const rr=nr+vector.r;
+        const cc=nc+vector.c;
+        if(!inside(rr,cc)) break;
+        const nextId=grid[rr][cc];
+        if(nextId==null){
+            nr=rr; nc=cc;
+        } else {
+          const nextTile=getTile(nextId);
+          if(nextTile.value===tile.value && !nextTile.merged){
+            nr=rr; nc=cc;
+          }
+          break;
         }
-        
-        function setupEventListeners() {
-            // Keyboard controls
-            window.addEventListener('keydown', (e) => {
-                if (keys.hasOwnProperty(e.key)) {
-                    keys[e.key] = true;
-                    e.preventDefault();
-                }
-            });
-            
-            window.addEventListener('keyup', (e) => {
-                if (keys.hasOwnProperty(e.key)) {
-                    keys[e.key] = false;
-                    e.preventDefault();
-                }
-            });
-            
-            // Mobile touch controls
-            const leftBtn = document.getElementById('leftBtn');
-            const rightBtn = document.getElementById('rightBtn');
-            const upBtn = document.getElementById('upBtn');
-            const downBtn = document.getElementById('downBtn');
-            
-            const setKeyState = (key, state) => {
-                keys[key] = state;
-            };
-            
-            leftBtn.addEventListener('touchstart', () => setKeyState('ArrowLeft', true));
-            leftBtn.addEventListener('touchend', () => setKeyState('ArrowLeft', false));
-            
-            rightBtn.addEventListener('touchstart', () => setKeyState('ArrowRight', true));
-            rightBtn.addEventListener('touchend', () => setKeyState('ArrowRight', false));
-            
-            upBtn.addEventListener('touchstart', () => setKeyState('ArrowUp', true));
-            upBtn.addEventListener('touchend', () => setKeyState('ArrowUp', false));
-            
-            downBtn.addEventListener('touchstart', () => setKeyState('ArrowDown', true));
-            downBtn.addEventListener('touchend', () => setKeyState('ArrowDown', false));
-            
-            // Device orientation
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
+      }
+      if(nr===r && nc===c) return;
+      const targetId=grid[nr][nc];
+      grid[r][c]=null;
+      if(targetId!=null){
+        const targetTile=getTile(targetId);
+        if(targetTile.value===tile.value && !targetTile.merged){
+          // merge
+          tiles = tiles.filter(tl=>tl.id!==tile.id);
+          targetTile.value*=2;
+          targetTile.merged=true;
+          targetTile.mergedFrom=[tile.id];
+          mergedScore+=targetTile.value;
+          highestTile=Math.max(highestTile,targetTile.value);
+          if(targetTile.value===2048 && !hasWon) created2048=true;
+        } else {
+          // Should not happen due to logic
         }
-        
-        function handleOrientation(event) {
-            tiltX = event.gamma / 45; // -1 to 1
-            tiltY = event.beta / 45;  // -1 to 1
-            
-            // Clamp values
-            tiltX = Math.max(-1, Math.min(1, tiltX));
-            tiltY = Math.max(-1, Math.min(1, tiltY));
+      } else {
+        grid[nr][nc]=tile.id;
+        tile.row=nr; tile.col=nc;
+      }
+      moved=true;
+    });
+  });
+
+  if(!moved){
+    speakStatus("No move");
+    return;
+  }
+
+  score+=mergedScore;
+  moves++;
+  spawnRandomTile();
+  updateStats();
+  renderTiles();
+  if(created2048 && !hasWon){
+    hasWon=true;
+    winOverlay.classList.add("active");
+    speakStatus("2048 achieved!");
+  }
+  checkGameOver();
+  maybeAwardPowerup(mergedScore);
+  speakStatus(`Moved ${dir}`);
+}
+
+function checkGameOver(){
+  if(randomEmptyCell()) return;
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      const id=grid[r][c];
+      const tile=getTile(id);
+      if(!tile) continue;
+      if(r+1<SIZE){
+        const downId=grid[r+1][c];
+        if(downId!=null && getTile(downId).value===tile.value) return;
+      }
+      if(c+1<SIZE){
+        const rightId=grid[r][c+1];
+        if(rightId!=null && getTile(rightId).value===tile.value) return;
+      }
+    }
+  }
+  showGameOver();
+}
+
+/* Powerups */
+function generatePowerupButtons(){
+  powerupsGrid.innerHTML="";
+  POWERUP_TYPES.forEach(type=>{
+    const info=POWERUP_INFO[type];
+    const b=document.createElement("button");
+    b.className="powerup-btn";
+    b.id="pwr-"+type;
+    b.innerHTML=`<span class="count" id="count-${type}">${powerups[type]}</span><strong>${info.icon} ${info.name}</strong><span style="opacity:.7;font-weight:500;">${info.desc}</span>`;
+    b.addEventListener("click",()=>activatePowerup(type));
+    powerupsGrid.appendChild(b);
+  });
+  updatePowerupButtons();
+}
+function updatePowerupButtons(){
+  POWERUP_TYPES.forEach(t=>{
+    const btn=document.getElementById("pwr-"+t);
+    if(!btn) return;
+    const count=document.getElementById("count-"+t);
+    if(count) count.textContent=powerups[t];
+    btn.disabled=powerups[t]<=0;
+  });
+  persist();
+}
+function awardPowerup(type){
+  const t=type || POWERUP_TYPES[Math.random()*POWERUP_TYPES.length|0];
+  powerups[t]=(powerups[t]||0)+1;
+  showToast(`Powerup earned: ${POWERUP_INFO[t].name}!`);
+  updatePowerupButtons();
+}
+function maybeAwardPowerup(mergedScore){
+  MILESTONE_TILES.forEach(m=>{
+    if(highestTile>=m && !milestoneTiles.has(m)){
+      milestoneTiles.add(m);
+      awardPowerup();
+    }
+  });
+  if(score - achievementScoreMilestone >= 1000){
+    achievementScoreMilestone=score;
+    awardPowerup();
+  }
+  if(mergedScore>=512) awardPowerup();
+}
+function activatePowerup(t){
+  if(powerups[t]<=0) return;
+  if(gameOverOverlay.classList.contains("active")) return;
+  if(winOverlay.classList.contains("active") && !allowContinueAfterWin) return;
+  powerups[t]--;
+  if(t==="undo"){ if(previousState) restoreState(previousState); }
+  else if(t==="shuffle"){ shuffleBoard(); }
+  else if(t==="double"){ doubleLowest(); }
+  else if(t==="spawn"){ spawnRandomTile(); renderTiles(); speakStatus("Spawned tile"); }
+  updatePowerupButtons();
+}
+function shuffleBoard(){
+  const values=tiles.map(t=>t.value);
+  initGrid();
+  tiles=[];
+  values.forEach(v=>{
+    const cell=randomEmptyCell();
+    if(cell) createTile(v,cell.r,cell.c);
+  });
+  renderTiles();
+  speakStatus("Board shuffled");
+}
+function doubleLowest(){
+  if(!tiles.length) return;
+  const min=Math.min(...tiles.map(t=>t.value));
+  const candidates=tiles.filter(t=>t.value===min);
+  const pick=candidates[Math.random()*candidates.length|0];
+  pick.value*=2;
+  pick.merged=true;
+  highestTile=Math.max(highestTile,pick.value);
+  renderTiles();
+  speakStatus("Lowest tile doubled");
+}
+
+/* Persistence */
+function persist(){
+  localStorage.setItem("aesthetic2048Save",JSON.stringify({
+    bestScore,
+    theme:document.body.getAttribute("data-theme"),
+    powerups,animationsEnabled,hintsEnabled
+  }));
+}
+function loadPersisted(){
+  try{
+    const data=JSON.parse(localStorage.getItem("aesthetic2048Save"));
+    if(!data) return;
+    if(data.bestScore) bestScore=data.bestScore;
+    if(data.theme){document.body.setAttribute("data-theme",data.theme);themeSelect.value=data.theme;}
+    if(data.powerups) powerups={...powerups,...data.powerups};
+    if(typeof data.animationsEnabled==="boolean"){
+      animationsEnabled=data.animationsEnabled;
+      animationsToggle.textContent=animationsEnabled?"On":"Off";
+      animationsToggle.setAttribute("aria-pressed",animationsEnabled);
+    }
+    if(typeof data.hintsEnabled==="boolean"){
+      hintsEnabled=data.hintsEnabled;
+      hintsToggle.textContent=hintsEnabled?"On":"Off";
+      hintsToggle.setAttribute("aria-pressed",hintsEnabled);
+    }
+  }catch(e){}
+}
+
+/* Custom Setup */
+const cycleValues=[0,2,4,8,16,32,64,128,256,512,1024,2048,4096];
+function openCustomSetup(){
+  hideOverlays();
+  customSetupOverlay.classList.add("active");
+  initCustomSetupGrid();
+  setTimeout(()=>{
+    const f=customSetupGridEl.querySelector(".custom-cell");
+    if(f) f.focus();
+  },40);
+}
+function closeCustomSetup(){ customSetupOverlay.classList.remove("active"); }
+function initCustomSetupGrid(){
+  customSetupGridEl.innerHTML="";
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      const cell=document.createElement("div");
+      cell.className="custom-cell empty";
+      cell.tabIndex=0;
+      cell.dataset.r=r;cell.dataset.c=c;
+      updateCustomCellVisual(cell);
+      cell.addEventListener("click",e=>{
+        cycleCellValue(r,c,e.shiftKey?-1:1);
+        updateCustomCellVisual(cell);
+      });
+      cell.addEventListener("keydown",e=>{
+        if(e.key===" "||e.key==="Enter"){
+          e.preventDefault();
+          cycleCellValue(r,c,e.shiftKey?-1:1);
+          updateCustomCellVisual(cell);
         }
-        
-        function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            gameRunning = true;
-            score = 0;
-            obstacles = [];
-            particles = [];
-            
-            orb.x = canvas.width / 2;
-            orb.y = canvas.height / 2;
-            orb.velocityX = 0;
-            orb.velocityY = 0;
-            
-            updateScore();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        function gameLoop(timestamp) {
-            if (!gameRunning) return;
-            
-            const deltaTime = timestamp - lastTime || 0;
-            lastTime = timestamp;
-            
-            update(deltaTime);
-            render();
-            
-            requestAnimationFrame(gameLoop);
-        }
-        
-        function update(deltaTime) {
-            // Apply controls
-            let controlX = 0;
-            let controlY = 0;
-            
-            if (keys.ArrowLeft) controlX -= 1;
-            if (keys.ArrowRight) controlX += 1;
-            if (keys.ArrowUp) controlY -= 1;
-            if (keys.ArrowDown) controlY += 1;
-            
-            // Use device orientation if available and no keyboard input
-            if (controlX === 0 && controlY === 0) {
-                controlX = tiltX;
-                controlY = tiltY;
-            }
-            
-            // Apply acceleration
-            const acceleration = 0.0005 * deltaTime;
-            orb.velocityX += controlX * acceleration;
-            orb.velocityY += controlY * acceleration;
-            
-            // Apply friction
-            const friction = 0.98;
-            orb.velocityX *= friction;
-            orb.velocityY *= friction;
-            
-            // Update position
-            orb.x += orb.velocityX * deltaTime;
-            orb.y += orb.velocityY * deltaTime;
-            
-            // Boundary check
-            if (orb.x - orb.radius < 0) {
-                orb.x = orb.radius;
-                orb.velocityX *= -0.8;
-            }
-            if (orb.x + orb.radius > canvas.width) {
-                orb.x = canvas.width - orb.radius;
-                orb.velocityX *= -0.8;
-            }
-            if (orb.y - orb.radius < 0) {
-                orb.y = orb.radius;
-                orb.velocityY *= -0.8;
-            }
-            if (orb.y + orb.radius > canvas.height) {
-                orb.y = canvas.height - orb.radius;
-                orb.velocityY *= -0.8;
-            }
-            
-            // Generate obstacles
-            if (Math.random() < 0.02) {
-                createObstacle();
-            }
-            
-            // Update obstacles
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                const obstacle = obstacles[i];
-                obstacle.y += obstacle.speed * deltaTime * 0.05;
-                
-                // Remove obstacles that are off screen
-                if (obstacle.y - obstacle.radius > canvas.height) {
-                    obstacles.splice(i, 1);
-                    score += 10;
-                    updateScore();
-                }
-                
-                // Check collision
-                if (checkCollision(orb, obstacle)) {
-                    gameOver();
-                    return;
-                }
-            }
-            
-            // Update particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const particle = particles[i];
-                particle.x += particle.vx;
-                particle.y += particle.vy;
-                particle.life--;
-                
-                if (particle.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-            
-            // Create trail particles
-            if (gameRunning && Math.random() < 0.3) {
-                createParticle(orb.x, orb.y, orb.velocityX * 0.5, orb.velocityY * 0.5);
-            }
-        }
-        
-        function createObstacle() {
-            const types = ['circle', 'triangle', 'square'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            
-            const obstacle = {
-                x: Math.random() * (canvas.width - 100) + 50,
-                y: -50,
-                radius: 15 + Math.random() * 20,
-                speed: 1 + Math.random() * 2,
-                type: type,
-                color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-                rotation: Math.random() * Math.PI * 2
-            };
-            
-            obstacles.push(obstacle);
-        }
-        
-        function checkCollision(orb, obstacle) {
-            const dx = orb.x - obstacle.x;
-            const dy = orb.y - obstacle.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            return distance < orb.radius + obstacle.radius;
-        }
-        
-        function createParticle(x, y, vx, vy) {
-            particles.push({
-                x: x,
-                y: y,
-                vx: vx + (Math.random() - 0.5) * 0.5,
-                vy: vy + (Math.random() - 0.5) * 0.5,
-                radius: 2 + Math.random() * 3,
-                color: `hsla(${Math.random() * 60 + 180}, 100%, 70%, ${0.5 + Math.random() * 0.5})`,
-                life: 30 + Math.random() * 40
-            });
-        }
-        
-        function createParticles() {
-            for (let i = 0; i < 50; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.2,
-                    vy: (Math.random() - 0.5) * 0.2,
-                    radius: 1 + Math.random() * 2,
-                    color: `hsla(${Math.random() * 360}, 70%, 60%, ${0.2 + Math.random() * 0.3})`,
-                    life: Infinity
-                });
-            }
-        }
-        
-        function render() {
-            // Clear canvas
-            ctx.fillStyle = 'rgba(15, 12, 41, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background particles
-            particles.forEach(particle => {
-                ctx.globalAlpha = particle.life === Infinity ? 0.3 : particle.life / 70;
-                ctx.fillStyle = particle.color;
-                ctx.beginPath();
-                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-            
-            // Draw obstacles
-            obstacles.forEach(obstacle => {
-                ctx.fillStyle = obstacle.color;
-                ctx.save();
-                ctx.translate(obstacle.x, obstacle.y);
-                ctx.rotate(obstacle.rotation);
-                
-                switch (obstacle.type) {
-                    case 'circle':
-                        ctx.beginPath();
-                        ctx.arc(0, 0, obstacle.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
-                    case 'triangle':
-                        ctx.beginPath();
-                        ctx.moveTo(0, -obstacle.radius);
-                        ctx.lineTo(obstacle.radius * 0.866, obstacle.radius * 0.5);
-                        ctx.lineTo(-obstacle.radius * 0.866, obstacle.radius * 0.5);
-                        ctx.closePath();
-                        ctx.fill();
-                        break;
-                    case 'square':
-                        ctx.fillRect(-obstacle.radius, -obstacle.radius, obstacle.radius * 2, obstacle.radius * 2);
-                        break;
-                }
-                
-                ctx.restore();
-                
-                // Glow effect
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = obstacle.color;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
-            
-            // Draw orb with glow
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = orb.color;
-            ctx.fillStyle = orb.color;
-            ctx.beginPath();
-            ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Draw orb inner glow
-            ctx.fillStyle = 'white';
-            ctx.globalAlpha = 0.3;
-            ctx.beginPath();
-            ctx.arc(orb.x - orb.radius * 0.3, orb.y - orb.radius * 0.3, orb.radius * 0.4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-        
-        function updateScore() {
-            document.getElementById('score').textContent = `Score: ${score}`;
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('gravityOrbHighScore', highScore);
-            }
-            
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('highScore').textContent = highScore;
-            document.getElementById('gameOver').style.display = 'block';
-            
-            // Create explosion particles
-            for (let i = 0; i < 50; i++) {
-                createParticle(
-                    orb.x,
-                    orb.y,
-                    (Math.random() - 0.5) * 3,
-                    (Math.random() - 0.5) * 3
-                );
-            }
-        }
-        
-        function restartGame() {
-            document.getElementById('gameOver').style.display = 'none';
-            startGame();
-        }
-        
-        // Initialize game when page loads
-        window.addEventListener('load', init);
-        
-        // Background particles animation
-        function animateBackgroundParticles() {
-            const particlesContainer = document.getElementById('particles');
-            particlesContainer.innerHTML = '';
-            
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.style.position = 'absolute';
-                particle.style.width = Math.random() * 4 + 1 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.background = `hsla(${Math.random() * 360}, 70%, 60%, ${Math.random() * 0.3})`;
-                particle.style.borderRadius = '50%';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animation = `float ${5 + Math.random() * 10}s infinite ease-in-out`;
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                particlesContainer.appendChild(particle);
-            }
-            
-            // Add CSS animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes float {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                    25% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                    50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                    75% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        // Initialize background particles
-        animateBackgroundParticles();
-    </script>
+      });
+      customSetupGridEl.appendChild(cell);
+    }
+  }
+}
+function cycleCellValue(r,c,dir=1){
+  const cur=customBoardData[r][c];
+  let idx=cycleValues.indexOf(cur);
+  idx=(idx+dir+cycleValues.length)%cycleValues.length;
+  customBoardData[r][c]=cycleValues[idx];
+}
+function updateCustomCellVisual(cell){
+  const r=+cell.dataset.r,c=+cell.dataset.c;
+  const v=customBoardData[r][c];
+  cell.textContent=v||"+";
+  cell.classList.toggle("empty",!v);
+  cell.setAttribute("aria-label",`Cell ${r+1},${c+1} value ${v||'empty'}`);
+}
+function clearCustomBoard(){ customBoardData.forEach(row=>row.fill(0)); initCustomSetupGrid(); }
+function randomPairCustom(){
+  clearCustomBoard();
+  let placed=0;
+  while(placed<2){
+    const r=Math.random()*SIZE|0, c=Math.random()*SIZE|0;
+    if(!customBoardData[r][c]){
+      customBoardData[r][c]=Math.random()<0.9?2:4;
+      placed++;
+    }
+  }
+  initCustomSetupGrid();
+}
+function balanceCustom(){
+  let count=customBoardData.flat().filter(v=>v).length;
+  if(count<2){
+    for(let i=count;i<2;i++){
+      const empt=[];
+      for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!customBoardData[r][c]) empt.push({r,c});
+      if(!empt.length) break;
+      const spot=empt[Math.random()*empt.length|0];
+      customBoardData[spot.r][spot.c]=2;
+    }
+    initCustomSetupGrid();
+  }
+}
+function isBoardStuckData(bd){
+  if(bd.some(row=>row.includes(0))) return false;
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      const v=bd[r][c];
+      if(r+1<SIZE && bd[r+1][c]===v) return false;
+      if(c+1<SIZE && bd[r][c+1]===v) return false;
+    }
+  }
+  return true;
+}
+function validateCustomBoard(bd){
+  const nonEmpty=bd.flat().filter(v=>v>0);
+  if(nonEmpty.length<2) return {ok:false,reason:"Need at least two tiles"};
+  if(isBoardStuckData(bd)) return {ok:false,reason:"No moves – adjust tiles"};
+  return {ok:true};
+}
+function applyCustomSetup(){
+  const val=validateCustomBoard(customBoardData);
+  if(!val.ok){ showToast(val.reason); return; }
+  initGrid();
+  tiles=[];
+  score=0;moves=0;highestTile=0;hasWon=false;allowContinueAfterWin=false;
+  milestoneTiles=new Set();achievementScoreMilestone=0;
+  for(let r=0;r<SIZE;r++)
+    for(let c=0;c<SIZE;c++){
+      const v=customBoardData[r][c];
+      if(v) createTile(v,r,c);
+    }
+  MILESTONE_TILES.forEach(m=>{ if(tiles.some(t=>t.value===m)) milestoneTiles.add(m); });
+  saveStateForUndo();
+  hideOverlays();
+  renderTiles(true);
+  updateStats();
+  speakStatus("Custom board started");
+}
+
+/* Input */
+document.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  if(["arrowup","w"].includes(k)){ move("up"); e.preventDefault(); }
+  else if(["arrowdown","s"].includes(k)){ move("down"); e.preventDefault(); }
+  else if(["arrowleft","a"].includes(k)){ move("left"); e.preventDefault(); }
+  else if(["arrowright","d"].includes(k)){ move("right"); e.preventDefault(); }
+  else if(k==="u"){ activatePowerup("undo"); }
+  else if(k==="h"){ activatePowerup("shuffle"); }
+  else if(k==="d"){ activatePowerup("double"); }
+  else if(k==="s"){ if(!(e.metaKey||e.ctrlKey)) activatePowerup("spawn"); }
+  else if(k==="r"){ newGame(); }
+  else if(k==="c"){ openCustomSetup(); }
+  else if(k==="escape" && customSetupOverlay.classList.contains("active")){
+    closeCustomSetup(); startOverlay.classList.add("active");
+  }
+});
+let touchStartX=0,touchStartY=0;
+boardEl.addEventListener("touchstart",e=>{
+  if(e.touches.length===1){
+    touchStartX=e.touches[0].clientX;
+    touchStartY=e.touches[0].clientY;
+  }
+},{passive:true});
+boardEl.addEventListener("touchend",e=>{
+  if(e.changedTouches.length===1){
+    const dx=e.changedTouches[0].clientX - touchStartX;
+    const dy=e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dx)<28 && Math.abs(dy)<28) return;
+    if(Math.abs(dx)>Math.abs(dy)) move(dx>0?"right":"left");
+    else move(dy>0?"down":"up");
+  }
+});
+
+/* Buttons */
+startBtn.addEventListener("click",newGame);
+startBtnTop.addEventListener("click",()=>{
+  if(!startOverlay.classList.contains("active") &&
+     !confirm("Start a new game? Current game will be lost.")) return;
+  newGame();
+});
+openCustomFromStartBtn.addEventListener("click",openCustomSetup);
+customSetupBtn.addEventListener("click",()=>{
+  if(!startOverlay.classList.contains("active") &&
+     !gameOverOverlay.classList.contains("active") &&
+     !winOverlay.classList.contains("active")){
+    if(!confirm("Open custom setup? Current game will be discarded.")) return;
+  }
+  openCustomSetup();
+});
+retryBtn.addEventListener("click",newGame);
+continueBtn.addEventListener("click",()=>gameOverOverlay.classList.remove("active"));
+keepGoingBtn.addEventListener("click",()=>{allowContinueAfterWin=true;winOverlay.classList.remove("active"); speakStatus("Continuing");});
+restartFromWinBtn.addEventListener("click",newGame);
+howBtn.addEventListener("click",toggleHow);
+howBtn2.addEventListener("click",toggleHow);
+function toggleHow(){
+  howToSection.hidden=!howToSection.hidden;
+  if(!howToSection.hidden) howToSection.scrollIntoView({behavior:"smooth"});
+}
+csClearBtn.addEventListener("click",clearCustomBoard);
+csRandomBtn.addEventListener("click",randomPairCustom);
+csBalanceBtn.addEventListener("click",balanceCustom);
+csStartBtn.addEventListener("click",applyCustomSetup);
+csCancelBtn.addEventListener("click",()=>{closeCustomSetup();startOverlay.classList.add("active");});
+
+/* Settings */
+themeSelect.addEventListener("change",()=>{
+  document.body.setAttribute("data-theme",themeSelect.value);
+  persist();
+});
+animationsToggle.addEventListener("click",()=>{
+  animationsEnabled=!animationsEnabled;
+  animationsToggle.textContent=animationsEnabled?"On":"Off";
+  animationsToggle.setAttribute("aria-pressed",animationsEnabled);
+  persist();
+  showToast(`Animations ${animationsEnabled?"enabled":"disabled"}`);
+});
+hintsToggle.addEventListener("click",()=>{
+  hintsEnabled=!hintsEnabled;
+  hintsToggle.textContent=hintsEnabled?"On":"Off";
+  hintsToggle.setAttribute("aria-pressed",hintsEnabled);
+  persist();
+  showToast(`Hints ${hintsEnabled?"enabled":"disabled"}`);
+});
+confirmResetBtn.addEventListener("click",()=>{
+  if(confirm("Reset best score, powerups & settings?")){
+    localStorage.removeItem("aesthetic2048Save");
+    powerups={undo:0,shuffle:0,double:0,spawn:0};
+    bestScore=0;
+    newGame();
+    loadPersisted();
+    generatePowerupButtons();
+    updateStats();
+    showToast("Progress reset");
+  }
+});
+
+/* Persistence init */
+function generatePowerupButtons(){
+  powerupsGrid.innerHTML="";
+  POWERUP_TYPES.forEach(t=>{
+    const p=POWERUP_INFO[t];
+    const b=document.createElement("button");
+    b.className="powerup-btn";
+    b.id="pwr-"+t;
+    b.innerHTML=`<span class="count" id="count-${t}">${powerups[t]}</span><strong>${p.icon} ${p.name}</strong><span style="opacity:.7;font-weight:500;">${p.desc}</span>`;
+    b.addEventListener("click",()=>activatePowerup(t));
+    powerupsGrid.appendChild(b);
+  });
+  updatePowerupButtons();
+}
+
+/* Init */
+function init(){
+  initGrid();
+  loadPersisted();
+  generatePowerupButtons();
+  renderTiles(true);
+  updateStats();
+  speakStatus("Ready. Press Play Now or Custom Setup to begin.");
+}
+init();
+
+/* End Game Logic */
+</script>
 </body>
 </html>
-
