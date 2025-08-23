@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Play 2048 with Powerups | Aesthetic Responsive 2048 Game</title>
-<meta name="description" content="Play an enhanced, mobile-friendly 2048 with themes, powerups, custom starting layouts, smooth animations, strategy guide & dark mode. Reach 2048 faster with pro tips.">
+<meta name="description" content="Play an enhanced, mobile-friendly 2048 with themes, powerups, custom starting layouts, smooth animations, scroll-locked swipes, strategy guide & dark mode.">
 <meta name="keywords" content="2048 game, play 2048, 2048 strategy, corner tactic, fastest way to get 2048, custom 2048 board, powerups 2048, high score 2048">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <link rel="canonical" href="https://aniketxraj.me/">
-<link rel="icon" type="image/png" href="/favicon.png">
 <meta name="robots" content="index,follow">
 <meta name="author" content="Aniket">
 <meta name="theme-color" content="#222831">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Play 2048 with Powerups | Aesthetic, Fast & Mobile Friendly">
-<meta property="og:description" content="Beautiful 2048 with themes, powerups, custom layout builder, smooth animations & strategy guide. Can you reach 4096+?">
+<meta property="og:description" content="Beautiful 2048 with themes, powerups, custom layout builder, smooth animations, scroll-locked mobile swipes & strategy guide. Can you reach 4096+?">
 <meta property="og:url" content="https://aniketxraj.me/">
 <meta property="og:image" content="https://aniketxraj.me/banner.jpg">
 <meta property="og:site_name" content="Aesthetic 2048">
@@ -21,7 +20,7 @@
 <meta name="twitter:title" content="Play 2048 with Powerups | Aesthetic Game">
 <meta name="twitter:description" content="Modern 2048 with themes, powerups, custom layouts, pro tips & smooth animations.">
 <meta name="twitter:image" content="https://aniketxraj.me/banner.jpg">
-<link rel="icon" href="/favicon.ico">
+<link rel="icon" href="/favicon.png">
 <link rel="preload" href="https://aniketxraj.me/banner.jpg" as="image">
 
 <!-- Game Schema -->
@@ -83,7 +82,6 @@
 </script>
 
 <style>
-/* --- (All styles from previous working smooth-animation build plus strategy section) --- */
 :root {
   --font-stack:"Segoe UI",system-ui,-apple-system,"Roboto","Oxygen","Ubuntu","Cantarell","Noto Sans",sans-serif;
   --bg:#090b10;
@@ -137,6 +135,24 @@ main{width:100%;max-width:1180px;margin:clamp(1rem,3vh,2rem) auto 1.5rem;padding
 .stat-box h4{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .2rem;color:var(--text-dim)}
 .stat-box .value{font-size:1.15rem;font-weight:700;line-height:1.1}
 .board-wrapper{position:relative;width:100%;max-width:540px;margin:0 auto 1.2rem}
+/* Scroll lock for mobile swipe */
+.board-wrapper,
+.board,
+.tiles-layer {
+  touch-action:none;
+  -ms-touch-action:none;
+  overscroll-behavior:contain;
+}
+body.scroll-locked, html.scroll-locked {
+  overflow:hidden;
+  height:100%;
+}
+body.scroll-locked {
+  position:fixed;
+  width:100%;
+  left:0;
+  right:0;
+}
 .board{position:relative;width:100%;aspect-ratio:1/1;background:var(--board-bg);border-radius:var(--radius);box-shadow:0 10px 40px -10px rgba(0,0,0,0.6);overflow:hidden;user-select:none}
 .grid-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:var(--gap);padding:var(--gap)}
 .grid-bg .cell{background:var(--tile-empty);border-radius:calc(var(--radius)*0.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02)}
@@ -187,8 +203,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
 .content-seo h3{margin:1.6rem 0 .5rem;font-size:1.08rem;color:var(--text)}
 .content-seo ul{margin:.5rem 0 .8rem 1.15rem;padding:0}
 .content-seo li{margin:.35rem 0}
-.content-seo code{background:rgba(255,255,255,.08);padding:.15rem .35rem;border-radius:.4rem;font-size:.75rem}
-.content-seo .inline-badge{background:var(--accent-gradient);-webkit-background-clip:text;color:transparent;font-weight:600}
 .inline-nav{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0 1.4rem}
 .inline-nav a{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;background:var(--panel-bg);border:1px solid var(--panel-border);padding:.4rem .6rem;border-radius:.6rem;text-decoration:none;color:var(--text-dim);transition:.25s}
 .inline-nav a:hover{color:var(--text);background:rgba(255,255,255,.12)}
@@ -329,7 +343,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <a href="#efficiency">Efficiency</a>
     <a href="#common-mistakes">Mistakes</a>
   </div>
-
   <h3 id="fast-checklist">Quick Checklist for Speed</h3>
   <ul>
     <li>Pick a permanent corner for your largest tile (never move it out).</li>
@@ -341,7 +354,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>Use powerups only to recover structure—not for tiny gains.</li>
   </ul>
   <div class="highlight-tip">Pro Tip: Losses usually begin 6–8 moves before the “bad spawn.” Protect empty cells.</div>
-
   <h3 id="corner-tactic">Corner Tactic (Detailed)</h3>
   <p>Keep the maximum tile glued to a chosen corner; feed it with a descending row/column so merges are directional & predictable.</p>
   <div class="inline-grid-diagram" aria-label="Corner tactic example">
@@ -361,7 +373,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>Don’t leave interior gaps: they invite disruptive spawns.</li>
     <li>Don’t over-merge early: keep sequence integrity.</li>
   </ul>
-
   <h3 id="merge-flow">Creating Merge Flow (Chaining)</h3>
   <p>Line up successive powers so one sweep triggers multiple merges.</p>
   <ul>
@@ -370,7 +381,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>Think in zones: stable chain zone vs staging zone.</li>
   </ul>
   <div class="highlight-tip">If you average ≥1 merge every ~1.4 moves pre‑1024 you’re on a strong pace.</div>
-
   <h3 id="world-records">High Tiles & “World Records”</h3>
   <p>No official central authority. Common high tiles: 32768, 65536, occasionally 131072 (extreme). Treat huge screenshots skeptically.</p>
   <ul>
@@ -378,10 +388,8 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>4096 chase: improved chain discipline required.</li>
     <li>65536: requires near flawless spawn control.</li>
   </ul>
-
   <h3 id="max-theory">Maximum Theoretical Tile</h3>
   <p>The 4×4 theoretical max is 131072 (needs two 65536, etc.). Practical runs seldom exceed 65536 without automation.</p>
-
   <h3 id="efficiency">Efficiency Metrics</h3>
   <ul>
     <li>Merges per move (early): target 0.65–0.75.</li>
@@ -389,7 +397,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>Edge disorder incidents &lt; 3 before 2048.</li>
     <li>Undo usage only to restore chain or corner control.</li>
   </ul>
-
   <h3 id="common-mistakes">Common Mistakes</h3>
   <ul>
     <li>Chasing every small merge (breaks structure).</li>
@@ -397,7 +404,6 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
     <li>Stacking two large equals too early.</li>
     <li>Panic alternating when space is low.</li>
   </ul>
-
   <h3>Powerup Strategy</h3>
   <ul>
     <li><strong>Undo:</strong> Fix chain/ corner mistakes only.</li>
@@ -418,7 +424,7 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
 
 <script>
 /* ===============================
-   FULL GAME LOGIC (working start)
+   FULL GAME LOGIC WITH SCROLL-LOCK SWIPES
    =============================== */
 
 /* Config */
@@ -433,8 +439,8 @@ const POWERUP_INFO={
 const MILESTONE_TILES=[128,256,512,1024,2048,4096];
 
 /* State */
-let tiles=[];              // {id,value,row,col,merged,new,mergedFrom}
-let grid=[];               // 2D map (ids or null)
+let tiles=[];
+let grid=[];
 let tileIdCounter=1;
 let score=0,bestScore=0,moves=0,highestTile=0;
 let hasWon=false,allowContinueAfterWin=false;
@@ -476,7 +482,6 @@ const continueBtn=document.getElementById("continueBtn");
 const keepGoingBtn=document.getElementById("keepGoingBtn");
 const restartFromWinBtn=document.getElementById("restartFromWinBtn");
 const customSetupBtn=document.getElementById("customSetupBtn");
-
 /* Custom setup */
 const customSetupOverlay=document.getElementById("customSetupOverlay");
 const customSetupGridEl=document.getElementById("customSetupGrid");
@@ -565,7 +570,6 @@ function renderTiles(skipAnim=false){
   const {gap,tileSize}=computeCellMetrics();
   const existing=new Map([...tilesLayer.querySelectorAll(".tile")].map(el=>[+el.dataset.id,el]));
   const frag=document.createDocumentFragment();
-
   tiles.forEach(t=>{
     let el=existing.get(t.id);
     const x=gap + t.col*(tileSize+gap);
@@ -644,44 +648,29 @@ function updateStats(){
 function move(dir){
   if(gameOverOverlay.classList.contains("active")) return;
   if(winOverlay.classList.contains("active") && !allowContinueAfterWin) return;
-
   saveStateForUndo();
-
-  const vector = {
-    left:{r:0,c:-1}, right:{r:0,c:1},
-    up:{r:-1,c:0},  down:{r:1,c:0}
-  }[dir];
+  const vector={left:{r:0,c:-1},right:{r:0,c:1},up:{r:-1,c:0},down:{r:1,c:0}}[dir];
   if(!vector) return;
-
   const rows=[...Array(SIZE).keys()];
   const cols=[...Array(SIZE).keys()];
   if(vector.r>0) rows.reverse();
   if(vector.c>0) cols.reverse();
-
-  let moved=false;
-  let mergedScore=0;
-  let created2048=false;
-
+  let moved=false, mergedScore=0, created2048=false;
   tiles.forEach(t=>{t.merged=false; t.mergedFrom=null;});
-
   rows.forEach(r=>{
     cols.forEach(c=>{
       const id=grid[r][c];
       if(id==null) return;
       const tile=getTile(id);
-      let nr=r, nc=c;
+      let nr=r,nc=c;
       while(true){
-        const rr=nr+vector.r;
-        const cc=nc+vector.c;
+        const rr=nr+vector.r, cc=nc+vector.c;
         if(!inside(rr,cc)) break;
         const nextId=grid[rr][cc];
-        if(nextId==null){
-            nr=rr; nc=cc;
-        } else {
+        if(nextId==null){ nr=rr; nc=cc; }
+        else{
           const nextTile=getTile(nextId);
-          if(nextTile.value===tile.value && !nextTile.merged){
-            nr=rr; nc=cc;
-          }
+          if(nextTile.value===tile.value && !nextTile.merged){ nr=rr; nc=cc; }
           break;
         }
       }
@@ -691,16 +680,13 @@ function move(dir){
       if(targetId!=null){
         const targetTile=getTile(targetId);
         if(targetTile.value===tile.value && !targetTile.merged){
-          // merge
           tiles = tiles.filter(tl=>tl.id!==tile.id);
           targetTile.value*=2;
-          targetTile.merged=true;
+            targetTile.merged=true;
           targetTile.mergedFrom=[tile.id];
           mergedScore+=targetTile.value;
           highestTile=Math.max(highestTile,targetTile.value);
           if(targetTile.value===2048 && !hasWon) created2048=true;
-        } else {
-          // Should not happen due to logic
         }
       } else {
         grid[nr][nc]=tile.id;
@@ -709,12 +695,7 @@ function move(dir){
       moved=true;
     });
   });
-
-  if(!moved){
-    speakStatus("No move");
-    return;
-  }
-
+  if(!moved){ speakStatus("No move"); return; }
   score+=mergedScore;
   moves++;
   spawnRandomTile();
@@ -967,7 +948,7 @@ function applyCustomSetup(){
   speakStatus("Custom board started");
 }
 
-/* Input */
+/* Keyboard Input */
 document.addEventListener("keydown",e=>{
   const k=e.key.toLowerCase();
   if(["arrowup","w"].includes(k)){ move("up"); e.preventDefault(); }
@@ -984,22 +965,61 @@ document.addEventListener("keydown",e=>{
     closeCustomSetup(); startOverlay.classList.add("active");
   }
 });
-let touchStartX=0,touchStartY=0;
-boardEl.addEventListener("touchstart",e=>{
-  if(e.touches.length===1){
-    touchStartX=e.touches[0].clientX;
-    touchStartY=e.touches[0].clientY;
-  }
-},{passive:true});
-boardEl.addEventListener("touchend",e=>{
-  if(e.changedTouches.length===1){
-    const dx=e.changedTouches[0].clientX - touchStartX;
-    const dy=e.changedTouches[0].clientY - touchStartY;
-    if(Math.abs(dx)<28 && Math.abs(dy)<28) return;
-    if(Math.abs(dx)>Math.abs(dy)) move(dx>0?"right":"left");
-    else move(dy>0?"down":"up");
+
+/* Scroll-lock swipe handling (pointer events) */
+let pStartX=0,pStartY=0;
+let dragging=false;
+let swipeConsumed=false;
+let scrollLockY=0;
+const SWIPE_THRESHOLD=28;
+
+function lockScroll(){
+  scrollLockY=window.scrollY;
+  document.documentElement.classList.add('scroll-locked');
+  document.body.classList.add('scroll-locked');
+  document.body.style.top=`-${scrollLockY}px`;
+}
+function unlockScroll(){
+  document.documentElement.classList.remove('scroll-locked');
+  document.body.classList.remove('scroll-locked');
+  document.body.style.top='';
+  window.scrollTo(0,scrollLockY);
+}
+
+boardEl.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch' || e.pointerType==='pen'){
+    dragging=true;
+    swipeConsumed=false;
+    pStartX=e.clientX;
+    pStartY=e.clientY;
+    lockScroll();
+    e.preventDefault();
   }
 });
+
+boardEl.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  if(!(e.pointerType==='touch' || e.pointerType==='pen')) return;
+  e.preventDefault();
+  if(swipeConsumed) return;
+  const dx=e.clientX - pStartX;
+  const dy=e.clientY - pStartY;
+  if(Math.abs(dx)<SWIPE_THRESHOLD && Math.abs(dy)<SWIPE_THRESHOLD) return;
+  swipeConsumed=true;
+  if(Math.abs(dx)>Math.abs(dy)) move(dx>0?"right":"left");
+  else move(dy>0?"down":"up");
+});
+
+function endPointer(){
+  if(dragging){
+    dragging=false;
+    swipeConsumed=false;
+    unlockScroll();
+  }
+}
+boardEl.addEventListener('pointerup',endPointer);
+boardEl.addEventListener('pointercancel',endPointer);
+boardEl.addEventListener('contextmenu',e=>e.preventDefault());
 
 /* Buttons */
 startBtn.addEventListener("click",newGame);
@@ -1090,8 +1110,6 @@ function init(){
   speakStatus("Ready. Press Play Now or Custom Setup to begin.");
 }
 init();
-
-/* End Game Logic */
 </script>
 </body>
 </html>
