@@ -1,0 +1,15 @@
+# robots.txt for aniketxraj.me
+
+# Allow all search engines
+User-agent: *
+
+# Allow everything on main site
+Allow: /
+
+# Block internal or experimental folders (if any)
+Disallow: /private/
+Disallow: /test/
+Disallow: /drafts/
+
+# Sitemap for better indexing
+Sitemap: https://aniketxraj.me/sitemap.xml
