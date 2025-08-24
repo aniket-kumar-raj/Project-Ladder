@@ -851,5 +851,17 @@ footer{
   });
 })();
 </script>
+  <script>
+(function(){
+  if (document.getElementById('pp-mini')) return;
+  const div = document.createElement('div');
+  div.id = 'pp-mini';
+  div.innerHTML = 'This website may collect data such as cookies and usage information to improve user experience. ' +
+    'Third-party vendors, including Google, use cookies to serve ads based on prior visits. ' +
+    'Users may opt out of personalized ads by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google Ads Settings</a>.';
+  div.style.cssText = 'font-size:11px;line-height:1.4;color:#888;text-align:center;margin:40px 0 10px;padding:0 12px;';
+  document.body.appendChild(div);
+})();
+</script>
 </body>
 </html>
