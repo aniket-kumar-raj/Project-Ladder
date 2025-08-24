@@ -226,6 +226,87 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
 .custom-setup-actions .btn{flex:1 1 auto;min-width:110px}
 .custom-help{font-size:.58rem;color:var(--text-dim);margin-top:.4rem;line-height:1.25;max-width:440px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0}
+
+/* Floating "About / Contact" reveal elements (initially hidden) */
+.info-fab{
+  position:fixed;
+  bottom:1.1rem;
+  right:1.1rem;
+  z-index:1200;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid var(--panel-border);
+  background:var(--accent-gradient);
+  color:#fff;
+  font:600 1.05rem/1 var(--font-stack);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 6px 22px -6px rgba(0,0,0,.6);
+  transition:.35s;
+  opacity:0;
+  pointer-events:none;
+}
+.info-fab.visible{opacity:1;pointer-events:auto}
+.info-fab:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.meta-links-panel{
+  position:fixed;
+  bottom:4.3rem;
+  right:1.1rem;
+  z-index:1199;
+  background:var(--panel-bg);
+  border:1px solid var(--panel-border);
+  backdrop-filter:blur(14px);
+  padding:.85rem .95rem 1rem;
+  border-radius:.95rem;
+  display:flex;
+  flex-direction:column;
+  gap:.55rem;
+  width:180px;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.65);
+  animation:panelPop .35s cubic-bezier(.4,1.4,.45,1) both;
+}
+@keyframes panelPop{
+  0%{transform:translateY(14px) scale(.85);opacity:0;filter:blur(4px)}
+  60%{filter:blur(0)}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+.meta-links-panel a{
+  text-decoration:none;
+  font-size:.7rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--panel-border);
+  padding:.5rem .55rem;
+  border-radius:.55rem;
+  font-weight:600;
+  transition:.25s;
+  display:inline-block;
+}
+.meta-links-panel a:hover,
+.meta-links-panel a:focus{color:var(--text);background:rgba(255,255,255,.14)}
+.meta-links-panel .close-panel{
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:var(--text-dim);
+  font-size:.65rem;
+  padding:.4rem .55rem;
+  border-radius:.5rem;
+  cursor:pointer;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-weight:600;
+  transition:.25s;
+}
+.meta-links-panel .close-panel:hover{background:rgba(255,255,255,.16);color:var(--text)}
+@media (max-width:640px){
+  .info-fab{width:42px;height:42px;font-size:.95rem;bottom:.85rem;right:.85rem}
+  .meta-links-panel{right:.6rem;bottom:4rem}
+}
 </style>
 </head>
 <body data-theme="neon">
@@ -420,6 +501,14 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
 <div class="footer">
   <p>Made with strategy, math, and a bit of glow ✨</p>
   <a class="cta" href="https://aniketxraj.me/Things-to-do-when-bored.html" target="_blank" rel="noopener">Bored? check this out</a>
+</div>
+
+<!-- Hidden / On-Demand About & Contact (button appears only after triggers) -->
+<button id="metaLinksBtn" class="info-fab" aria-expanded="false" aria-controls="metaLinksPanel" aria-label="Open site links">☰</button>
+<div id="metaLinksPanel" class="meta-links-panel" hidden>
+  <a href="https://aniketxraj.me/about" rel="noopener">About Us</a>
+  <a href="https://aniketxraj.me/contact" rel="noopener">Contact Us</a>
+  <button class="close-panel" id="closeMetaLinks" aria-label="Close panel">Close</button>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -672,7 +761,7 @@ function move(dir){
         if(nextId==null){ nr=rr; nc=cc; }
         else{
           const nextTile=getTile(nextId);
-          if(nextTile.value===tile.value && !nextTile.merged){ nr=rr; nc=cc; }
+            if(nextTile.value===tile.value && !nextTile.merged){ nr=rr; nc=cc; }
           break;
         }
       }
@@ -684,7 +773,7 @@ function move(dir){
         if(targetTile.value===tile.value && !targetTile.merged){
           tiles = tiles.filter(tl=>tl.id!==tile.id);
           targetTile.value*=2;
-            targetTile.merged=true;
+          targetTile.merged=true;
           targetTile.mergedFrom=[tile.id];
           mergedScore+=targetTile.value;
           highestTile=Math.max(highestTile,targetTile.value);
@@ -1112,6 +1201,65 @@ function init(){
   speakStatus("Ready. Press Play Now or Custom Setup to begin.");
 }
 init();
+
+/* =========================================
+   Meta Links (About / Contact) lazy reveal
+   ========================================= */
+(function(){
+  const btn=document.getElementById('metaLinksBtn');
+  const panel=document.getElementById('metaLinksPanel');
+  const closeBtn=document.getElementById('closeMetaLinks');
+  const winOverlay=document.getElementById('winOverlay');
+  const gameOverOverlay=document.getElementById('gameOverOverlay');
+  let revealed=false;
+
+  function reveal(){
+    if(revealed) return;
+    revealed=true;
+    btn.classList.add('visible');
+  }
+
+  function togglePanel(force){
+    const open = (typeof force==='boolean')? force : panel.hasAttribute('hidden');
+    if(open){
+      panel.removeAttribute('hidden');
+      btn.setAttribute('aria-expanded','true');
+      const firstLink=panel.querySelector('a');
+      if(firstLink) firstLink.focus();
+    } else {
+      panel.setAttribute('hidden','');
+      btn.setAttribute('aria-expanded','false');
+      btn.focus();
+    }
+  }
+
+  btn.addEventListener('click',()=>togglePanel());
+  closeBtn.addEventListener('click',()=>togglePanel(false));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !panel.hasAttribute('hidden')) togglePanel(false);
+  });
+  document.addEventListener('click',e=>{
+    if(!panel.hasAttribute('hidden') && !panel.contains(e.target) && e.target!==btn){
+      togglePanel(false);
+    }
+  });
+
+  // Reveal triggers:
+  // 1. After 20 seconds idle
+  setTimeout(reveal,20000);
+  // 2. On win or game over (mutation observer)
+  const mo=new MutationObserver(()=>{
+    if(winOverlay.classList.contains('active') || gameOverOverlay.classList.contains('active')) reveal();
+  });
+  mo.observe(winOverlay,{attributes:true,attributeFilter:['class']});
+  mo.observe(gameOverOverlay,{attributes:true,attributeFilter:['class']});
+  // 3. Scroll past 60% page
+  window.addEventListener('scroll',()=>{
+    const st=document.documentElement.scrollTop||document.body.scrollTop;
+    const h=document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    if(h>0 && st/h>0.6) reveal();
+  },{passive:true});
+})();
 </script>
 </body>
 </html>
