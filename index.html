@@ -325,9 +325,16 @@ html, body {
   user-select: none;
 }
 }
- /* ✅ Fix mobile disappearing content issue */
-@media (max-width: 768px) {
-  /* Remove blur on mobile to stop content vanishing */
+.board-wrapper,
+.board,
+.tiles-layer {
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+ @media (max-width: 768px) {
   .stat-box,
   .panel,
   .overlay,
@@ -335,17 +342,9 @@ html, body {
   .toast {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
-    background: rgba(20,20,20,0.9) !important; /* fallback solid background */
+    background: rgba(20,20,20,0.9) !important; /* fallback */
   }
-
-  /* Don't overlock gestures on mobile */
-  .board-wrapper,
-  .board,
-  .tiles-layer {
-    touch-action: pan-x pan-y !important;
-    overscroll-behavior: contain !important;
-  }
-}
+ }
 </style>
 </head>
 <body data-theme="neon">
