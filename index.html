@@ -137,14 +137,7 @@ main{width:100%;max-width:1180px;margin:clamp(1rem,3vh,2rem) auto 1.5rem;padding
 .stat-box h4{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .2rem;color:var(--text-dim)}
 .stat-box .value{font-size:1.15rem;font-weight:700;line-height:1.1}
 .board-wrapper{position:relative;width:100%;max-width:540px;margin:0 auto 1.2rem}
-/* Scroll lock for mobile swipe */
-.board-wrapper,
-.board,
-.tiles-layer {
-  touch-action:none;
-  -ms-touch-action:none;
-  overscroll-behavior:contain;
-}
+
 body.scroll-locked, html.scroll-locked {
   overflow:hidden;
   height:100%;
@@ -342,6 +335,11 @@ html, body {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+ }
+ body.touching .meta-links-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(20,20,20,0.9) !important; /* fallback solid background */
  }
 </style>
 </head>
