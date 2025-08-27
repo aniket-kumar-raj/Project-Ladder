@@ -307,6 +307,14 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
   .info-fab{width:42px;height:42px;font-size:.95rem;bottom:.85rem;right:.85rem}
   .meta-links-panel{right:.6rem;bottom:4rem}
 }
+ .board-wrapper,
+.board,
+.tiles-layer {
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent; /* <-- add this line for phones */
+}
 </style>
 </head>
 <body data-theme="neon">
