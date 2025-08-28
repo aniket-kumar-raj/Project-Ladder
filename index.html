@@ -143,10 +143,10 @@ body.scroll-locked, html.scroll-locked {
   height:100%;
 }
 body.scroll-locked {
-  position:fixed;
-  width:100%;
-  left:0;
-  right:0;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  /* remove height:100% here too */
 }
 .board{position:relative;width:100%;aspect-ratio:1/1;background:var(--board-bg);border-radius:var(--radius);box-shadow:0 10px 40px -10px rgba(0,0,0,0.6);overflow:hidden;user-select:none}
 .grid-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:var(--gap);padding:var(--gap)}
@@ -304,8 +304,7 @@ html, body {
   overscroll-behavior: none;
   margin: 0;
   padding: 0;
-  height: 100%;
-  /* remove background-attachment: fixed */
+  /* remove height:100% here */
 }
 
 .board-wrapper,
