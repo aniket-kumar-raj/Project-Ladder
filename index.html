@@ -1181,7 +1181,6 @@ const SWIPE_THRESHOLD=28;
 function lockScroll(){
   scrollLockY=window.scrollY;
   document.documentElement.classList.add('scroll-locked');
-  document.body.classList.add('scroll-locked');
   document.body.style.top=`-${scrollLockY}px`;
 }
 function unlockScroll(){
