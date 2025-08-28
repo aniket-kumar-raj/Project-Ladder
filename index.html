@@ -170,7 +170,7 @@ body.scroll-locked {
 .tile[data-v="2048"]{background:linear-gradient(135deg,#0cebeb,#20e3b2,#29ffc6);font-size:clamp(.85rem,3vw,1.5rem)}
 .tile[data-v="4096"]{background:linear-gradient(135deg,#ff512f,#dd2476);font-size:clamp(.78rem,2.7vw,1.4rem)}
 .tile[data-v="8192"]{background:linear-gradient(135deg,#141e30,#243b55);font-size:clamp(.72rem,2.5vw,1.3rem)}
-.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.4rem;text-align:center;backdrop-filter:blur(10px);border-radius:var(--radius);z-index:10;opacity:0;pointer-events:none;transition:.45s}
+.overlay{position:absolute;inset:0;background:transparent !important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.4rem;text-align:center;backdrop-filter:blur(10px);border-radius:var(--radius);z-index:10;opacity:0;pointer-events:none;transition:.45s}
 .overlay.active{opacity:1;pointer-events:auto}
 .overlay h2{margin:0;font-size:clamp(1.55rem,4vw,2.4rem);background:var(--accent-gradient);-webkit-background-clip:text;color:transparent}
 .overlay p{margin:0;color:var(--text-dim);max-width:420px;font-size:.9rem;line-height:1.4}
