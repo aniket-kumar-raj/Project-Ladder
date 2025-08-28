@@ -170,8 +170,13 @@ body.scroll-locked {
 .tile[data-v="2048"]{background:linear-gradient(135deg,#0cebeb,#20e3b2,#29ffc6);font-size:clamp(.85rem,3vw,1.5rem)}
 .tile[data-v="4096"]{background:linear-gradient(135deg,#ff512f,#dd2476);font-size:clamp(.78rem,2.7vw,1.4rem)}
 .tile[data-v="8192"]{background:linear-gradient(135deg,#141e30,#243b55);font-size:clamp(.72rem,2.5vw,1.3rem)}
-.overlay{position:absolute;inset:0;background:transparent !important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.4rem;text-align:center;backdrop-filter:blur(10px);border-radius:var(--radius);z-index:10;opacity:0;pointer-events:none;transition:.45s}
-.overlay.active{opacity:1;pointer-events:auto}
+/* Overlay backdrop - covers full screen when active */
+.overlay-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:1000;opacity:0;pointer-events:none;transition:.45s;display:flex;align-items:center;justify-content:center;padding:1rem}
+.overlay-backdrop.active{opacity:1;pointer-events:auto}
+
+/* Overlay content - responsive and centered */
+.overlay{position:relative;background:var(--panel-bg);border:1px solid var(--panel-border);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.4rem;text-align:center;border-radius:var(--radius);z-index:1001;max-width:min(480px,90vw);max-height:min(600px,85vh);overflow-y:auto;box-shadow:0 20px 60px -10px rgba(0,0,0,0.8);transform:scale(0.9) translateY(20px);transition:.45s cubic-bezier(.25,.8,.25,1)}
+.overlay-backdrop.active .overlay{transform:scale(1) translateY(0)}
 .overlay h2{margin:0;font-size:clamp(1.55rem,4vw,2.4rem);background:var(--accent-gradient);-webkit-background-clip:text;color:transparent}
 .overlay p{margin:0;color:var(--text-dim);max-width:420px;font-size:.9rem;line-height:1.4}
 .btn{background:var(--panel-bg);color:var(--text);border:1px solid var(--panel-border);font-weight:600;padding:.65rem 1rem;font-size:.75rem;letter-spacing:.4px;border-radius:.75rem;cursor:pointer;transition:.3s;display:inline-flex;align-items:center;gap:.4rem}
@@ -370,42 +375,50 @@ html, body {
       </div>
 
       <!-- Overlays -->
-      <div id="startOverlay" class="overlay">
-        <h2>Start Game</h2>
-        <p>Swipe or use arrow keys / WASD to merge tiles & reach 2048. Try powerups and custom setups!</p>
-        <div style="display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;">
-          <button class="btn primary" id="startBtn">Play Now</button>
-          <button class="btn" id="openCustomFromStart">Custom Setup</button>
-          <button class="btn" id="howBtn2">How To</button>
+      <div id="startOverlay" class="overlay-backdrop">
+        <div class="overlay">
+          <h2>Start Game</h2>
+          <p>Swipe or use arrow keys / WASD to merge tiles & reach 2048. Try powerups and custom setups!</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;">
+            <button class="btn primary" id="startBtn">Play Now</button>
+            <button class="btn" id="openCustomFromStart">Custom Setup</button>
+            <button class="btn" id="howBtn2">How To</button>
+          </div>
         </div>
       </div>
-      <div id="gameOverOverlay" class="overlay" role="alertdialog" aria-modal="true">
-        <h2>Game Over</h2>
-        <p id="finalScoreText">You scored 0.</p>
-        <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
-          <button class="btn primary" id="retryBtn">Try Again</button>
-          <button class="btn" id="continueBtn">Close</button>
+      <div id="gameOverOverlay" class="overlay-backdrop" role="alertdialog" aria-modal="true">
+        <div class="overlay">
+          <h2>Game Over</h2>
+          <p id="finalScoreText">You scored 0.</p>
+          <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
+            <button class="btn primary" id="retryBtn">Try Again</button>
+            <button class="btn" id="continueBtn">Close</button>
+          </div>
         </div>
       </div>
-      <div id="winOverlay" class="overlay">
-        <h2>2048 Achieved!</h2>
-        <p>Continue for a higher score or restart a new run.</p>
-        <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
-          <button class="btn primary" id="keepGoingBtn">Keep Going</button>
-          <button class="btn" id="restartFromWinBtn">Restart</button>
+      <div id="winOverlay" class="overlay-backdrop">
+        <div class="overlay">
+          <h2>2048 Achieved!</h2>
+          <p>Continue for a higher score or restart a new run.</p>
+          <div style="display:flex;gap:.55rem;flex-wrap:wrap;justify-content:center;">
+            <button class="btn primary" id="keepGoingBtn">Keep Going</button>
+            <button class="btn" id="restartFromWinBtn">Restart</button>
+          </div>
         </div>
       </div>
-      <div id="customSetupOverlay" class="overlay">
-        <h2>Custom Setup</h2>
-        <div class="custom-setup-grid" id="customSetupGrid"></div>
-        <div class="custom-setup-actions">
-          <button class="btn" id="csClearBtn">Clear</button>
-          <button class="btn" id="csRandomBtn">Random Pair</button>
-          <button class="btn" id="csBalanceBtn">Balance</button>
-          <button class="btn primary" id="csStartBtn">Start Game</button>
-          <button class="btn" id="csCancelBtn">Cancel</button>
+      <div id="customSetupOverlay" class="overlay-backdrop">
+        <div class="overlay">
+          <h2>Custom Setup</h2>
+          <div class="custom-setup-grid" id="customSetupGrid"></div>
+          <div class="custom-setup-actions">
+            <button class="btn" id="csClearBtn">Clear</button>
+            <button class="btn" id="csRandomBtn">Random Pair</button>
+            <button class="btn" id="csBalanceBtn">Balance</button>
+            <button class="btn primary" id="csStartBtn">Start Game</button>
+            <button class="btn" id="csCancelBtn">Cancel</button>
+          </div>
+          <div class="custom-help">Click / Enter / Space to cycle values (Shift = reverse). Need at least 2 tiles. ESC cancels.</div>
         </div>
-        <div class="custom-help">Click / Enter / Space to cycle values (Shift = reverse). Need at least 2 tiles. ESC cancels.</div>
       </div>
     </div>
 
@@ -822,8 +835,71 @@ function renderTiles(skipAnim=false){
 }
 window.addEventListener("resize",()=>renderTiles(true));
 
-/* Game Flow */
-function hideOverlays(){ [startOverlay,gameOverOverlay,winOverlay,customSetupOverlay].forEach(o=>o.classList.remove("active")); }
+/* Centralized Overlay Management */
+let currentOverlay = null;
+const overlayTypes = {
+  start: startOverlay,
+  gameOver: gameOverOverlay,
+  win: winOverlay,
+  customSetup: customSetupOverlay
+};
+
+function showOverlay(type){
+  // Hide any currently active overlay first
+  hideOverlay();
+  
+  const overlay = overlayTypes[type];
+  if(!overlay) return;
+  
+  currentOverlay = type;
+  overlay.classList.add("active");
+  
+  // Focus management for accessibility
+  const firstButton = overlay.querySelector('button, input, select, textarea');
+  if(firstButton) {
+    setTimeout(() => firstButton.focus(), 100);
+  }
+}
+
+function hideOverlay(){
+  if(currentOverlay && overlayTypes[currentOverlay]){
+    overlayTypes[currentOverlay].classList.remove("active");
+  }
+  currentOverlay = null;
+}
+
+function hideOverlays(){
+  // Legacy function - now uses centralized system
+  hideOverlay();
+}
+
+// ESC key and click-outside handling for overlays
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && currentOverlay) {
+    if(currentOverlay === 'customSetup') {
+      closeCustomSetup(); 
+      showOverlay('start');
+    } else {
+      hideOverlay();
+    }
+  }
+});
+
+// Click outside to dismiss overlay
+document.addEventListener('click', (e) => {
+  if(currentOverlay && overlayTypes[currentOverlay]) {
+    const overlay = overlayTypes[currentOverlay];
+    const overlayContent = overlay.querySelector('.overlay');
+    if(overlay.contains(e.target) && !overlayContent.contains(e.target)) {
+      if(currentOverlay === 'customSetup') {
+        closeCustomSetup(); 
+        showOverlay('start');
+      } else {
+        hideOverlay();
+      }
+    }
+  }
+});
 function newGame(){
   initGrid();
   tiles=[];
@@ -838,7 +914,7 @@ function newGame(){
 }
 function showGameOver(){
   finalScoreText.textContent=`You scored ${score}.`;
-  gameOverOverlay.classList.add("active");
+  showOverlay('gameOver');
   speakStatus("Game over");
 }
 function updateStats(){
@@ -908,7 +984,7 @@ function move(dir){
   renderTiles();
   if(created2048 && !hasWon){
     hasWon=true;
-    winOverlay.classList.add("active");
+    showOverlay('win');
     speakStatus("2048 achieved!");
   }
   checkGameOver();
@@ -1044,15 +1120,14 @@ function loadPersisted(){
 /* Custom Setup */
 const cycleValues=[0,2,4,8,16,32,64,128,256,512,1024,2048,4096];
 function openCustomSetup(){
-  hideOverlays();
-  customSetupOverlay.classList.add("active");
+  showOverlay('customSetup');
   initCustomSetupGrid();
   setTimeout(()=>{
     const f=customSetupGridEl.querySelector(".custom-cell");
     if(f) f.focus();
   },40);
 }
-function closeCustomSetup(){ customSetupOverlay.classList.remove("active"); }
+function closeCustomSetup(){ hideOverlay(); }
 function initCustomSetupGrid(){
   customSetupGridEl.innerHTML="";
   for(let r=0;r<SIZE;r++){
@@ -1166,9 +1241,6 @@ document.addEventListener("keydown",e=>{
   else if(k==="s"){ if(!(e.metaKey||e.ctrlKey)) activatePowerup("spawn"); }
   else if(k==="r"){ newGame(); }
   else if(k==="c"){ openCustomSetup(); }
-  else if(k==="escape" && customSetupOverlay.classList.contains("active")){
-    closeCustomSetup(); startOverlay.classList.add("active");
-  }
 });
 
 /* Scroll-lock swipe handling (pointer events) */
@@ -1228,22 +1300,22 @@ boardEl.addEventListener('contextmenu',e=>e.preventDefault());
 /* Buttons */
 startBtn.addEventListener("click",newGame);
 startBtnTop.addEventListener("click",()=>{
-  if(!startOverlay.classList.contains("active") &&
+  if(currentOverlay !== 'start' &&
      !confirm("Start a new game? Current game will be lost.")) return;
   newGame();
 });
 openCustomFromStartBtn.addEventListener("click",openCustomSetup);
 customSetupBtn.addEventListener("click",()=>{
-  if(!startOverlay.classList.contains("active") &&
-     !gameOverOverlay.classList.contains("active") &&
-     !winOverlay.classList.contains("active")){
+  if(currentOverlay !== 'start' &&
+     currentOverlay !== 'gameOver' &&
+     currentOverlay !== 'win'){
     if(!confirm("Open custom setup? Current game will be discarded.")) return;
   }
   openCustomSetup();
 });
 retryBtn.addEventListener("click",newGame);
-continueBtn.addEventListener("click",()=>gameOverOverlay.classList.remove("active"));
-keepGoingBtn.addEventListener("click",()=>{allowContinueAfterWin=true;winOverlay.classList.remove("active"); speakStatus("Continuing");});
+continueBtn.addEventListener("click",()=>hideOverlay());
+keepGoingBtn.addEventListener("click",()=>{allowContinueAfterWin=true;hideOverlay(); speakStatus("Continuing");});
 restartFromWinBtn.addEventListener("click",newGame);
 howBtn.addEventListener("click",toggleHow);
 howBtn2.addEventListener("click",toggleHow);
@@ -1255,7 +1327,7 @@ csClearBtn.addEventListener("click",clearCustomBoard);
 csRandomBtn.addEventListener("click",randomPairCustom);
 csBalanceBtn.addEventListener("click",balanceCustom);
 csStartBtn.addEventListener("click",applyCustomSetup);
-csCancelBtn.addEventListener("click",()=>{closeCustomSetup();startOverlay.classList.add("active");});
+csCancelBtn.addEventListener("click",()=>{closeCustomSetup();showOverlay('start');});
 
 /* Settings */
 themeSelect.addEventListener("change",()=>{
@@ -1311,6 +1383,7 @@ function init(){
   generatePowerupButtons();
   renderTiles(true);
   updateStats();
+  showOverlay('start'); // Show start overlay initially
   speakStatus("Ready. Press Play Now or Custom Setup to begin.");
 }
 init();
@@ -1362,7 +1435,7 @@ init();
   setTimeout(reveal,20000);
   // 2. On win or game over (mutation observer)
   const mo=new MutationObserver(()=>{
-    if(winOverlay.classList.contains('active') || gameOverOverlay.classList.contains('active')) reveal();
+    if(currentOverlay === 'win' || currentOverlay === 'gameOver') reveal();
   });
   mo.observe(winOverlay,{attributes:true,attributeFilter:['class']});
   mo.observe(gameOverOverlay,{attributes:true,attributeFilter:['class']});
