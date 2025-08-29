@@ -296,9 +296,10 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
   transition:.25s;
 }
 .meta-links-panel .close-panel:hover{background:rgba(255,255,255,.16);color:var(--text)}
-@media (max-width:640px){
-  .info-fab{width:42px;height:42px;font-size:.95rem;bottom:.85rem;right:.85rem}
-  .meta-links-panel{right:.6rem;bottom:4rem}
+@media (max-width:1024px){
+  main{grid-template-columns:100%}
+  .side-panels{order:-1;display:flex;flex-wrap:wrap;gap:1rem}
+  .panel.compact-grow{flex:1 1 100%}
 }
 html, body {
   overscroll-behavior: none;
@@ -335,9 +336,22 @@ html, body {
     -webkit-backdrop-filter: none !important;
   }
  }
+ .top-bar button {
+  flex:1 1 100px;
+}
+.stats {
+  justify-content:center;
+}
  body.touching .meta-links-panel {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+ }
+ @media (max-width:640px){
+  .content-seo{
+    font-size:0.95rem;
+    line-height:1.6;
+    padding:0 1rem 2rem;
+  }
  }
 </style>
 </head>
