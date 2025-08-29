@@ -304,11 +304,9 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
 html, body {
   margin: 0;
   padding: 0;
-  overscroll-behavior: none;  /* stops blue glow */
+  overscroll-behavior: none; /* stops blue glow globally */
   height: 100%;
-  overflow: hidden;           /* prevent page shift */
 }
-
 .board-wrapper,
 .board,
 .tiles-layer {
@@ -1390,6 +1388,11 @@ init();
 })();
  // Prevent touchmove from scrolling page while playing
 document.getElementById("board").addEventListener("touchmove", e => {
+  e.preventDefault();
+}, { passive: false });
+ // Stop page scrolling only while finger is inside the board
+const board = document.getElementById("board");
+board.addEventListener("touchmove", e => {
   e.preventDefault();
 }, { passive: false });
 </script>
