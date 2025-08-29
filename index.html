@@ -139,14 +139,7 @@ main{width:100%;max-width:1180px;margin:clamp(1rem,3vh,2rem) auto 1.5rem;padding
 .board-wrapper{position:relative;width:100%;max-width:540px;margin:0 auto 1.2rem}
 
 body.scroll-locked, html.scroll-locked {
-  overflow:hidden;
-  height:100%;
-}
-body.scroll-locked {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  /* remove height:100% here too */
+  overscroll-behavior: none;
 }
 .board{position:relative;width:100%;aspect-ratio:1/1;background:var(--board-bg);border-radius:var(--radius);box-shadow:0 10px 40px -10px rgba(0,0,0,0.6);overflow:hidden;user-select:none}
 .grid-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:var(--gap);padding:var(--gap)}
@@ -1393,6 +1386,10 @@ document.getElementById("board").addEventListener("touchmove", e => {
  // Stop page scrolling only while finger is inside the board
 const board = document.getElementById("board");
 board.addEventListener("touchmove", e => {
+  e.preventDefault();
+}, { passive: false });
+ // Stop page overscroll only while inside the board
+document.getElementById("board").addEventListener("touchmove", e => {
   e.preventDefault();
 }, { passive: false });
 </script>
