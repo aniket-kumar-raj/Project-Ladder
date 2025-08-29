@@ -302,10 +302,11 @@ select,.toggle{font:inherit;background:var(--board-bg);color:var(--text);border:
   .panel.compact-grow{flex:1 1 100%}
 }
 html, body {
-  overscroll-behavior: none;
   margin: 0;
   padding: 0;
-  /* remove height:100% here */
+  overscroll-behavior: none;  /* stops blue glow */
+  height: 100%;
+  overflow: hidden;           /* prevent page shift */
 }
 
 .board-wrapper,
@@ -1387,6 +1388,10 @@ init();
     if(h>0 && st/h>0.6) reveal();
   },{passive:true});
 })();
+ // Prevent touchmove from scrolling page while playing
+document.getElementById("board").addEventListener("touchmove", e => {
+  e.preventDefault();
+}, { passive: false });
 </script>
 </body>
 </html>
