@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>How much will be before you rage quit</title>
+<style>
+  :root{
+    --bg:#0f1724; --panel:#111827; --muted:#9ca3af; --accent:#f97316;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(135deg,var(--bg),#071029);color:#e6eef8}
+  .game{
+    display:flex;flex-direction:column;gap:12px;padding:18px;max-width:1100px;margin:18px auto;
+  }
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:20px;letter-spacing:0.5px}
+  .hud{display:flex;gap:12px;align-items:center}
+  .chip{background:rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;font-weight:600}
+  #playBtn{background:var(--accent);border:0;padding:8px 12px;border-radius:8px;color:white;cursor:pointer}
+  #settings{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+  .arena{
+    height:64vh;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.12));border-radius:12px;padding:12px;position:relative;overflow:hidden;
+    box-shadow:0 10px 30px rgba(2,6,23,0.6) inset;
+  }
+  .centerMsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;color:var(--muted)}
+  .popup{
+    position:absolute;background:white;color:#111;padding:10px;border-radius:8px;box-shadow:0 10px 30px rgba(2,6,23,0.6);min-width:160px;z-index:1000;border:3px solid #fde68a;
+    user-select:none;cursor:move;
+  }
+  .popup .close{position:absolute;right:6px;top:4px;background:transparent;border:0;font-weight:700;cursor:pointer}
+  .banner{position:absolute;background:linear-gradient(90deg,#ffecd2,#fcb69f);padding:8px;border-radius:6px;border:2px solid rgba(0,0,0,0.08);z-index:900}
+  .sticky-bottom{position:fixed;left:0;right:0;bottom:0;background:#111;padding:6px 12px;display:flex;gap:10px;align-items:center;justify-content:center;z-index:1001}
+  .smallAd{padding:6px 10px;border-radius:6px;background:linear-gradient(90deg,#fff,#eee);color:#111;border:1px solid #ddd}
+  .settingsPanel{position:fixed;right:16px;top:70px;background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);z-index:2000;width:260px}
+  .settingRow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;color:var(--muted)}
+  .muted{color:var(--muted);font-size:13px}
+  #endOverlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.8));display:none;align-items:center;justify-content:center;z-index:3000}
+  .endCard{background:#071022;padding:28px;border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+  .tiny{font-size:12px;color:var(--muted)}
+  button:active{transform:translateY(1px)}
+  .cursorChase{position:fixed;width:120px;padding:6px;border-radius:8px;z-index:1200;pointer-events:none;background:#fff;color:#111;border:1px solid #ccc;font-weight:700}
+  .fakeAdVideo{position:absolute;inset:60px 60px 60px 60px;background:#000;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;z-index:200;opacity:0.95}
+</style>
+</head>
+<body>
+<div class="game">
+  <header>
+    <h1>How much will be before you rage quit</h1>
+    <div class="hud">
+      <div class="chip">Time: <span id="time">0.00</span>s</div>
+      <div class="chip">Best: <span id="best">0.00</span>s</div>
+      <button id="playBtn">Start</button>
+      <button id="settings">Settings</button>
+    </div>
+  </header>
+
+  <section class="arena" id="arena">
+    <div class="centerMsg" id="centerMsg">
+      Click Start to begin. Survive as long as you can. Things will get obnoxious. 🤖🔥
+    </div>
+    <!-- fake ad video / overlay area inserted dynamically -->
+  </section>
+
+  <div class="sticky-bottom" id="sticky" style="display:none">
+    <div class="smallAd">Hot Deal! Click never (it's fake)</div>
+    <div class="smallAd">You got 0 reward points</div>
+    <div class="smallAd">Sponsored: Totally Not Annoying, Inc.</div>
+  </div>
+</div>
+
+<!-- End overlay -->
+<div id="endOverlay">
+  <div class="endCard">
+    <h2>You Rage Quit!</h2>
+    <p class="tiny">You lasted <strong id="finalTime">0.00</strong> seconds</p>
+    <p class="tiny">Best: <span id="finalBest">0.00</span> s</p>
+    <div style="margin-top:12px">
+      <button id="restart">Play Again</button>
+      <button id="closeEnd" style="margin-left:8px">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings panel -->
+<div class="settingsPanel" id="panel" style="display:none">
+  <h3 style="margin:0 0 8px 0">Annoyance Settings</h3>
+  <div class="settingRow"><div class="muted">Popups</div><input id="sPop" type="checkbox" checked></div>
+  <div class="settingRow"><div class="muted">Banners</div><input id="sBan" type="checkbox" checked></div>
+  <div class="settingRow"><div class="muted">Cursor chaser</div><input id="sChase" type="checkbox" checked></div>
+  <div class="settingRow"><div class="muted">Keyboard hijack</div><input id="sKey" type="checkbox" checked></div>
+  <div class="settingRow"><div class="muted">Fake video overlay</div><input id="sVid" type="checkbox" checked></div>
+  <div style="margin-top:8px" class="tiny">Sound: <label><input id="sSound" type="checkbox"> enabled</label></div>
+</div>
+
+<script>
+/* Rage-quit annoyance simulator
+   - No external network calls
+   - Fully client side
+*/
+(() => {
+  const arena = document.getElementById('arena');
+  const playBtn = document.getElementById('playBtn');
+  const timeEl = document.getElementById('time');
+  const bestEl = document.getElementById('best');
+  const centerMsg = document.getElementById('centerMsg');
+  const sticky = document.getElementById('sticky');
+  const panel = document.getElementById('panel');
+  const settingsBtn = document.getElementById('settings');
+  const endOverlay = document.getElementById('endOverlay');
+  const finalTime = document.getElementById('finalTime');
+  const finalBest = document.getElementById('finalBest');
+  const restart = document.getElementById('restart');
+  const closeEnd = document.getElementById('closeEnd');
+
+  // settings controls
+  const sPop = document.getElementById('sPop');
+  const sBan = document.getElementById('sBan');
+  const sChase = document.getElementById('sChase');
+  const sKey = document.getElementById('sKey');
+  const sVid = document.getElementById('sVid');
+  const sSound = document.getElementById('sSound');
+
+  // state
+  let running = false;
+  let startTime = 0;
+  let tickHandle = null;
+  let spawnHandles = [];
+  let intensity = 0; // scales up every 10s
+  let best = parseFloat(localStorage.getItem('rageBest') || '0') || 0;
+  bestEl.textContent = best.toFixed(2);
+
+  // audio beep (optional)
+  function beep() {
+    if (!sSound.checked) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.value = 600;
+      g.gain.value = 0.005;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{o.stop();ctx.close()}, 80);
+    } catch (e) { /* ignore on iOS quirks */ }
+  }
+
+  function startGame(){
+    if(running) return;
+    running = true;
+    centerMsg.style.display = 'none';
+    playBtn.textContent = 'Rage Quit';
+    startTime = performance.now();
+    intensity = 0;
+    timeEl.textContent = '0.00';
+    sticky.style.display = 'flex';
+    endOverlay.style.display = 'none';
+    // escalate intensity every 10 seconds
+    tickHandle = requestAnimationFrame(tick);
+    // schedule spawners
+    scheduleSpawner(spawnPopups, 2200);
+    scheduleSpawner(spawnBanners, 2500);
+    scheduleSpawner(spawnCursorChaser, 6000);
+    // keyboard hijack via keydown events (feature toggle used on event)
+    window.addEventListener('keydown', onKeyHijack);
+  }
+
+  function stopGame(reason='quit'){
+    if(!running) return;
+    running=false;
+    playBtn.textContent = 'Start';
+    // clear spawners
+    spawnHandles.forEach(h => clearInterval(h));
+    spawnHandles = [];
+    cancelAnimationFrame(tickHandle);
+    // remove all fake elements
+    document.querySelectorAll('.popup,.banner,.cursorChase,.fakeAdVideo').forEach(e=>e.remove());
+    sticky.style.display = 'none';
+    window.removeEventListener('keydown', onKeyHijack);
+    const survived = (performance.now() - startTime) / 1000;
+    // update best
+    if (survived > best) {
+      best = survived;
+      localStorage.setItem('rageBest', best);
+      bestEl.textContent = best.toFixed(2);
+    }
+    finalTime.textContent = survived.toFixed(2);
+    finalBest.textContent = best.toFixed(2);
+    // show end overlay
+    endOverlay.style.display = 'flex';
+  }
+
+  playBtn.addEventListener('click', () => {
+    if(running) {
+      // player intentionally rage quits by clicking button
+      stopGame('player');
+    } else {
+      startGame();
+    }
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  restart.addEventListener('click', () => {
+    endOverlay.style.display='none';
+    startGame();
+  });
+  closeEnd.addEventListener('click', ()=> endOverlay.style.display='none');
+
+  function scheduleSpawner(fn, baseInterval){
+    const h = setInterval(() => {
+      if (!running) return;
+      // intensity increases spawn rate
+      const jitter = Math.max(200, baseInterval - intensity*120);
+      fn();
+    }, baseInterval);
+    spawnHandles.push(h);
+  }
+
+  function tick(){
+    if(!running) return;
+    const elapsed = (performance.now() - startTime) / 1000;
+    // update intensity every 10s
+    intensity = Math.floor(elapsed / 10);
+    timeEl.textContent = elapsed.toFixed(2);
+
+    // subtle UX trick: slightly nudge title or background when intensity high
+    if (intensity >= 3) {
+      document.body.style.transform = `translateY(${Math.sin(elapsed*6)*2}px)`;
+    } else {
+      document.body.style.transform = 'none';
+    }
+
+    // escalate: more intrusive fake overlay at intensity >=2
+    if (sVid.checked && intensity >= 2 && !document.querySelector('.fakeAdVideo')) {
+      spawnFakeVideoOverlay();
+      beep();
+    }
+
+    // auto end if intensity grows too wild (optional)
+    if (elapsed > 300) stopGame('timeout');
+
+    tickHandle = requestAnimationFrame(tick);
+  }
+
+  // Popups
+  function spawnPopups(){
+    if (!sPop.checked) return;
+    const p = document.createElement('div');
+    p.className = 'popup';
+    p.innerHTML = `<button class="close">×</button>
+      <div style="font-weight:800;margin-bottom:6px">URGENT NOTICE</div>
+      <div class="tiny">You won a prize! Click to collect (but don't).</div>
+      <div style="margin-top:8px"><button class="fakeBtn">Claim</button></div>`;
+    arena.appendChild(p);
+    // random pos inside arena (including partially off)
+    const a = arena.getBoundingClientRect();
+    const w = Math.min(320, Math.max(160, 120 + Math.random()*240));
+    p.style.width = w + 'px';
+    const left = Math.random() * (a.width - 30);
+    const top = Math.random() * (a.height - 30);
+    p.style.left = left + 'px';
+    p.style.top = top + 'px';
+
+    // make draggable
+    makeDraggable(p);
+
+    // close button
+    p.querySelector('.close').addEventListener('click', () => {
+      p.remove();
+      beep();
+    });
+    // fake claim: spawns more banners if clicked
+    p.querySelector('.fakeBtn').addEventListener('click', () => {
+      // instead of redirecting, create several banners
+      for(let i=0;i<3+intensity;i++) spawnBanners();
+      beep();
+    });
+
+    // auto fade after some time but maybe reappear soon
+    setTimeout(() => { try{ p.remove() } catch (e){} }, 7000 - intensity*500);
+  }
+
+  // Banners
+  function spawnBanners(){
+    if (!sBan.checked) return;
+    const b = document.createElement('div');
+    b.className = 'banner';
+    const text = ['SALE!','Click me!','Sponsored','You won!','UPDATE AVAILABLE'][Math.floor(Math.random()*5)];
+    b.textContent = text;
+    const a = arena.getBoundingClientRect();
+    // random edges
+    const edge = Math.random();
+    if (edge < 0.6) {
+      b.style.top = (Math.random() * (a.height - 40)) + 'px';
+      b.style.left = (Math.random() * (a.width - 120)) + 'px';
+    } else if(edge < 0.8) {
+      b.style.bottom = (10 + Math.random()*80) + 'px';
+      b.style.left = (Math.random() * (a.width - 120)) + 'px';
+    } else {
+      b.style.top = (Math.random() * (a.height - 40)) + 'px';
+      b.style.right = (10 + Math.random()*120) + 'px';
+    }
+    arena.appendChild(b);
+    // auto remove after some time
+    setTimeout(()=> b.remove(), 6000 + Math.random()*6000 - intensity*400);
+  }
+
+  // Fake video overlay (big modal)
+  function spawnFakeVideoOverlay(){
+    if (!sVid.checked) return;
+    const v = document.createElement('div');
+    v.className = 'fakeAdVideo';
+    v.textContent = 'AD: Click to "play" — totally not a trap';
+    arena.appendChild(v);
+    v.addEventListener('click', ()=>{
+      // clicking spawns a swarm of small banners
+      for(let i=0;i<6+intensity*2;i++) spawnBanners();
+      v.remove();
+    });
+    // remove after a while
+    setTimeout(()=>v.remove(), 12000 - intensity*1000);
+  }
+
+  // Cursor chaser
+  let chaseEl = null;
+  function spawnCursorChaser(){
+    if (!sChase.checked) return;
+    if (chaseEl) chaseEl.remove();
+    chaseEl = document.createElement('div');
+    chaseEl.className = 'cursorChase';
+    chaseEl.textContent = 'FREE GIFT';
+    document.body.appendChild(chaseEl);
+    document.addEventListener('mousemove', onMouseMoveChase);
+    // remove after a while
+    setTimeout(()=>{ if(chaseEl) chaseEl.remove(); chaseEl=null; document.removeEventListener('mousemove', onMouseMoveChase); }, 7000 + Math.random()*5000);
+  }
+  function onMouseMoveChase(e){
+    if(!chaseEl) return;
+    // follow with slight lag
+    chaseEl.style.left = (e.clientX + 20 + Math.sin(performance.now()/200)*10) + 'px';
+    chaseEl.style.top = (e.clientY + 12 + Math.cos(performance.now()/200)*8) + 'px';
+  }
+
+  // Keyboard hijack: random keys cause tiny popups
+  function onKeyHijack(e){
+    if(!sKey.checked) return;
+    // small chance on any key to create a tiny popup
+    if (Math.random() < 0.12 + intensity*0.06) {
+      const mini = document.createElement('div');
+      mini.className = 'popup';
+      mini.style.width = '180px';
+      mini.innerHTML = `<button class="close">×</button><div style="font-weight:700">System</div><div class="tiny">Pressing "${e.key}" grants 0 points</div>`;
+      // position near top-left but random
+      mini.style.left = (20 + Math.random()*200) + 'px';
+      mini.style.top = (20 + Math.random()*200) + 'px';
+      arena.appendChild(mini);
+      makeDraggable(mini);
+      mini.querySelector('.close').addEventListener('click', ()=>mini.remove());
+      setTimeout(()=>mini.remove(), 5000);
+      beep();
+    }
+    // occasionally swallow the key (prevent default)
+    if (Math.random() < 0.05 + intensity*0.03) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  // draggable helper
+  function makeDraggable(el){
+    let isDown=false, startX=0, startY=0, origX=0, origY=0;
+    el.addEventListener('mousedown', (ev)=>{
+      isDown=true;
+      startX=ev.clientX; startY=ev.clientY;
+      const rect = el.getBoundingClientRect();
+      origX = rect.left; origY=rect.top;
+      el.style.transition = 'none';
+      // bring to front
+      el.style.zIndex = parseInt((Date.now()/10)%10000)+2000;
+    });
+    window.addEventListener('mousemove', (ev)=>{
+      if(!isDown) return;
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      el.style.left = (origX + dx) + 'px';
+      el.style.top = (origY + dy) + 'px';
+    });
+    window.addEventListener('mouseup', ()=> isDown=false);
+  }
+
+  // Prevent the game from trying to actually open external links:
+  document.addEventListener('click', (e)=>{
+    // if any element has data-unsafe-link attribute, we intercept and simulate
+    if (e.target && e.target.dataset && e.target.dataset.simulateRedirect) {
+      e.preventDefault();
+      // create a 'redirected' popup simulation
+      const p = document.createElement('div');
+      p.className = 'popup';
+      p.style.left = '50px'; p.style.top = '50px';
+      p.innerHTML = `<button class="close">×</button><div style="font-weight:700">Redirect Blocked</div><div class="tiny">External navigation was blocked for safety.</div>`;
+      arena.appendChild(p);
+      makeDraggable(p);
+      p.querySelector('.close').addEventListener('click', ()=>p.remove());
+      return false;
+    }
+  });
+
+  // small banner that looks sticky at start
+  (function initialBanner(){
+    setTimeout(()=> spawnBanners(), 600);
+  })();
+
+  // UI: clicking in arena sometimes spawns small popup teasing a redirect
+  arena.addEventListener('click', (e)=>{
+    if (!running) return;
+    if (Math.random() < 0.12 + intensity*0.06) {
+      const bait = document.createElement('div');
+      bait.className = 'popup';
+      bait.innerHTML = `<button class="close">×</button><div style="font-weight:700">Click to Continue</div><div class="tiny">This would take you offsite — simulated.</div><div style="margin-top:6px"><a href="#" data-simulate-redirect="1">Continue</a></div>`;
+      arena.appendChild(bait);
+      bait.style.left = (e.clientX - arena.getBoundingClientRect().left + 10) + 'px';
+      bait.style.top = (e.clientY - arena.getBoundingClientRect().top + 10) + 'px';
+      makeDraggable(bait);
+      bait.querySelector('.close').addEventListener('click', ()=>bait.remove());
+      setTimeout(()=>bait.remove(), 7000);
+    }
+  });
+
+  // keyboard shortcut to intentionally rage quit: press R
+  window.addEventListener('keydown', (e)=>{
+    if (e.key.toLowerCase() === 'r' && running) {
+      stopGame('hotkey');
+    }
+  });
+
+  // friendly notice for page-unload attempts (simulate annoy)
+  window.addEventListener('beforeunload', (e) => {
+    if (!running) return;
+    // show standard confirmation (browsers control exact text)
+    e.returnValue = 'Are you sure you want to leave? The game is cruel, but you can do it.';
+    return e.returnValue;
+  });
+
+  // defensive: stop all when tab hidden (optional)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && running) {
+      // optionally pause or continue; we will keep it running to annoy
+      // nothing to do
+    }
+  });
+
+  // expose a function to spawn an immediate harassment spike (dev)
+  window.__spawnHarass = ()=>{
+    for(let i=0;i<4+intensity;i++) {
+      spawnPopups(); spawnBanners();
+    }
+    spawnCursorChaser();
+  };
+
+  // small playful instructions
+  console.log('Game loaded. Call __spawnHarass() from the console for chaos. Reminder: no external redirects are used.');
+
+})();
+</script>
+</body>
+</html>
