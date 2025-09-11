@@ -2,91 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stay on Site Sandbox</title>
+  <title>Boring Web Challenge</title>
   <style>
     body {
       margin: 0;
-      background: #111;
-      color: #fff;
-      font-family: sans-serif;
       overflow: hidden;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
     }
-    #timer {
+    #hud {
       position: fixed;
       top: 10px;
       left: 10px;
-      background: rgba(0,0,0,0.6);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 18px;
-    }
-    #controls {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.6);
-      padding: 6px 12px;
-      border-radius: 6px;
-    }
-    #leaderboard {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      background: rgba(0,0,0,0.5);
       padding: 10px;
-      border-radius: 6px;
-      width: 300px;
-      max-height: 200px;
-      overflow-y: auto;
-      text-align: left;
-    }
-    #leaderboard h3 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-    }
-    #leaderboard ul {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-    #leaderboard li {
-      margin: 4px 0;
+      border-radius: 8px;
     }
     .banner {
       position: absolute;
       width: 320px;
       height: 50px;
       background: #222;
-      border: 2px solid #444;
-      border-radius: 6px;
+      border: 2px solid #555;
+      border-radius: 4px;
       cursor: grab;
-      overflow: hidden;
     }
-    .banner:active {
-      cursor: grabbing;
+    #leaderboard {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <div id="timer">Time: 0s</div>
-  <div id="controls">
+  <div id="hud">
+    <div id="timer">Time: 0s</div>
     <button id="addBanner">Add Banner</button>
     <button id="saveScore">Save Score</button>
   </div>
+
   <div id="leaderboard">
     <h3>🏆 Leaderboard</h3>
-    <ul id="scores"></ul>
+    <ol id="scores"></ol>
   </div>
 
-  <!-- Firebase -->
   <script type="module">
-    // Import Firebase SDKs
+    // --- Firebase setup ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, limit } 
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDT0do1NdS_uF4lcX7kuQD7JBUwqQjsIVY",
       authDomain: "boring-web.firebaseapp.com",
@@ -97,11 +70,10 @@
       measurementId: "G-LF6S5G8WZR"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Ask player name at entry
+    // --- Player name ---
     let playerName = localStorage.getItem("playerName");
     if (!playerName) {
       playerName = prompt("Enter your name:");
@@ -112,7 +84,7 @@
       }
     }
 
-    // Timer
+    // --- Timer ---
     let stayTime = parseInt(localStorage.getItem("stayTime") || "0");
     setInterval(() => {
       stayTime++;
@@ -120,7 +92,7 @@
       document.getElementById("timer").textContent = "Time: " + stayTime + "s";
     }, 1000);
 
-    // Save score
+    // --- Save score ---
     async function saveScore() {
       const userRef = doc(db, "scores", playerName);
       const docSnap = await getDoc(userRef);
@@ -135,7 +107,7 @@
     }
     document.getElementById("saveScore").addEventListener("click", saveScore);
 
-    // Load leaderboard
+    // --- Load leaderboard ---
     async function loadLeaderboard() {
       const q = query(collection(db, "scores"), orderBy("time", "desc"), limit(10));
       const querySnapshot = await getDocs(q);
@@ -150,12 +122,9 @@
       });
     }
     loadLeaderboard();
-    setInterval(loadLeaderboard, 5000);
 
-    // Gravity banners
+    // --- Gravity banners ---
     const banners = [];
-    const addBtn = document.getElementById("addBanner");
-    addBtn.addEventListener("click", () => createBanner(Math.random() * 400, 50));
 
     function createBanner(x = 100, y = 100) {
       const el = document.createElement("div");
@@ -163,19 +132,24 @@
       el.style.left = x + "px";
       el.style.top = y + "px";
 
-      // Insert ad script
-      el.innerHTML = `
-        <script type="text/javascript">
-          atOptions = {
-            'key' : '33c6e05f0ae701783ecead35e54f3b14',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js"></script>
+      // Insert ad scripts properly
+      const s1 = document.createElement("script");
+      s1.type = "text/javascript";
+      s1.text = `
+        atOptions = {
+          'key' : '33c6e05f0ae701783ecead35e54f3b14',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
       `;
+      const s2 = document.createElement("script");
+      s2.type = "text/javascript";
+      s2.src = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
+
+      el.appendChild(s1);
+      el.appendChild(s2);
 
       document.body.appendChild(el);
 
@@ -224,6 +198,11 @@
     // First banner
     createBanner(200, 100);
     loop();
+
+    // Button for more banners
+    document.getElementById("addBanner").addEventListener("click", () => {
+      createBanner(Math.random() * (window.innerWidth - 320), 50);
+    });
   </script>
 </body>
 </html>
