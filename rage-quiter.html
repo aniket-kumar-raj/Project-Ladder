@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How Long Before Rage Quit?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #141414;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #game-container {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #232526, #414345);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: filter 0.3s;
+    }
+    #game-area {
+      width: 80vw;
+      height: 70vh;
+      background: #1e1e1e;
+      border-radius: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #start-btn {
+      font-size: 1.5em;
+      padding: 0.7em 2em;
+      border: none;
+      background: #ff5252;
+      color: white;
+      border-radius: 16px;
+      margin-top: 2em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: background 0.2s;
+    }
+    #start-btn:hover {
+      background: #ff2121;
+    }
+    .hide {
+      display: none !important;
+    }
+    /* Banner popup styling */
+    .banner-popup {
+      position: fixed;
+      z-index: 9999;
+      background: #222;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      padding: 0;
+      min-width: 340px;
+      min-height: 70px;
+      max-width: 90vw;
+      max-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #444;
+      user-select: none;
+      transition: box-shadow 0.2s;
+    }
+    .banner-drag-area {
+      position: absolute;
+      left: 0; top: 0; right: 0; height: 30px;
+      cursor: move;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      background: linear-gradient(90deg, #373737, #292929 80%);
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1em;
+      letter-spacing: 1px;
+    }
+    .banner-close {
+      position: absolute;
+      right: 12px; top: 5px;
+      font-size: 1.2em;
+      color: #ccc;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0 4px;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    .banner-close:hover {
+      background: #ff2121;
+      color: #fff;
+    }
+    #rage-stats {
+      font-size: 1.2em;
+      color: #ffc107;
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    /* Game UI */
+    #challenge {
+      color: #fff;
+      font-size: 2em;
+      margin-bottom: 1.2em;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    #score {
+      color: #fff;
+      font-size: 1.2em;
+      margin-bottom: 1em;
+    }
+    #buttons {
+      display: flex;
+      gap: 1.5em;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .game-btn {
+      font-size: 1.1em;
+      padding: 0.8em 2.5em;
+      margin: 0.3em;
+      border: none;
+      border-radius: 10px;
+      background: #3949ab;
+      color: #fff;
+      transition: background 0.2s, transform 0.1s;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .game-btn:active {
+      background: #303f9f;
+      transform: scale(0.96);
+    }
+    #rage-btn {
+      background: #ff5252;
+    }
+    #rage-btn:active {
+      background: #ff1744;
+    }
+    @media (max-width: 700px) {
+      #game-area {
+        width: 98vw;
+        height: 65vh;
+      }
+      .banner-popup {
+        min-width: 80vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Banner Container -->
+  <div id="banners-container"></div>
+  <!-- Game Area -->
+  <div id="game-container">
+    <div id="game-area">
+      <div id="welcome">
+        <h1 style="color:#fff;margin-bottom:0.5em;">How Long Before Rage Quit?</h1>
+        <div style="color:#d1c4e9;font-size:1.2em;">Can you keep your cool as the game gets harder and more annoying?</div>
+        <button id="start-btn">Start Game</button>
+      </div>
+      <div id="game-ui" class="hide">
+        <div id="challenge">Loading...</div>
+        <div id="score">Score: 0 | Time: 0s</div>
+        <div id="buttons">
+          <!-- Game buttons will be injected here -->
+        </div>
+        <button id="rage-btn" class="game-btn" style="margin-top:1.3em;background:#ff5252;">Rage Quit!</button>
+        <div id="rage-stats" class="hide"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- Annoying Banners Logic ---
+    const adScriptSrc = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
+    const bannersContainer = document.getElementById('banners-container');
+    let bannerCount = 0;
+    // Keep track of all banners for drag management
+    function createBanner() {
+      // Random position with padding (no touch edge)
+      const pad = 16;
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      const w = 340, h = 80;
+      const left = Math.floor(Math.random() * (winW - w - pad*2)) + pad;
+      const top = Math.floor(Math.random() * (winH - h - pad*2)) + pad;
+      const banner = document.createElement('div');
+      banner.className = 'banner-popup';
+      banner.style.left = left + "px";
+      banner.style.top = top + "px";
+      banner.style.width = "340px";
+      banner.style.height = "80px";
+      banner.style.position = "fixed";
+      banner.style.transform = "none";
+      banner.style.boxShadow = "0 8px 32px rgba(255,0,0,0.3)";
+      banner.setAttribute('tabindex', 0);
+
+      // Drag area
+      const dragArea = document.createElement('div');
+      dragArea.className = 'banner-drag-area';
+      dragArea.innerText = 'Special Offer — Drag Me!';
+      banner.appendChild(dragArea);
+
+      // Close button
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'banner-close';
+      closeBtn.title = "Close";
+      closeBtn.innerHTML = '&times;';
+      closeBtn.onclick = () => banner.remove();
+      banner.appendChild(closeBtn);
+
+      // Ad container (ad script will inject iframe here)
+      const adDiv = document.createElement('div');
+      adDiv.style.marginTop = "30px";
+      adDiv.style.width = "320px";
+      adDiv.style.height = "50px";
+      adDiv.style.display = "flex";
+      adDiv.style.justifyContent = "center";
+      adDiv.style.alignItems = "center";
+      adDiv.innerHTML = `
+        <script type="text/javascript">
+        atOptions = {
+          'key' : '33c6e05f0ae701783ecead35e54f3b14',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+        </script>
+        <script type="text/javascript" src="${adScriptSrc}"></script>
+      `;
+      banner.appendChild(adDiv);
+
+      // Drag logic
+      let isDragging = false, offsetX = 0, offsetY = 0;
+      function onStart(e) {
+        isDragging = true;
+        const rect = banner.getBoundingClientRect();
+        if (e.touches) {
+          offsetX = e.touches[0].clientX - rect.left;
+          offsetY = e.touches[0].clientY - rect.top;
+        } else {
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+        }
+        document.body.style.userSelect = 'none';
+      }
+      function onMove(e) {
+        if (!isDragging) return;
+        let x, y;
+        if (e.touches) {
+          x = e.touches[0].clientX;
+          y = e.touches[0].clientY;
+        } else {
+          x = e.clientX;
+          y = e.clientY;
+        }
+        const minX = pad;
+        const minY = pad;
+        const maxX = window.innerWidth - banner.offsetWidth - pad;
+        const maxY = window.innerHeight - banner.offsetHeight - pad;
+        let left = Math.min(Math.max(x - offsetX, minX), maxX);
+        let top = Math.min(Math.max(y - offsetY, minY), maxY);
+        banner.style.left = left + 'px';
+        banner.style.top = top + 'px';
+        banner.style.transform = 'none';
+      }
+      function onEnd() {
+        isDragging = false;
+        document.body.style.userSelect = '';
+      }
+      dragArea.addEventListener('mousedown', onStart);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+
+      dragArea.addEventListener('touchstart', onStart, {passive:false});
+      document.addEventListener('touchmove', onMove, {passive:false});
+      document.addEventListener('touchend', onEnd);
+
+      // Actually inject ad script AFTER insert to DOM so it runs
+      bannersContainer.appendChild(banner);
+      // Must forcibly inject scripts for every new banner
+      setTimeout(() => {
+        const scripts = banner.getElementsByTagName('script');
+        for (let s of Array.from(scripts)) {
+          const script = document.createElement('script');
+          if (s.src) script.src = s.src;
+          else script.textContent = s.textContent;
+          s.parentNode.replaceChild(script, s);
+        }
+      }, 30);
+
+      bannerCount++;
+    }
+    // Start with 2 banners
+    createBanner();
+    setTimeout(createBanner, 500);
+    // Add 2 banners every 5 seconds
+    setInterval(() => {
+      createBanner();
+      setTimeout(createBanner, 500);
+    }, 5000);
+
+    // --- GAME LOGIC BELOW (same as before) ---
+    (function() {
+      const startBtn = document.getElementById('start-btn');
+      const welcome = document.getElementById('welcome');
+      const gameUI = document.getElementById('game-ui');
+      const challenge = document.getElementById('challenge');
+      const scoreDisplay = document.getElementById('score');
+      const buttonsDiv = document.getElementById('buttons');
+      const rageBtn = document.getElementById('rage-btn');
+      const rageStats = document.getElementById('rage-stats');
+      const gameArea = document.getElementById('game-area');
+
+      let gameStarted = false;
+      let score = 0;
+      let startTime = 0;
+      let timerId = null;
+      let currentRound = 0;
+      let gameOver = false;
+
+      // Annoying challenges for rage game
+      const challenges = [
+        { text: "Click the BLUE button to continue.", type: "color", correct: "blue" },
+        { text: "Quick! Click the GREEN button.", type: "color", correct: "green" },
+        { text: "Do NOT click RED!", type: "color", correct: "not_red" },
+        { text: "Which is the LARGEST number?", type: "numbers", correct: "largest" },
+        { text: "Which is the SMALLEST number?", type: "numbers", correct: "smallest" },
+        { text: "Find the 'Continue' button!", type: "label", correct: "Continue" },
+        { text: "Click the ODD number.", type: "odd_even", correct: "odd" },
+        { text: "Click the EVEN number.", type: "odd_even", correct: "even" },
+        { text: "Is this fun? Click YES to proceed.", type: "yes_no", correct: "yes" },
+        { text: "Don't click anything for 2 seconds!", type: "wait", correct: null },
+        { text: "Click the button that is MOVING!", type: "moving", correct: "moving" },
+      ];
+
+      function makeGameFullscreen() {
+        gameArea.style.width = '99vw';
+        gameArea.style.height = '94vh';
+        gameArea.style.maxWidth = '99vw';
+        gameArea.style.maxHeight = '94vh';
+      }
+
+      function resetGame() {
+        score = 0;
+        currentRound = 0;
+        gameOver = false;
+        rageStats.classList.add('hide');
+      }
+
+      function updateScore() {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        scoreDisplay.textContent = `Score: ${score} | Time: ${seconds}s`;
+      }
+
+      function nextChallenge() {
+        if (currentRound >= challenges.length) {
+          currentRound = 0;
+          shuffleArray(challenges);
+        }
+        const chal = challenges[currentRound];
+        challenge.textContent = chal.text;
+        buttonsDiv.innerHTML = '';
+        let movingBtn = document.getElementById('moving-btn');
+        if (movingBtn) movingBtn.remove();
+
+        switch (chal.type) {
+          case "color":
+            renderColorButtons(chal);
+            break;
+          case "numbers":
+            renderNumberButtons(chal);
+            break;
+          case "label":
+            renderLabelButtons(chal);
+            break;
+          case "odd_even":
+            renderOddEvenButtons(chal);
+            break;
+          case "yes_no":
+            renderYesNoButtons(chal);
+            break;
+          case "wait":
+            renderWaitChallenge();
+            break;
+          case "moving":
+            renderMovingButton();
+            break;
+        }
+        updateScore();
+        currentRound++;
+      }
+
+      function renderColorButtons(chal) {
+        const colors = ["blue", "green", "red"];
+        shuffleArray(colors);
+        colors.forEach(color => {
+          const btn = document.createElement('button');
+          btn.className = 'game-btn';
+          btn.style.background = color;
+          btn.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+          btn.onclick = () => {
+            if (chal.correct === "not_red" && color !== "red") {
+              score++;
+              nextChallenge();
+            } else if (color === chal.correct) {
+              score++;
+              nextChallenge();
+            } else {
+              endGame("Clicked the wrong color.");
+            }
+          };
+          buttonsDiv.appendChild(btn);
+        });
+      }
+
+      function renderNumberButtons(chal) {
+        const nums = [];
+        for (let i = 0; i < 3; i++) nums.push(Math.floor(Math.random() * 100));
+        let correctIdx = 0;
+        if (chal.correct === "largest") {
+          correctIdx = nums.indexOf(Math.max(...nums));
+        } else {
+          correctIdx = nums.indexOf(Math.min(...nums));
+        }
+        nums.forEach((num, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'game-btn';
+          btn.textContent = num;
+          btn.onclick = () => {
+            if (idx === correctIdx) {
+              score++;
+              nextChallenge();
+            } else {
+              endGame("Wrong number!");
+            }
+          };
+          buttonsDiv.appendChild(btn);
+        });
+      }
+
+      function renderLabelButtons(chal) {
+        const labels = ["Continue", "Cancel", "Abort"];
+        shuffleArray(labels);
+        labels.forEach(label => {
+          const btn = document.createElement('button');
+          btn.className = 'game-btn';
+          btn.textContent = label;
+          btn.onclick = () => {
+            if (label === chal.correct) {
+              score++;
+              nextChallenge();
+            } else {
+              endGame("Wrong label!");
+            }
+          };
+          buttonsDiv.appendChild(btn);
+        });
+      }
+
+      function renderOddEvenButtons(chal) {
+        let a = Math.floor(Math.random()*50)*2 + 1; // odd
+        let b = Math.floor(Math.random()*50)*2;     // even
+        let arr = chal.correct === "odd" ? [a, b] : [b, a];
+        shuffleArray(arr);
+        arr.forEach(num => {
+          const btn = document.createElement('button');
+          btn.className = 'game-btn';
+          btn.textContent = num;
+          btn.onclick = () => {
+            if ((chal.correct === "odd" && num%2===1) || (chal.correct === "even" && num%2===0)) {
+              score++;
+              nextChallenge();
+            } else {
+              endGame("Wrong choice!");
+            }
+          };
+          buttonsDiv.appendChild(btn);
+        });
+      }
+
+      function renderYesNoButtons(chal) {
+        ["YES","NO"].forEach(label => {
+          const btn = document.createElement('button');
+          btn.className = 'game-btn';
+          btn.textContent = label;
+          btn.onclick = () => {
+            if (label.toLowerCase() === chal.correct) {
+              score++;
+              nextChallenge();
+            } else {
+              endGame("Why so negative?");
+            }
+          };
+          buttonsDiv.appendChild(btn);
+        });
+      }
+
+      function renderWaitChallenge() {
+        challenge.textContent = "Don't click anything for 2 seconds!";
+        let failed = false;
+        buttonsDiv.innerHTML = '';
+        const failHandler = () => {
+          if (!failed) {
+            failed = true;
+            endGame("You clicked too soon!");
+            document.removeEventListener('click', failHandler, true);
+          }
+        };
+        document.addEventListener('click', failHandler, true);
+        setTimeout(() => {
+          if (!failed) {
+            document.removeEventListener('click', failHandler, true);
+            score++;
+            nextChallenge();
+          }
+        }, 2000);
+      }
+
+      function renderMovingButton() {
+        buttonsDiv.innerHTML = '';
+        const btn = document.createElement('button');
+        btn.id = 'moving-btn';
+        btn.className = 'game-btn';
+        btn.textContent = "Catch Me!";
+        let moveInterval;
+        btn.onclick = () => {
+          clearInterval(moveInterval);
+          score++;
+          nextChallenge();
+        };
+        buttonsDiv.appendChild(btn);
+        moveInterval = setInterval(() => {
+          const w = gameArea.offsetWidth || 800;
+          const h = gameArea.offsetHeight || 400;
+          btn.style.position = "absolute";
+          btn.style.left = Math.random()*(w-130) + "px";
+          btn.style.top = Math.random()*(h-90) + "px";
+        }, 400);
+      }
+
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      }
+
+      function endGame(reason) {
+        gameOver = true;
+        clearInterval(timerId);
+        rageStats.textContent = `You rage quit! Reason: ${reason}
+Total Score: ${score}
+Your Calm Lasted: ${Math.floor((Date.now()-startTime)/1000)} seconds.`;
+        rageStats.classList.remove('hide');
+        gameUI.classList.add('hide');
+        welcome.classList.remove('hide');
+        startBtn.textContent = "Play Again";
+        makeGameFullscreen();
+      }
+
+      rageBtn.onclick = () => {
+        endGame("You pressed Rage Quit!");
+      };
+
+      startBtn.onclick = () => {
+        gameStarted = true;
+        resetGame();
+        makeGameFullscreen();
+        welcome.classList.add('hide');
+        gameUI.classList.remove('hide');
+        startTime = Date.now();
+        nextChallenge();
+        timerId = setInterval(updateScore, 500);
+      };
+    })();
+  </script>
+</body>
+</html>
