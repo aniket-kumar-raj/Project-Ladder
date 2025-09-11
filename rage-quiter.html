@@ -553,18 +553,27 @@
         }
       }
 
-      function endGame(reason) {
-        gameOver = true;
-        clearInterval(timerId);
-        rageStats.textContent = `You rage quit! Reason: ${reason}
-Total Score: ${score}
+function endGame(reason) {
+  gameOver = true;
+  clearInterval(timerId);
+
+  // --- High Score logic ---
+  let highScore = parseInt(localStorage.getItem('rageQuitHighScore') || "0", 10);
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('rageQuitHighScore', highScore.toString());
+  }
+
+  rageStats.innerHTML = `You rage quit! Reason: ${reason}<br>
+Total Score: ${score}<br>
+High Score: ${highScore}<br>
 Your Calm Lasted: ${Math.floor((Date.now()-startTime)/1000)} seconds.`;
-        rageStats.classList.remove('hide');
-        gameUI.classList.add('hide');
-        welcome.classList.remove('hide');
-        startBtn.textContent = "Play Again";
-        makeGameFullscreen();
-      }
+  rageStats.classList.remove('hide');
+  gameUI.classList.add('hide');
+  welcome.classList.remove('hide');
+  startBtn.textContent = "Play Again";
+  makeGameFullscreen();
+    }
 
       rageBtn.onclick = () => {
         endGame("You pressed Rage Quit!");
