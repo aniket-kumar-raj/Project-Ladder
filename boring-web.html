@@ -2,75 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Boring Web Challenge</title>
+  <title>Stay on Site Sandbox</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
       background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
+      color: #fff;
+      font-family: sans-serif;
+      overflow: hidden;
     }
-    #hud {
+    #timer {
       position: fixed;
       top: 10px;
       left: 10px;
-      z-index: 1000;
-      background: rgba(0,0,0,0.5);
-      padding: 12px;
-      border-radius: 8px;
-    }
-    #hud button {
-      font-size: 15px;  /* slightly larger */
+      background: rgba(0,0,0,0.6);
       padding: 6px 12px;
-      margin-top: 5px;
-      cursor: pointer;
+      border-radius: 6px;
+      font-size: 18px;
+      z-index: 1000;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 16px;
+      z-index: 1000;
     }
     .banner {
       position: absolute;
       width: 320px;
       height: 50px;
-      background: #000;
-      border: 2px solid #555;
-      border-radius: 4px;
-      cursor: grab;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      background: #222;
       overflow: hidden;
+      cursor: grab;
     }
-    .banner iframe {
+    .banner:active {
+      cursor: grabbing;
+    }
+    iframe {
       width: 100%;
       height: 100%;
       border: none;
-    }
-    #leaderboard {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      background: rgba(0,0,0,0.5);
-      padding: 10px;
-      border-radius: 8px;
-      max-height: 90vh;
-      overflow-y: auto;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div id="hud">
-    <div id="timer">Time: 0s</div>
-    <button id="addBanner">Add Banner</button>
-    <button id="saveScore">Save Score</button>
-  </div>
+  <div id="timer">Time: 0s</div>
+  <div id="controls"><button id="addBanner">+ Add Banner</button></div>
 
-  <div id="leaderboard">
-    <h3>🏆 Leaderboard</h3>
-    <ol id="scores"></ol>
-  </div>
+  <div id="leaderboard"></div>
 
   <script type="module">
-    // --- Firebase setup ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, limit } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    // ---------------- Firebase Setup ----------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDT0do1NdS_uF4lcX7kuQD7JBUwqQjsIVY",
@@ -78,96 +69,60 @@
       projectId: "boring-web",
       storageBucket: "boring-web.appspot.com",
       messagingSenderId: "468553979535",
-      appId: "1:468553979535:web:45404f1a4ecd49add1c2fa",
-      measurementId: "G-LF6S5G8WZR"
+      appId: "1:468553979535:web:45404f1a4ecd49add1c2fa"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- Player name ---
+    // ---------------- Game Logic ----------------
     let playerName = localStorage.getItem("playerName");
     if (!playerName) {
-      playerName = prompt("Enter your name:");
-      if (playerName) {
-        localStorage.setItem("playerName", playerName);
-      } else {
-        playerName = "Anonymous";
-      }
+      playerName = prompt("Enter your name:") || "Anonymous";
+      localStorage.setItem("playerName", playerName);
     }
 
-    // --- Timer ---
-    let stayTime = parseInt(localStorage.getItem("stayTime") || "0");
+    const banners = [];
+    let startTime = Date.now();
+
+    const timerEl = document.getElementById("timer");
     setInterval(() => {
-      stayTime++;
-      localStorage.setItem("stayTime", stayTime);
-      document.getElementById("timer").textContent = "Time: " + stayTime + "s";
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      timerEl.textContent = `Time: ${seconds}s`;
     }, 1000);
 
-    // --- Save score ---
-    async function saveScore() {
-      const userRef = doc(db, "scores", playerName);
-      const docSnap = await getDoc(userRef);
-
-      if (!docSnap.exists() || stayTime > docSnap.data().time) {
-        await setDoc(userRef, { name: playerName, time: stayTime });
-        alert("Score saved!");
-        loadLeaderboard();
-      } else {
-        alert("You already have a higher score.");
-      }
-    }
-    document.getElementById("saveScore").addEventListener("click", saveScore);
-
-    // --- Load leaderboard ---
-    async function loadLeaderboard() {
-      const q = query(collection(db, "scores"), orderBy("time", "desc"), limit(10));
-      const querySnapshot = await getDocs(q);
-
-      const scoresList = document.getElementById("scores");
-      scoresList.innerHTML = "";
-      querySnapshot.forEach((docSnap, idx) => {
-        const data = docSnap.data();
-        const li = document.createElement("li");
-        li.textContent = (idx === 0 ? "👑 " : "") + data.name + ": " + data.time + "s";
-        scoresList.appendChild(li);
-      });
-    }
-    loadLeaderboard();
-
-    // --- Gravity banners ---
-    const banners = [];
-
-    function createBanner(x = 100, y = 100) {
+    function createBanner(x, y) {
       const el = document.createElement("div");
       el.className = "banner";
       el.style.left = x + "px";
       el.style.top = y + "px";
 
-      // Embed ad inside iframe (always loads)
-      const adFrame = document.createElement("iframe");
-      adFrame.src = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
-      el.appendChild(adFrame);
+      // Insert your ad inside the banner
+      el.innerHTML = `
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '33c6e05f0ae701783ecead35e54f3b14',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js"></script>
+      `;
 
       document.body.appendChild(el);
 
-      const bannerObj = {
-        el,
-        x, y,
-        vy: 0,
-        dragging: false,
-        offsetX: 0,
-        offsetY: 0,
-        width: 320,
-        height: 50
-      };
+      const bannerObj = { el, x, y, vy: 0, dragging: false, offsetX: 0, offsetY: 0 };
 
       el.addEventListener("mousedown", (e) => {
         bannerObj.dragging = true;
         bannerObj.offsetX = e.clientX - bannerObj.x;
         bannerObj.offsetY = e.clientY - bannerObj.y;
       });
+
       document.addEventListener("mouseup", () => { bannerObj.dragging = false; });
+
       document.addEventListener("mousemove", (e) => {
         if (bannerObj.dragging) {
           bannerObj.x = e.clientX - bannerObj.offsetX;
@@ -180,48 +135,48 @@
     }
 
     function loop() {
-      banners.forEach((b, i) => {
+      banners.forEach(b => {
         if (!b.dragging) {
           b.vy += 0.3;
           b.y += b.vy;
-          if (b.y + b.height > window.innerHeight) {
-            b.y = window.innerHeight - b.height;
+          if (b.y + 50 > window.innerHeight) {
+            b.y = window.innerHeight - 50;
             b.vy *= -0.6;
           }
         }
-
-        // --- simple hitbox collision ---
-        for (let j = i + 1; j < banners.length; j++) {
-          const other = banners[j];
-          if (Math.abs(b.x - other.x) < b.width && Math.abs(b.y - other.y) < b.height) {
-            // push apart
-            const overlapX = b.width - Math.abs(b.x - other.x);
-            const overlapY = b.height - Math.abs(b.y - other.y);
-            if (overlapX < overlapY) {
-              if (b.x < other.x) { b.x -= overlapX/2; other.x += overlapX/2; }
-              else { b.x += overlapX/2; other.x -= overlapX/2; }
-            } else {
-              if (b.y < other.y) { b.y -= overlapY/2; other.y += overlapY/2; }
-              else { b.y += overlapY/2; other.y -= overlapY/2; }
-              b.vy = 0; other.vy = 0;
-            }
-          }
-        }
-
         b.el.style.left = b.x + "px";
         b.el.style.top = b.y + "px";
       });
       requestAnimationFrame(loop);
     }
 
-    // First banner
     createBanner(200, 100);
     loop();
 
-    // Button for more banners
-    document.getElementById("addBanner").addEventListener("click", () => {
+    document.getElementById("addBanner").onclick = () => {
       createBanner(Math.random() * (window.innerWidth - 320), 50);
-    });
+    };
+
+    // ---------------- Leaderboard ----------------
+    async function saveScore() {
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      await addDoc(collection(db, "scores"), { name: playerName, time: seconds, created: Date.now() });
+      loadLeaderboard();
+    }
+
+    async function loadLeaderboard() {
+      const q = query(collection(db, "scores"), orderBy("time", "desc"), limit(5));
+      const snapshot = await getDocs(q);
+      const board = document.getElementById("leaderboard");
+      board.innerHTML = "<h3>Leaderboard</h3>";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        board.innerHTML += `<div>${data.name}: ${data.time}s</div>`;
+      });
+    }
+
+    window.addEventListener("beforeunload", saveScore);
+    loadLeaderboard();
   </script>
 </body>
 </html>
