@@ -28,6 +28,31 @@
       padding: 6px 12px;
       border-radius: 6px;
     }
+    #leaderboard {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 6px;
+      width: 300px;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    #leaderboard h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+    }
+    #leaderboard ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    #leaderboard li {
+      margin: 4px 0;
+    }
     .banner {
       position: absolute;
       width: 320px;
@@ -47,32 +72,98 @@
   <div id="timer">Time: 0s</div>
   <div id="controls">
     <button id="addBanner">Add Banner</button>
+    <button id="saveScore">Save Score</button>
+  </div>
+  <div id="leaderboard">
+    <h3>🏆 Leaderboard</h3>
+    <ul id="scores"></ul>
   </div>
 
-  <script>
-    const timerEl = document.getElementById("timer");
-    const addBtn = document.getElementById("addBanner");
+  <!-- Firebase -->
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, limit } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-    let banners = [];
-    let lastTime = performance.now();
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDT0do1NdS_uF4lcX7kuQD7JBUwqQjsIVY",
+      authDomain: "boring-web.firebaseapp.com",
+      projectId: "boring-web",
+      storageBucket: "boring-web.appspot.com",
+      messagingSenderId: "468553979535",
+      appId: "1:468553979535:web:45404f1a4ecd49add1c2fa",
+      measurementId: "G-LF6S5G8WZR"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Ask player name at entry
+    let playerName = localStorage.getItem("playerName");
+    if (!playerName) {
+      playerName = prompt("Enter your name:");
+      if (playerName) {
+        localStorage.setItem("playerName", playerName);
+      } else {
+        playerName = "Anonymous";
+      }
+    }
+
+    // Timer
     let stayTime = parseInt(localStorage.getItem("stayTime") || "0");
-
-    // Timer loop
-    function updateTimer() {
+    setInterval(() => {
       stayTime++;
       localStorage.setItem("stayTime", stayTime);
-      timerEl.textContent = "Time: " + stayTime + "s";
-    }
-    setInterval(updateTimer, 1000);
+      document.getElementById("timer").textContent = "Time: " + stayTime + "s";
+    }, 1000);
 
-    // Create a banner with gravity
+    // Save score
+    async function saveScore() {
+      const userRef = doc(db, "scores", playerName);
+      const docSnap = await getDoc(userRef);
+
+      if (!docSnap.exists() || stayTime > docSnap.data().time) {
+        await setDoc(userRef, { name: playerName, time: stayTime });
+        alert("Score saved!");
+        loadLeaderboard();
+      } else {
+        alert("You already have a higher score.");
+      }
+    }
+    document.getElementById("saveScore").addEventListener("click", saveScore);
+
+    // Load leaderboard
+    async function loadLeaderboard() {
+      const q = query(collection(db, "scores"), orderBy("time", "desc"), limit(10));
+      const querySnapshot = await getDocs(q);
+
+      const scoresList = document.getElementById("scores");
+      scoresList.innerHTML = "";
+      querySnapshot.forEach((docSnap, idx) => {
+        const data = docSnap.data();
+        const li = document.createElement("li");
+        li.textContent = (idx === 0 ? "👑 " : "") + data.name + ": " + data.time + "s";
+        scoresList.appendChild(li);
+      });
+    }
+    loadLeaderboard();
+    setInterval(loadLeaderboard, 5000);
+
+    // Gravity banners
+    const banners = [];
+    const addBtn = document.getElementById("addBanner");
+    addBtn.addEventListener("click", () => createBanner(Math.random() * 400, 50));
+
     function createBanner(x = 100, y = 100) {
       const el = document.createElement("div");
       el.className = "banner";
       el.style.left = x + "px";
       el.style.top = y + "px";
 
-      // insert ad script
+      // Insert ad script
       el.innerHTML = `
         <script type="text/javascript">
           atOptions = {
@@ -97,7 +188,6 @@
         offsetY: 0
       };
 
-      // Dragging handlers
       el.addEventListener("mousedown", (e) => {
         bannerObj.dragging = true;
         bannerObj.offsetX = e.clientX - bannerObj.x;
@@ -108,25 +198,18 @@
         if (bannerObj.dragging) {
           bannerObj.x = e.clientX - bannerObj.offsetX;
           bannerObj.y = e.clientY - bannerObj.offsetY;
-          bannerObj.vy = 0; // reset gravity while dragging
+          bannerObj.vy = 0;
         }
       });
 
       banners.push(bannerObj);
     }
 
-    // Gravity update
     function loop() {
-      let now = performance.now();
-      let dt = (now - lastTime) / 16; // normalize
-      lastTime = now;
-
       banners.forEach(b => {
         if (!b.dragging) {
-          b.vy += 0.3 * dt; // gravity
-          b.y += b.vy * dt;
-
-          // bounce on floor
+          b.vy += 0.3;
+          b.y += b.vy;
           if (b.y + 50 > window.innerHeight) {
             b.y = window.innerHeight - 50;
             b.vy *= -0.6;
@@ -135,13 +218,10 @@
         b.el.style.left = b.x + "px";
         b.el.style.top = b.y + "px";
       });
-
       requestAnimationFrame(loop);
     }
 
-    addBtn.addEventListener("click", () => createBanner(Math.random()*400, 50));
-
-    // spawn first banner
+    // First banner
     createBanner(200, 100);
     loop();
   </script>
