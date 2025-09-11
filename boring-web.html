@@ -17,17 +17,29 @@
       left: 10px;
       z-index: 1000;
       background: rgba(0,0,0,0.5);
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
+    }
+    #hud button {
+      font-size: 15px;  /* slightly larger */
+      padding: 6px 12px;
+      margin-top: 5px;
+      cursor: pointer;
     }
     .banner {
       position: absolute;
       width: 320px;
       height: 50px;
-      background: #222;
+      background: #000;
       border: 2px solid #555;
       border-radius: 4px;
       cursor: grab;
+      overflow: hidden;
+    }
+    .banner iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
     #leaderboard {
       position: fixed;
@@ -132,24 +144,10 @@
       el.style.left = x + "px";
       el.style.top = y + "px";
 
-      // Insert ad scripts properly
-      const s1 = document.createElement("script");
-      s1.type = "text/javascript";
-      s1.text = `
-        atOptions = {
-          'key' : '33c6e05f0ae701783ecead35e54f3b14',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      `;
-      const s2 = document.createElement("script");
-      s2.type = "text/javascript";
-      s2.src = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
-
-      el.appendChild(s1);
-      el.appendChild(s2);
+      // Embed ad inside iframe (always loads)
+      const adFrame = document.createElement("iframe");
+      adFrame.src = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
+      el.appendChild(adFrame);
 
       document.body.appendChild(el);
 
@@ -159,7 +157,9 @@
         vy: 0,
         dragging: false,
         offsetX: 0,
-        offsetY: 0
+        offsetY: 0,
+        width: 320,
+        height: 50
       };
 
       el.addEventListener("mousedown", (e) => {
@@ -180,15 +180,34 @@
     }
 
     function loop() {
-      banners.forEach(b => {
+      banners.forEach((b, i) => {
         if (!b.dragging) {
           b.vy += 0.3;
           b.y += b.vy;
-          if (b.y + 50 > window.innerHeight) {
-            b.y = window.innerHeight - 50;
+          if (b.y + b.height > window.innerHeight) {
+            b.y = window.innerHeight - b.height;
             b.vy *= -0.6;
           }
         }
+
+        // --- simple hitbox collision ---
+        for (let j = i + 1; j < banners.length; j++) {
+          const other = banners[j];
+          if (Math.abs(b.x - other.x) < b.width && Math.abs(b.y - other.y) < b.height) {
+            // push apart
+            const overlapX = b.width - Math.abs(b.x - other.x);
+            const overlapY = b.height - Math.abs(b.y - other.y);
+            if (overlapX < overlapY) {
+              if (b.x < other.x) { b.x -= overlapX/2; other.x += overlapX/2; }
+              else { b.x += overlapX/2; other.x -= overlapX/2; }
+            } else {
+              if (b.y < other.y) { b.y -= overlapY/2; other.y += overlapY/2; }
+              else { b.y += overlapY/2; other.y -= overlapY/2; }
+              b.vy = 0; other.vy = 0;
+            }
+          }
+        }
+
         b.el.style.left = b.x + "px";
         b.el.style.top = b.y + "px";
       });
