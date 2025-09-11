@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How Long Can You Stay?</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 90vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #222, #333);
+    }
+    #box {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #4af;
+      border-radius: 8px;
+      left: 50%;
+      top: 10%;
+      transform: translate(-50%, -50%);
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+    .ad {
+      position: absolute;
+      width: 100%;
+      height: 60px;
+      background: #000;
+    }
+    .ad.top { top: 0; }
+    .ad.bottom { bottom: 0; }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div id="score">Score: 0</div>
+    <div id="box"></div>
+
+    <!-- Ad border top -->
+    <div class="ad top">
+      <script type="text/javascript">
+        atOptions = {
+          'key' : '33c6e05f0ae701783ecead35e54f3b14',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script type="text/javascript" src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js"></script>
+    </div>
+
+    <!-- Ad border bottom -->
+    <div class="ad bottom">
+      <script type="text/javascript">
+        atOptions = {
+          'key' : '33c6e05f0ae701783ecead35e54f3b14',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script type="text/javascript" src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js"></script>
+    </div>
+  </div>
+
+  <script>
+    const box = document.getElementById("box");
+    const scoreEl = document.getElementById("score");
+    const gameArea = document.getElementById("gameArea");
+
+    let y = 50, x = window.innerWidth / 2;
+    let vy = 0, vx = 2;
+    let gravity = 0.4;
+    let score = 0;
+
+    function update() {
+      vy += gravity;
+      y += vy;
+      x += vx;
+
+      // Bounce off side walls
+      if (x < 20 || x > window.innerWidth - 20) {
+        vx *= -1;
+      }
+
+      // Game over if box hits ads (top/bottom border)
+      if (y > window.innerHeight * 0.9 - 40 || y < 60) {
+        alert("Game Over! Your score: " + score);
+        document.location.reload();
+      }
+
+      box.style.top = y + "px";
+      box.style.left = x + "px";
+      score++;
+      scoreEl.textContent = "Score: " + score;
+    }
+
+    // Tap or click to push the box upward
+    document.addEventListener("keydown", () => { vy = -7; });
+    document.addEventListener("click", () => { vy = -7; });
+
+    setInterval(update, 30);
+  </script>
+</body>
+</html>
