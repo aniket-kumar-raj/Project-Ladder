@@ -1,147 +1,75 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Find the Button</title>
+<meta charset="UTF-8">
+<title>Ad Brick Physics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <style>
-  body{margin:0;background:#111;color:#fff;font-family:sans-serif;overflow:hidden}
-
-  /* Loading screen */
-  #loadingScreen{
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    flex-direction:column;background:#000;z-index:2000;color:#fff;font-size:22px
+  body { margin:0; overflow:hidden; background:#e0e0e0; }
+  .brick {
+    position: absolute;
+    width: 150px;
+    height: 50px;
+    border: 2px solid #333;
+    background: #fff;
+    text-align:center;
+    line-height:50px;
+    font-weight:bold;
+    color:#333;
   }
-  #progress{font-size:18px;margin-top:10px;color:#0f0}
-
-  /* Popups */
-  .popup{position:fixed;background:#222;border:2px solid #444;border-radius:8px;
-         box-shadow:0 6px 20px rgba(0,0,0,.6);width:320px;height:120px;display:none}
-  .drag{height:26px;background:#333;color:#eee;padding:4px 8px;font-size:14px;
-        cursor:move;border-top-left-radius:6px;border-top-right-radius:6px}
-  .close{position:absolute;top:4px;right:6px;color:#bbb;background:none;border:none;
-         font-size:18px;cursor:pointer}
-  .close:hover{color:#f55}
-  .popup-body{padding:4px;height:80px;overflow:hidden}
-
-  /* Target button (hidden behind popups) */
-  #targetBtn{position:absolute;padding:10px 18px;background:#f55;border:none;
-             color:#fff;font-weight:bold;cursor:pointer;border-radius:6px;z-index:1}
-  .reveal{background:#ff0 !important;color:#000 !important;
-          animation:fade 1s infinite alternate}
-  @keyframes fade{from{opacity:.4}to{opacity:1}}
-
-  /* Overlay */
-  #overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
-           background:rgba(0,0,0,.7);z-index:3000}
-  #overlay div{background:#000;padding:20px;border-radius:8px;text-align:center}
-  #overlay h2{margin-top:0}
-  #overlay button{margin-top:10px;padding:8px 14px;border:none;border-radius:6px;
-                  background:#f55;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
 
-<!-- Loading screen -->
-<div id="loadingScreen">
-  <div>Loading game…</div>
-  <div id="progress">0%</div>
+<!-- Your Ad Container -->
+<div id="ad-brick" class="brick">
+  <script async="async" data-cfasync="false" src="//pl27595750.revenuecpmgate.com/29cc3422072ad8357e225b70e4a38e1a/invoke.js"></script>
+  <div id="container-29cc3422072ad8357e225b70e4a38e1a"></div>
+  BRICK AD
 </div>
 
-<!-- The hidden target button -->
-<button id="targetBtn">Find Me</button>
-
-<!-- Overlay result -->
-<div id="overlay"><div><h2 id="msg"></h2>
-<button onclick="location.reload()">Restart</button></div></div>
-
 <script>
-const TOTAL=30, LIMIT=15000;
-let popups=[],found=false,timer;
-let loadedCount=0;
+  // Matter.js setup
+  const { Engine, Render, Runner, Bodies, World, Body, Events } = Matter;
 
-/* Place target button randomly */
-const target=document.getElementById('targetBtn');
-target.style.left=Math.random()*(window.innerWidth-100)+'px';
-target.style.top=Math.random()*(window.innerHeight-50)+'px';
-target.onclick=()=>{found=true;clearTimeout(timer);target.classList.add('reveal');gameOver("You found it!")};
+  const engine = Engine.create();
+  engine.gravity.y = 1; // change this for gravity strength
+  const world = engine.world;
 
-/* create popup */
-function makePopup(){
-  const p=document.createElement('div');p.className='popup';
-  p.style.left=Math.random()*(window.innerWidth-340)+'px';
-  p.style.top=Math.random()*(window.innerHeight-160)+'px';
-
-  const drag=document.createElement('div');drag.className='drag';drag.textContent='Ad Window';
-  p.appendChild(drag);
-
-  const x=document.createElement('button');x.className='close';x.innerHTML='&times;';
-  x.onclick=()=>p.remove();p.appendChild(x);
-
-  const body=document.createElement('div');body.className='popup-body';
-
-  // ad scripts
-  let s1=document.createElement('script');
-  s1.innerHTML=`
-    atOptions = {
-      'key' : '33c6e05f0ae701783ecead35e54f3b14',
-      'format' : 'iframe',
-      'height' : 50,
-      'width' : 320,
-      'params' : {}
-    };
-  `;
-  let s2=document.createElement('script');
-  s2.src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
-  s2.onload=markLoaded;
-  s2.onerror=markLoaded;
-
-  body.appendChild(s1);
-  body.appendChild(s2);
-  p.appendChild(body);
-  document.body.appendChild(p);
-  popups.push(p);
-
-  // dragging
-  let offsetX,offsetY,dragging=false;
-  drag.onmousedown=e=>{
-    dragging=true;offsetX=e.clientX-p.offsetLeft;offsetY=e.clientY-p.offsetTop;
-  };
-  document.onmousemove=e=>{
-    if(dragging){
-      p.style.left=(e.clientX-offsetX)+"px";
-      p.style.top=(e.clientY-offsetY)+"px";
+  const render = Render.create({
+    element: document.body,
+    engine: engine,
+    options: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      wireframes: false,
+      background: 'transparent'
     }
-  };
-  document.onmouseup=()=>dragging=false;
-}
+  });
 
-/* progress tracker */
-function markLoaded(){
-  loadedCount++;
-  document.getElementById('progress').textContent=Math.floor((loadedCount/TOTAL)*100)+"%";
-  if(loadedCount>=TOTAL) startGame();
-}
+  Render.run(render);
+  const runner = Runner.create();
+  Runner.run(runner, engine);
 
-/* start game */
-function startGame(){
-  document.getElementById('loadingScreen').style.display='none';
-  popups.forEach(p=>p.style.display='block');
-  timer=setTimeout(()=>{
-    if(!found){
-      target.classList.add("reveal");
-      gameOver("Game Over - Time Up");
-    }
-  },LIMIT);
-}
+  // Create brick body
+  const brick = Bodies.rectangle(400, 100, 150, 50, {
+    restitution: 0.3,
+    friction: 0.5
+  });
 
-/* overlay */
-function gameOver(txt){
-  document.getElementById('msg').textContent=txt;
-  document.getElementById('overlay').style.display='flex';
-}
+  // Ground
+  const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight-10, window.innerWidth, 20, { isStatic: true });
 
-/* spawn popups */
-for(let i=0;i<TOTAL;i++) makePopup();
+  World.add(world, [brick, ground]);
+
+  // Sync DOM element with physics body
+  Events.on(engine, 'afterUpdate', () => {
+    const el = document.getElementById('ad-brick');
+    el.style.left = brick.position.x - 75 + 'px';
+    el.style.top = brick.position.y - 25 + 'px';
+    el.style.transform = `rotate(${brick.angle}rad)`;
+  });
 </script>
+
 </body>
 </html>
