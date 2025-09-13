@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ad Bricks Creative Sandbox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<style>
+  body { margin:0; overflow:hidden; background:#e0e0e0; font-family:sans-serif; transition: background 0.3s; }
+  .shape {
+    position: absolute;
+    border: 2px solid #333;
+    background: #fff;
+    overflow: hidden;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    user-select: none;
+    will-change: transform;
+    z-index: 10;
+    pointer-events: auto;
+  }
+  .brick { width: 150px; height: 50px; line-height: 50px; }
+  .square { width: 70px; height: 70px; line-height: 70px; }
+  .circle { width: 70px; height: 70px; border-radius: 50%; line-height: 70px; }
+  .triangle {
+    width: 0; height: 0;
+    border-left: 38px solid transparent;
+    border-right: 38px solid transparent;
+    border-bottom: 70px solid #fff;
+    background: none;
+    border-radius: 0;
+    border-top: 0;
+    line-height: normal;
+    text-indent: -9999px;
+  }
+  button, #gravityRange {
+    z-index: 999;
+    font-size: 16px;
+  }
+  #toolbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #fff8;
+    padding: 10px 15px 10px 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1001;
+    box-shadow: 0 1px 10px #0003;
+  }
+  #toolbar label { font-size: 15px; }
+  #toolbar select, #toolbar input[type='color'] { margin-right: 6px; }
+  #spawnBtn { padding: 7px 15px;}
+  #gravityRange { width: 90px; }
+  #colorPickerWrapper {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  #colorPickerBox {
+    background: #fff;
+    padding: 2em 3em 2em 3em;
+    border-radius: 12px;
+    box-shadow: 0 0 24px 2px #8884;
+    text-align: center;
+  }
+  #startBtn {
+    margin-top: 1.5em;
+    padding: 0.7em 1.5em;
+    font-size: 1.1em;
+    border-radius: 0.5em;
+    border: none;
+    background: #1976d2;
+    color: #fff;
+    cursor: pointer;
+  }
+  #startBtn:active { background: #145ba1; }
+  label[for="bgColor"] {
+    font-size: 1.1em;
+    margin-bottom: 1em;
+    display: block;
+  }
+  #shapeColorPickerPopup {
+    position: fixed;
+    z-index: 3000;
+    display: none;
+    background: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 0 24px 2px #8884;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+  }
+  #shapeColorPickerPopup input[type='color'] {
+    width: 60px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    margin: 0 10px;
+  }
+  #shapeColorPickerPopup button {
+    margin-top: 1em;
+    padding: 0.5em 1.3em;
+    font-size: 1em;
+    border-radius: 0.4em;
+    border: none;
+    background: #1976d2;
+    color: #fff;
+    cursor: pointer;
+  }
+  #topAdContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 60px;
+    background: #fff;
+    z-index: 3001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 14px #0002;
+  }
+  #adInner {
+    width: 320px;
+    height: 50px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    pointer-events: auto !important;
+    z-index: 1;
+  }
+  body {
+    padding-top: 60px;
+  }
+</style>
+</head>
+<body>
+
+<div id="topAdContainer">
+  <div id="adInner"></div>
+</div>
+
+<div id="colorPickerWrapper">
+  <div id="colorPickerBox">
+    <label for="bgColor">Choose your background color:</label>
+    <input type="color" id="bgColor" value="#e0e0e0">
+    <br>
+    <button id="startBtn">Start</button>
+  </div>
+</div>
+
+<div id="toolbar" style="display:none">
+  <label for="shapeType">Shape:</label>
+  <select id="shapeType">
+    <option value="brick">Brick</option>
+    <option value="square">Square</option>
+    <option value="circle">Circle</option>
+    <option value="triangle">Triangle</option>
+  </select>
+  <input type="color" id="shapeColor" title="Shape Color" value="#ffffff">
+  <label for="gravityRange">Gravity:</label>
+  <input type="range" min="0" max="2" step="0.01" value="1" id="gravityRange" title="Gravity">
+  <span id="gravityValue">1</span>
+  <button id="spawnBtn">Spawn</button>
+</div>
+
+<!-- Shape color picker popup -->
+<div id="shapeColorPickerPopup">
+  <div>
+    <label for="chooseShapeColor">Change shape color:</label>
+    <input type="color" id="chooseShapeColor" value="#ffffff">
+  </div>
+  <button id="applyShapeColorBtn">Apply</button>
+</div>
+
+<script>
+const { Engine, Render, Runner, Bodies, World, Events, Mouse, MouseConstraint, Composite, Vertices, Body } = Matter;
+
+// --- Top Ad logic ---
+function loadAd() {
+  const adInner = document.getElementById('adInner');
+  adInner.innerHTML = ""; // Clear previous ad/script
+  const adScript = document.createElement('script');
+  adScript.async = true;
+  adScript.setAttribute('data-cfasync', 'false');
+  adScript.src = "//pl27595750.revenuecpmgate.com/29cc3422072ad8357e225b70e4a38e1a/invoke.js";
+  adInner.appendChild(adScript);
+}
+loadAd();
+setInterval(loadAd, 5000);
+
+// --- Color picker logic ---
+const colorPickerWrapper = document.getElementById('colorPickerWrapper');
+const colorPicker = document.getElementById('bgColor');
+const startBtn = document.getElementById('startBtn');
+const toolbar = document.getElementById('toolbar');
+const spawnBtn = document.getElementById('spawnBtn');
+const gravityRange = document.getElementById('gravityRange');
+const gravityValue = document.getElementById('gravityValue');
+const shapeType = document.getElementById('shapeType');
+const shapeColor = document.getElementById('shapeColor');
+
+const shapeColorPickerPopup = document.getElementById('shapeColorPickerPopup');
+const chooseShapeColor = document.getElementById('chooseShapeColor');
+const applyShapeColorBtn = document.getElementById('applyShapeColorBtn');
+
+function setBackground(color) {
+  document.body.style.background = color;
+}
+colorPicker.addEventListener('input', (e) => setBackground(e.target.value));
+
+startBtn.addEventListener('click', () => {
+  setBackground(colorPicker.value);
+  colorPickerWrapper.style.display = 'none';
+  toolbar.style.display = '';
+  startPhysics();
+});
+
+// Prevent double-tap zoom on mobile
+document.addEventListener('touchstart', function preventZoom(e) {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function preventDoubleTapZoom(e) {
+  const now = new Date().getTime();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+
+// --- Matter.js and Shape logic ---
+let engine, render, runner, world, mouse, mouseConstraint, boundaries = [], shapes = [];
+let shapeElsToIndex = new Map();
+
+function createBoundaries() {
+  boundaries.forEach(b => Composite.remove(world, b));
+  boundaries = [];
+  const thickness = 100;
+  boundaries.push(Bodies.rectangle(-thickness/2, window.innerHeight/2, thickness, window.innerHeight, { isStatic: true }));
+  boundaries.push(Bodies.rectangle(window.innerWidth + thickness/2, window.innerHeight/2, thickness, window.innerHeight, { isStatic: true }));
+  boundaries.push(Bodies.rectangle(window.innerWidth/2, -thickness/2, window.innerWidth, thickness, { isStatic: true }));
+  boundaries.push(Bodies.rectangle(window.innerWidth/2, window.innerHeight-10, window.innerWidth, 20, { isStatic: true }));
+  World.add(world, boundaries);
+}
+
+function spawnShape(type, color) {
+  let body, el, w, h;
+  const x = Math.random() * (window.innerWidth - 150) + 75;
+  const y = 100; // Avoid top ad area
+
+  if(type==='brick') {
+    w = 150; h = 50;
+    body = Bodies.rectangle(x, y, w, h, { restitution: 0.3, friction: 0.5, render: { fillStyle: color } });
+    el = document.createElement('div');
+    el.className = 'shape brick';
+    el.style.background = color;
+    el.innerHTML = ""; // No ad in bricks now
+  } else if(type==='square') {
+    w = h = 70;
+    body = Bodies.rectangle(x, y, w, h, { restitution: 0.3, friction: 0.5, render: { fillStyle: color } });
+    el = document.createElement('div');
+    el.className = 'shape square';
+    el.style.background = color;
+    el.innerText = '';
+  } else if(type==='circle') {
+    w = h = 70;
+    body = Bodies.circle(x, y, w/2, { restitution: 0.3, friction: 0.5, render: { fillStyle: color } });
+    el = document.createElement('div');
+    el.className = 'shape circle';
+    el.style.background = color;
+    el.innerText = '';
+  } else if(type==='triangle') {
+    const verts = Vertices.fromPath('0 70 38 0 76 70');
+    body = Bodies.fromVertices(x, y, [verts], { restitution: 0.3, friction: 0.5, render: { fillStyle: color } }, true);
+    el = document.createElement('div');
+    el.className = 'shape triangle';
+    el.style.borderBottomColor = color;
+    el.innerText = '';
+  }
+
+  document.body.appendChild(el);
+  World.add(world, body);
+  let shapeObj = { body, el, type, color };
+  shapes.push(shapeObj);
+  shapeElsToIndex.set(el, shapes.length - 1);
+
+  // attach long press handler for color picker
+  setupLongPressColorPicker(el, shapeObj);
+}
+
+function updateShapeColor(shapeObj, newColor) {
+  shapeObj.color = newColor;
+  if (shapeObj.type === "triangle") {
+    shapeObj.el.style.borderBottomColor = newColor;
+  } else {
+    shapeObj.el.style.background = newColor;
+  }
+}
+
+function startPhysics() {
+  engine = Engine.create();
+  engine.gravity.y = parseFloat(gravityRange.value);
+  world = engine.world;
+
+  render = Render.create({
+      element: document.body,
+      engine: engine,
+      options: { width: window.innerWidth, height: window.innerHeight, wireframes: false, background: 'transparent' }
+  });
+
+  Render.run(render);
+  runner = Runner.create();
+  Runner.run(runner, engine);
+
+  // Add mouse constraint for dragging
+  mouse = Mouse.create(render.canvas);
+  mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+          stiffness: 0.2,
+          render: { visible: false }
+      }
+  });
+  World.add(world, mouseConstraint);
+  render.mouse = mouse;
+
+  createBoundaries();
+  shapes = [];
+  shapeElsToIndex = new Map();
+  spawnShape('brick', shapeColor.value);
+
+  spawnBtn.addEventListener('click', () => {
+    spawnShape(shapeType.value, shapeColor.value);
+  });
+
+  // Drag shapes with mouse/touch (by forwarding pointer events to the Matter.js mouse)
+  document.body.addEventListener('pointerdown', function(e) {
+    if (e.target.classList.contains('shape')) {
+      const canvas = render.canvas;
+      const evt = new MouseEvent('mousedown', {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        screenX: e.screenX,
+        screenY: e.screenY,
+        bubbles: true
+      });
+      canvas.dispatchEvent(evt);
+    }
+  });
+
+  document.body.addEventListener('pointermove', function(e) {
+    if (e.target.classList.contains('shape')) {
+      const canvas = render.canvas;
+      const evt = new MouseEvent('mousemove', {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        screenX: e.screenX,
+        screenY: e.screenY,
+        bubbles: true
+      });
+      canvas.dispatchEvent(evt);
+    }
+  });
+
+  document.body.addEventListener('pointerup', function(e) {
+    if (e.target.classList.contains('shape')) {
+      const canvas = render.canvas;
+      const evt = new MouseEvent('mouseup', {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        screenX: e.screenX,
+        screenY: e.screenY,
+        bubbles: true
+      });
+      canvas.dispatchEvent(evt);
+    }
+  });
+
+  Events.on(engine, 'afterUpdate', () => {
+    shapes.forEach((s, idx) => {
+      let b = s.body, el = s.el, t = s.type;
+      if (t === 'brick' || t === 'square') {
+        el.style.left = (b.position.x - (t==='brick'?75:35)) + 'px';
+        el.style.top = (b.body.position.y - (t==='brick'?25:35)) + 'px';
+        el.style.transform = `rotate(${b.body.angle}rad)`;
+        el.style.background = s.color;
+      } else if (t === 'circle') {
+        el.style.left = (b.body.position.x - 35) + 'px';
+        el.style.top = (b.body.position.y - 35) + 'px';
+        el.style.transform = `rotate(${b.body.angle}rad)`;
+        el.style.background = s.color;
+      } else if (t === 'triangle') {
+        el.style.left = (b.body.position.x - 38) + 'px';
+        el.style.top = (b.body.position.y - 35) + 'px';
+        el.style.transform = `rotate(${b.body.angle}rad)`;
+        el.style.borderBottomColor = s.color;
+      }
+    });
+  });
+
+  window.addEventListener('resize', () => {
+      render.options.width = window.innerWidth;
+      render.options.height = window.innerHeight;
+      render.canvas.width = window.innerWidth;
+      render.canvas.height = window.innerHeight;
+      createBoundaries();
+  });
+
+  // Gravity range logic
+  gravityRange.addEventListener('input', () => {
+    engine.gravity.y = parseFloat(gravityRange.value);
+    gravityValue.innerText = gravityRange.value;
+  });
+  gravityValue.innerText = gravityRange.value;
+
+  shapeColor.addEventListener('input', () => {
+    // Optionally, live preview on UI could be added
+  });
+}
+
+// --- Long Press Color Picker ---
+function setupLongPressColorPicker(el, shapeObj) {
+  let longPressTimer = null;
+  let pointerDown = false;
+
+  function showColorPickerForShape() {
+    chooseShapeColor.value = shapeObj.color;
+    shapeColorPickerPopup.style.display = 'block';
+    shapeColorPickerPopup.dataset.shapeIndex = shapes.indexOf(shapeObj);
+  }
+
+  el.addEventListener('pointerdown', function(e) {
+    pointerDown = true;
+    longPressTimer = setTimeout(() => {
+      showColorPickerForShape();
+    }, 1200);
+  });
+
+  el.addEventListener('pointerup', function(e) {
+    pointerDown = false;
+    clearTimeout(longPressTimer);
+  });
+  el.addEventListener('pointerleave', function(e) {
+    pointerDown = false;
+    clearTimeout(longPressTimer);
+  });
+  el.addEventListener('pointercancel', function(e) {
+    pointerDown = false;
+    clearTimeout(longPressTimer);
+  });
+}
+
+// Handle color picker popup for shape
+applyShapeColorBtn.addEventListener('click', function() {
+  const idx = parseInt(shapeColorPickerPopup.dataset.shapeIndex, 10);
+  if (!isNaN(idx) && shapes[idx]) {
+    updateShapeColor(shapes[idx], chooseShapeColor.value);
+  }
+  shapeColorPickerPopup.style.display = 'none';
+});
+
+chooseShapeColor.addEventListener('input', function() {});
+
+document.addEventListener('click', function(e) {
+  if (
+    shapeColorPickerPopup.style.display === 'block' &&
+    !shapeColorPickerPopup.contains(e.target)
+  ) {
+    shapeColorPickerPopup.style.display = 'none';
+  }
+});
+
+// Set initial color on load
+setBackground(colorPicker.value);
+</script>
+</body>
+</html>
