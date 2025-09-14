@@ -157,21 +157,23 @@
     });
 
     // Shake physics from phone motion
-    if (window.DeviceMotionEvent) {
-      window.addEventListener("devicemotion", (event) => {
-        if (!dragMode) {
-          let ax = event.accelerationIncludingGravity.x || 0;
-          let ay = event.accelerationIncludingGravity.y || 0;
-          const forceScale = 0.0005;
-          shapes.forEach(body => {
-            Body.applyForce(body, body.position, {
-              x: ax * forceScale,
-              y: -ay * forceScale
-            });
-          });
-        }
+    // Shake physics from phone motion
+if (window.DeviceMotionEvent) {
+  window.addEventListener("devicemotion", (event) => {
+    if (!dragMode) {
+      let ax = event.accelerationIncludingGravity.x || 0;
+      let ay = event.accelerationIncludingGravity.y || 0;
+      const forceScale = 0.0005;
+
+      shapes.forEach(body => {
+        Matter.Body.applyForce(body, body.position, {
+          x: ax * forceScale,
+          y: ay * forceScale   // <-- changed sign here
+        });
       });
     }
+  });
+}
   </script>
 </body>
 </html>
