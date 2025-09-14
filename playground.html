@@ -156,8 +156,7 @@
       }
     });
 
-    // Shake physics from phone motion
-    // Shake physics from phone motion
+// Shake physics from phone motion
 if (window.DeviceMotionEvent) {
   window.addEventListener("devicemotion", (event) => {
     if (!dragMode) {
@@ -167,8 +166,8 @@ if (window.DeviceMotionEvent) {
 
       shapes.forEach(body => {
         Matter.Body.applyForce(body, body.position, {
-          x: ax * forceScale,
-          y: ay * forceScale   // <-- changed sign here
+          x: -ax * forceScale,  // invert X for natural left/right
+          y: ay * forceScale    // keep Y same for natural up/down
         });
       });
     }
