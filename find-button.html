@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>Simple Draggable Bricks</title>
+  <title>Bricks Playground</title>
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
   <style>
-    html,body { height:100%; margin:0; background:#111; font-family:system-ui,Segoe UI,Roboto,Arial; -webkit-user-select:none; user-select:none; touch-action:manipulation; }
+    html,body { height:100%; margin:0; background:#111; font-family:system-ui,Segoe UI,Roboto,Arial; }
     #controls {
       position: fixed;
       top: 12px;
@@ -14,8 +14,8 @@
       z-index: 999;
     }
     #spawnBtn {
-      font-size: 18px;           /* a bit bigger */
-      padding: 12px 22px;       /* larger click area */
+      font-size: 18px;
+      padding: 12px 22px;
       border-radius: 8px;
       border: none;
       background: #1e90ff;
@@ -23,155 +23,138 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
-    #spawnBtn:active { transform: translateY(1px); }
-    canvas { display:block; }
-
-    /* Brick DOM overlay (visual only). pointer-events:none so canvas receives pointer input */
-    .brick {
-      position: absolute;
-      width: 100px;    /* smaller width */
-      height: 30px;    /* smaller height */
-      line-height: 30px;
-      text-align: center;
-      color: #fff;
-      background: linear-gradient(180deg,#7b2cff,#4a00d4);
-      border: 2px solid rgba(255,255,255,0.12);
-      border-radius: 4px;
-      font-weight: 700;
-      pointer-events: none;
-      transform-origin: center;
-      user-select: none;
+    #colorPicker {
+      position: fixed;
+      display: none;
+      z-index: 1000;
     }
+    canvas { display:block; touch-action:manipulation; }
   </style>
 </head>
 <body>
-
   <div id="controls">
     <button id="spawnBtn">Spawn Brick</button>
+    <input type="color" id="colorPicker" />
   </div>
-
   <canvas id="world"></canvas>
 
 <script>
-  // Matter.js aliases
-  const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Events } = Matter;
+const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Events } = Matter;
 
-  // Create engine & world
-  const engine = Engine.create();
-  const world = engine.world;
+const engine = Engine.create();
+const world = engine.world;
 
-  // Renderer (full-window)
-  const canvas = document.getElementById('world');
-  function setCanvasSize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+const canvas = document.getElementById('world');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const render = Render.create({
+  canvas: canvas,
+  engine: engine,
+  options: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    background: '#111',
+    wireframes: false
   }
-  setCanvasSize();
+});
+Render.run(render);
 
-  const render = Render.create({
-    canvas: canvas,
-    engine: engine,
-    options: {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      wireframes: false,
-      background: '#111'
+const runner = Runner.create();
+Runner.run(runner, engine);
+
+const thickness = 200;
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
+const walls = [
+  Bodies.rectangle(W()/2, -thickness/2, W(), thickness, { isStatic: true }),
+  Bodies.rectangle(W()/2, H()+thickness/2, W(), thickness, { isStatic: true }),
+  Bodies.rectangle(-thickness/2, H()/2, thickness, H(), { isStatic: true }),
+  Bodies.rectangle(W()+thickness/2, H()/2, thickness, H(), { isStatic: true })
+];
+World.add(world, walls);
+
+const BRICK_W = 100, BRICK_H = 30;
+let bricks = [];
+
+function spawnBrick(x){
+  const startX = x || BRICK_W/2 + Math.random() * (W() - BRICK_W);
+  const startY = 60;
+  const color = "#7b2cff";
+  const body = Bodies.rectangle(startX, startY, BRICK_W, BRICK_H, {
+    restitution: 0.15,
+    friction: 0.6,
+    density: 0.002,
+    render: {
+      fillStyle: color
     }
   });
-  Render.run(render);
+  World.add(world, body);
+  bricks.push(body);
+}
+spawnBrick(W()/2);
 
-  // Runner
-  const runner = Runner.create();
-  Runner.run(runner, engine);
+document.getElementById('spawnBtn').addEventListener('click', () => spawnBrick());
 
-  // Simple screen-edge walls (so bricks don't escape)
-  const thickness = 200;
-  const W = () => window.innerWidth;
-  const H = () => window.innerHeight;
-  const topWall    = Bodies.rectangle(W()/2, -thickness/2, W(), thickness, { isStatic: true });
-  const bottomWall = Bodies.rectangle(W()/2, H()+thickness/2, W(), thickness, { isStatic: true });
-  const leftWall   = Bodies.rectangle(-thickness/2, H()/2, thickness, H(), { isStatic: true });
-  const rightWall  = Bodies.rectangle(W()+thickness/2, H()/2, thickness, H(), { isStatic: true });
-  World.add(world, [topWall, bottomWall, leftWall, rightWall]);
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+  constraint: { stiffness: 0.2, render: { visible: false } }
+});
+World.add(world, mouseConstraint);
+render.mouse = mouse;
 
-  // Brick size (smaller)
-  const BRICK_W = 100;
-  const BRICK_H = 30;
+// Long press detection
+let pressTimer = null;
+let selectedBrick = null;
+const colorPicker = document.getElementById('colorPicker');
 
-  // Keep track of bricks
-  const bricks = [];
-
-  function spawnBrick(x){
-    const startX = (typeof x === 'number') ? x : (BRICK_W/2 + Math.random() * (window.innerWidth - BRICK_W));
-    const startY = 60;
-
-    const body = Bodies.rectangle(startX, startY, BRICK_W, BRICK_H, {
-      restitution: 0.15,
-      friction: 0.6,
-      density: 0.002
-    });
-    World.add(world, body);
-
-    const el = document.createElement('div');
-    el.className = 'brick';
-    el.textContent = 'BRICK';
-    // Size via style (keeps DOM and physics sizes consistent)
-    el.style.width  = BRICK_W + 'px';
-    el.style.height = BRICK_H + 'px';
-    document.body.appendChild(el);
-
-    bricks.push({ body, el });
+Events.on(mouseConstraint, "mousedown", e => {
+  if (e.body && bricks.includes(e.body)) {
+    selectedBrick = e.body;
+    pressTimer = setTimeout(() => {
+      // Show color picker at mouse pos
+      colorPicker.style.left = mouse.position.x + "px";
+      colorPicker.style.top = mouse.position.y + "px";
+      colorPicker.style.display = "block";
+      colorPicker.value = rgbToHex(selectedBrick.render.fillStyle || "#7b2cff");
+      colorPicker.click();
+    }, 2000); // 2 sec hold
   }
+});
 
-  // Spawn an initial brick
-  spawnBrick(window.innerWidth/2);
+Events.on(mouseConstraint, "mouseup", () => {
+  clearTimeout(pressTimer);
+});
 
-  // Big spawn button
-  document.getElementById('spawnBtn').addEventListener('click', () => {
-    spawnBrick();
-  });
+colorPicker.addEventListener("input", () => {
+  if (selectedBrick) {
+    selectedBrick.render.fillStyle = colorPicker.value;
+    colorPicker.style.display = "none";
+  }
+});
 
-  // Mouse/touch dragging (works with pointer events on canvas)
-  const mouse = Mouse.create(render.canvas);
-  const mouseConstraint = MouseConstraint.create(engine, {
-    mouse: mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } }
-  });
-  World.add(world, mouseConstraint);
-  render.mouse = mouse;
+// Helper to convert rgb() to hex
+function rgbToHex(rgb){
+  if (!rgb) return "#7b2cff";
+  if (rgb.startsWith("#")) return rgb;
+  const result = rgb.match(/\d+/g);
+  if (!result) return "#7b2cff";
+  return "#" + result.slice(0,3).map(x=>{
+    const hex = parseInt(x).toString(16);
+    return hex.length === 1 ? "0"+hex : hex;
+  }).join("");
+}
 
-  // Sync DOM overlay to physics bodies
-  Events.on(engine, 'afterUpdate', () => {
-    for (let i = 0; i < bricks.length; i++){
-      const b = bricks[i];
-      const pos = b.body.position;
-      const angle = b.body.angle;
-      // Apply position (DOM left/top in screen coords)
-      b.el.style.left = (pos.x - BRICK_W/2) + 'px';
-      b.el.style.top  = (pos.y - BRICK_H/2) + 'px';
-      b.el.style.transform = `rotate(${angle}rad)`;
-    }
-  });
-
-  // Prevent double-click zoom / selection
-  window.addEventListener('dblclick', e => e.preventDefault());
-
-  // Keep canvas & walls sized on resize
-  window.addEventListener('resize', () => {
-    setCanvasSize();
-    render.bounds.max.x = window.innerWidth;
-    render.bounds.max.y = window.innerHeight;
-    render.options.width = window.innerWidth;
-    render.options.height = window.innerHeight;
-    render.canvas.width = window.innerWidth;
-    render.canvas.height = window.innerHeight;
-
-    // Move walls to match new viewport
-    Matter.Body.setPosition(topWall,    { x: window.innerWidth/2, y: -thickness/2 });
-    Matter.Body.setPosition(bottomWall, { x: window.innerWidth/2, y: window.innerHeight + thickness/2 });
-    Matter.Body.setPosition(leftWall,   { x: -thickness/2, y: window.innerHeight/2 });
-    Matter.Body.setPosition(rightWall,  { x: window.innerWidth + thickness/2, y: window.innerHeight/2 });
-  });
+// Resize canvas + walls
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  Matter.Body.setPosition(walls[0], { x: W()/2, y: -thickness/2 });
+  Matter.Body.setPosition(walls[1], { x: W()/2, y: H()+thickness/2 });
+  Matter.Body.setPosition(walls[2], { x: -thickness/2, y: H()/2 });
+  Matter.Body.setPosition(walls[3], { x: W()+thickness/2, y: H()/2 });
+});
 </script>
 </body>
 </html>
