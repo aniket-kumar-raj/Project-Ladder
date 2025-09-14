@@ -87,18 +87,38 @@
   </style>
 </head>
 <body>
-  <div id="banner-ad">
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '33c6e05f0ae701783ecead35e54f3b14',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 350,
-        'params' : {}
-      };
-    </script>
-    <script type="text/javascript" src="//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js"></script>
-  </div>
+<div id="banner-ad"></div>
+<script>
+function loadAd() {
+  const adDiv = document.getElementById('banner-ad');
+  adDiv.innerHTML = ""; // Remove previous ad
+
+  // Insert atOptions config as a script
+  const configScript = document.createElement('script');
+  configScript.type = "text/javascript";
+  configScript.text = `
+    atOptions = {
+      'key' : '33c6e05f0ae701783ecead35e54f3b14',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 350,
+      'params' : {}
+    };
+  `;
+  adDiv.appendChild(configScript);
+
+  // Insert the ad loader script
+  const adScript = document.createElement('script');
+  adScript.type = "text/javascript";
+  adScript.src = "//www.highperformanceformat.com/33c6e05f0ae701783ecead35e54f3b14/invoke.js";
+  adDiv.appendChild(adScript);
+}
+
+// Load ad initially
+loadAd();
+// Reload every 4 seconds (4000ms)
+setInterval(loadAd, 4000);
+</script>
   <div id="controls">
     <button id="spawnRect">Spawn Brick</button>
     <button id="spawnCircle">Spawn Circle</button>
