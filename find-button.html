@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Draggable Physics Bricks</title>
+<title>Big Stage Bricks</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <style>
   body {
@@ -10,9 +10,9 @@
     overflow: hidden;
     background: #e0e0e0;
     font-family: sans-serif;
-    -webkit-user-select: none; /* prevent accidental text selection */
+    -webkit-user-select: none;
     user-select: none;
-    touch-action: manipulation; /* stops double-tap zoom on mobile */
+    touch-action: manipulation; /* stop double-tap zoom */
   }
   .brick {
     position: absolute;
@@ -24,7 +24,7 @@
     line-height: 50px;
     font-weight: bold;
     color: #333;
-    pointer-events: none; /* let physics take care of it */
+    pointer-events: none;
   }
   button {
     position: fixed;
@@ -48,6 +48,10 @@ const engine = Engine.create();
 engine.gravity.y = 1;
 const world = engine.world;
 
+// Big stage size
+const STAGE_WIDTH = 3000;
+const STAGE_HEIGHT = 2000;
+
 const render = Render.create({
     element: document.body,
     engine: engine,
@@ -55,7 +59,7 @@ const render = Render.create({
       width: window.innerWidth, 
       height: window.innerHeight, 
       wireframes: false, 
-      background: 'transparent' 
+      background: '#e0e0e0' 
     }
 });
 
@@ -63,23 +67,26 @@ Render.run(render);
 const runner = Runner.create();
 Runner.run(runner, engine);
 
-// Ground
-const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight-10, window.innerWidth, 20, { isStatic: true });
-World.add(world, [ground]);
+// Stage boundaries (walls)
+const walls = [
+  Bodies.rectangle(STAGE_WIDTH/2, 0, STAGE_WIDTH, 20, { isStatic: true }), // top
+  Bodies.rectangle(STAGE_WIDTH/2, STAGE_HEIGHT, STAGE_WIDTH, 20, { isStatic: true }), // bottom
+  Bodies.rectangle(0, STAGE_HEIGHT/2, 20, STAGE_HEIGHT, { isStatic: true }), // left
+  Bodies.rectangle(STAGE_WIDTH, STAGE_HEIGHT/2, 20, STAGE_HEIGHT, { isStatic: true }) // right
+];
+World.add(world, walls);
 
 // Brick list
 let bricks = [];
 
 // Function to spawn a brick
 function spawnBrick() {
-    const x = Math.random() * (window.innerWidth - 150) + 75;
-    const y = 50;
+    const x = Math.random() * (STAGE_WIDTH - 200) + 100;
+    const y = 100;
 
-    // Create physics body
     const brickBody = Bodies.rectangle(x, y, 150, 50, { restitution: 0.1, friction: 0.6 });
     World.add(world, brickBody);
 
-    // Create DOM element
     const brickEl = document.createElement('div');
     brickEl.className = 'brick';
     brickEl.textContent = "BRICK";
@@ -91,10 +98,10 @@ function spawnBrick() {
 // Spawn initial brick
 spawnBrick();
 
-// Button to spawn more bricks
+// Button to spawn more
 document.getElementById('spawnBtn').addEventListener('click', spawnBrick);
 
-// Mouse control for dragging
+// Mouse control for dragging bricks
 const mouse = Mouse.create(render.canvas);
 const mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
@@ -102,14 +109,39 @@ const mouseConstraint = MouseConstraint.create(engine, {
 });
 World.add(world, mouseConstraint);
 
-// Prevent double-tap zoom on mobile
+// Prevent double-tap zoom
 document.addEventListener('dblclick', e => e.preventDefault());
 
-// Update DOM positions based on physics
+// Camera panning
+let offsetX = 0, offsetY = 0;
+let isPanning = false, startX, startY;
+
+render.canvas.addEventListener('mousedown', e => {
+    if (!mouseConstraint.mouse.button) { // right/middle click pan only
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+    }
+});
+window.addEventListener('mouseup', () => { isPanning = false; });
+window.addEventListener('mousemove', e => {
+    if (isPanning) {
+        offsetX += (e.clientX - startX);
+        offsetY += (e.clientY - startY);
+        startX = e.clientX;
+        startY = e.clientY;
+        Render.lookAt(render, {
+            min: { x: -offsetX, y: -offsetY },
+            max: { x: -offsetX + window.innerWidth, y: -offsetY + window.innerHeight }
+        });
+    }
+});
+
+// Update brick DOM positions
 Events.on(engine, 'afterUpdate', () => {
     bricks.forEach(b => {
-        b.el.style.left = b.body.position.x - 75 + 'px';
-        b.el.style.top = b.body.position.y - 25 + 'px';
+        b.el.style.left = b.body.position.x - 75 - offsetX + 'px';
+        b.el.style.top = b.body.position.y - 25 - offsetY + 'px';
         b.el.style.transform = `rotate(${b.body.angle}rad)`;
     });
 });
