@@ -12,6 +12,14 @@
       -webkit-user-select:none; user-select:none;
       touch-action:manipulation; /* disable double-tap zoom globally */
     }
+    @keyframes bgshift {
+  0% { background: #111; }
+  50% { background: #333; }
+  100% { background: #111; }
+}
+body {
+  animation: bgshift 6s infinite alternate;
+}
     #controls {
       position: fixed;
       top: 12px; left: 12px;
