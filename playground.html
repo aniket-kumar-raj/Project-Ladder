@@ -50,6 +50,23 @@
   <canvas id="world"></canvas>
 
 <script>
+let vy = 2;
+function gravity() {
+  const brick = document.getElementById("brick");
+  let top = parseInt(brick.style.top || 0);
+
+  top += vy;
+  if (top + brick.offsetHeight > window.innerHeight - 70) {
+    top = window.innerHeight - brick.offsetHeight - 70;
+    vy = -vy * 0.7; // bounce with energy loss
+  } else {
+    vy += 0.5; // gravity pull
+  }
+
+  brick.style.top = top + "px";
+  requestAnimationFrame(gravity);
+}
+gravity();
 const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Vertices, Events } = Matter;
 
 const engine = Engine.create();
