@@ -1,210 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>Shapes Playground</title>
-  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Ad Window</title>
   <style>
-    html,body {
-      height:100%; margin:0; background:#111;
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-      -webkit-user-select:none; user-select:none;
-      touch-action:manipulation; /* disable double-tap zoom globally */
-    }
-    @keyframes bgshift {
-  0% { background: #111; }
-  50% { background: #333; }
-  100% { background: #111; }
-}
-body {
-  animation: bgshift 6s infinite alternate;
-}
-    #controls {
-      position: fixed;
-      top: 12px; left: 12px;
-      z-index: 999;
-      display: flex;
-      gap: 8px;
-    }
-    button {
-      font-size: 16px;
-      padding: 12px 18px;
-      border-radius: 8px;
-      border: none;
-      background: #1e90ff;
+    body {
+      background: #111;
+      margin: 0;
+      font-family: sans-serif;
       color: white;
+    }
+
+    #adWindow {
+      width: 250px;
+      height: 150px;
+      background: #222;
+      border: 2px solid #555;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      overflow: hidden;
+    }
+
+    #titleBar {
+      background: #333;
+      padding: 5px;
+      cursor: move;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #closeBtn {
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      touch-action:manipulation; /* prevent zoom on double-tap */
+      color: red;
+      font-weight: bold;
     }
-    button:active { transform: translateY(1px); }
-    #colorPicker {
+
+    #modeBtn {
       position: fixed;
-      display: none;
-      z-index: 1000;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 15px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
     }
-    canvas { display:block; }
+
+    #modeBtn:hover {
+      background: #666;
+    }
+
+    /* fun shake animation */
+    @keyframes crazyShake {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      20%  { transform: translate(-10px, -5px) rotate(-3deg); }
+      40%  { transform: translate(10px, 5px) rotate(3deg); }
+      60%  { transform: translate(-8px, 5px) rotate(-2deg); }
+      80%  { transform: translate(8px, -5px) rotate(2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
   </style>
 </head>
 <body>
-  <button id="toggleMode">Shake Mode</button>
 
-<script>
-let isShakeMode = false;
-
-const toggleBtn = document.getElementById('toggleMode');
-toggleBtn.addEventListener('click', () => {
-  isShakeMode = !isShakeMode;
-  toggleBtn.textContent = isShakeMode ? "Drag Mode" : "Shake Mode";
-
-  // Enable/disable dragging
-  mouseConstraint.constraint.stiffness = isShakeMode ? 0 : 0.2;
-});
-
-// Apply phone motion when in shake mode
-if (window.DeviceMotionEvent) {
-  window.addEventListener("devicemotion", (event) => {
-    if (!isShakeMode) return;
-    let ax = event.accelerationIncludingGravity.x || 0;
-    let ay = event.accelerationIncludingGravity.y || 0;
-
-    // Scale values to force
-    const forceScale = 0.0005;
-    shapes.forEach(body => {
-      Matter.Body.applyForce(body, body.position, {
-        x: ax * forceScale,
-        y: -ay * forceScale
-      });
-    });
-  });
-}
-</script>
-  <div id="controls">
-    <button id="spawnBrick">Brick</button>
-    <button id="spawnSquare">Square</button>
-    <button id="spawnCircle">Circle</button>
-    <button id="spawnTriangle">Triangle</button>
-    <input type="color" id="colorPicker" />
+<div id="adWindow">
+  <div id="titleBar">
+    Ad Window
+    <span id="closeBtn">✖</span>
   </div>
-  <canvas id="world"></canvas>
+  <div style="padding:10px;">
+    Your Ad Content Here!
+  </div>
+</div>
+
+<button id="modeBtn">Switch to Shake Mode</button>
 
 <script>
-const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Vertices, Events } = Matter;
+  const adWindow = document.getElementById("adWindow");
+  const titleBar = document.getElementById("titleBar");
+  const closeBtn = document.getElementById("closeBtn");
+  const modeBtn = document.getElementById("modeBtn");
 
-const engine = Engine.create();
-const world = engine.world;
+  let dragMode = true;
+  let isDragging = false;
+  let offsetX, offsetY;
 
-const canvas = document.getElementById('world');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  // --- DRAG MODE ---
+  titleBar.addEventListener("mousedown", (e) => {
+    if (!dragMode) return;
+    isDragging = true;
+    offsetX = e.clientX - adWindow.offsetLeft;
+    offsetY = e.clientY - adWindow.offsetTop;
+  });
 
-const render = Render.create({
-  canvas,
-  engine,
-  options: {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    background: '#111',
-    wireframes: false
-  }
-});
-Render.run(render);
-Runner.run(Runner.create(), engine);
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging && dragMode) {
+      adWindow.style.left = (e.clientX - offsetX) + "px";
+      adWindow.style.top = (e.clientY - offsetY) + "px";
+    }
+  });
 
-// Walls
-const thickness = 200;
-function W(){ return window.innerWidth; }
-function H(){ return window.innerHeight; }
-World.add(world, [
-  Bodies.rectangle(W()/2, -thickness/2, W(), thickness, { isStatic: true }),
-  Bodies.rectangle(W()/2, H()+thickness/2, W(), thickness, { isStatic: true }),
-  Bodies.rectangle(-thickness/2, H()/2, thickness, H(), { isStatic: true }),
-  Bodies.rectangle(W()+thickness/2, H()/2, thickness, H(), { isStatic: true })
-]);
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
 
-// Shapes
-let shapes = [];
+  // --- SWITCH MODES ---
+  modeBtn.addEventListener("click", () => {
+    dragMode = !dragMode;
+    if (dragMode) {
+      modeBtn.textContent = "Switch to Shake Mode";
+      adWindow.style.animation = "none";
+    } else {
+      modeBtn.textContent = "Switch to Drag Mode";
+      adWindow.style.animation = "crazyShake 0.4s infinite";
+    }
+  });
 
-function spawnBrick(x){
-  const body = Bodies.rectangle(x||randX(), 60, 100, 30, baseOptions());
-  World.add(world, body); shapes.push(body);
-}
-function spawnSquare(x){
-  const body = Bodies.rectangle(x||randX(), 60, 60, 60, baseOptions());
-  World.add(world, body); shapes.push(body);
-}
-function spawnCircle(x){
-  const body = Bodies.circle(x||randX(), 60, 35, baseOptions());
-  World.add(world, body); shapes.push(body);
-}
-function spawnTriangle(x){
-  const verts = Vertices.fromPath("0 0 40 80 -40 80");
-  const body = Bodies.fromVertices(x||randX(), 60, verts, baseOptions(), true);
-  World.add(world, body); shapes.push(body);
-}
-function baseOptions(){
-  return {
-    restitution:0.15, friction:0.6, density:0.002,
-    render:{ fillStyle: randomColor() }
-  };
-}
-function randX(){ return 100 + Math.random()*(W()-200); }
-function randomColor(){
-  const colors = ["#ff4757","#1e90ff","#2ed573","#ffa502","#7b2cff"];
-  return colors[Math.floor(Math.random()*colors.length)];
-}
-
-// Spawn buttons
-document.getElementById('spawnBrick').addEventListener('click', ()=>spawnBrick());
-document.getElementById('spawnSquare').addEventListener('click', ()=>spawnSquare());
-document.getElementById('spawnCircle').addEventListener('click', ()=>spawnCircle());
-document.getElementById('spawnTriangle').addEventListener('click', ()=>spawnTriangle());
-
-// Mouse constraint for dragging
-const mouse = Mouse.create(render.canvas);
-const mouseConstraint = MouseConstraint.create(engine, {
-  mouse,
-  constraint:{ stiffness:0.2, render:{visible:false} }
-});
-World.add(world, mouseConstraint);
-render.mouse = mouse;
-
-// Long press → color picker
-let pressTimer=null, selected=null;
-const colorPicker=document.getElementById('colorPicker');
-
-Events.on(mouseConstraint,"mousedown", e=>{
-  if (e.body && shapes.includes(e.body)){
-    selected=e.body;
-    pressTimer=setTimeout(()=>{
-      colorPicker.style.left=mouse.position.x+"px";
-      colorPicker.style.top=mouse.position.y+"px";
-      colorPicker.style.display="block";
-      colorPicker.value=rgbToHex(selected.render.fillStyle||"#7b2cff");
-      colorPicker.click();
-    },2000);
-  }
-});
-Events.on(mouseConstraint,"mouseup",()=>clearTimeout(pressTimer));
-colorPicker.addEventListener("input",()=>{
-  if(selected){ selected.render.fillStyle=colorPicker.value; colorPicker.style.display="none"; }
-});
-
-function rgbToHex(rgb){
-  if(!rgb) return "#7b2cff";
-  if(rgb.startsWith("#")) return rgb;
-  const m=rgb.match(/\d+/g); if(!m) return "#7b2cff";
-  return "#"+m.slice(0,3).map(x=>{
-    const hex=parseInt(x).toString(16);
-    return hex.length===1?"0"+hex:hex;
-  }).join("");
-}
-
-// Resize
-window.addEventListener('resize',()=>{
-  canvas.width=W(); canvas.height=H();
-});
+  // --- CLOSE BUTTON ---
+  closeBtn.addEventListener("click", () => {
+    adWindow.style.display = "none";
+  });
 </script>
+
 </body>
 </html>
