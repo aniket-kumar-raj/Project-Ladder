@@ -3,43 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>Bricks Playground</title>
+  <title>Shapes Playground</title>
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
   <style>
-    html,body { height:100%; margin:0; background:#111; font-family:system-ui,Segoe UI,Roboto,Arial; }
+    html,body {
+      height:100%; margin:0; background:#111;
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+      -webkit-user-select:none; user-select:none;
+      touch-action:manipulation; /* disable double-tap zoom globally */
+    }
     #controls {
       position: fixed;
-      top: 12px;
-      left: 12px;
+      top: 12px; left: 12px;
       z-index: 999;
+      display: flex;
+      gap: 8px;
     }
-    #spawnBtn {
-      font-size: 18px;
-      padding: 12px 22px;
+    button {
+      font-size: 16px;
+      padding: 12px 18px;
       border-radius: 8px;
       border: none;
       background: #1e90ff;
       color: white;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      touch-action:manipulation; /* prevent zoom on double-tap */
     }
+    button:active { transform: translateY(1px); }
     #colorPicker {
       position: fixed;
       display: none;
       z-index: 1000;
     }
-    canvas { display:block; touch-action:manipulation; }
+    canvas { display:block; }
   </style>
 </head>
 <body>
   <div id="controls">
-    <button id="spawnBtn">Spawn Brick</button>
+    <button id="spawnBrick">Brick</button>
+    <button id="spawnSquare">Square</button>
+    <button id="spawnCircle">Circle</button>
+    <button id="spawnTriangle">Triangle</button>
     <input type="color" id="colorPicker" />
   </div>
   <canvas id="world"></canvas>
 
 <script>
-const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Events } = Matter;
+const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Vertices, Events } = Matter;
 
 const engine = Engine.create();
 const world = engine.world;
@@ -49,8 +60,8 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const render = Render.create({
-  canvas: canvas,
-  engine: engine,
+  canvas,
+  engine,
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -59,101 +70,100 @@ const render = Render.create({
   }
 });
 Render.run(render);
+Runner.run(Runner.create(), engine);
 
-const runner = Runner.create();
-Runner.run(runner, engine);
-
+// Walls
 const thickness = 200;
-const W = () => window.innerWidth;
-const H = () => window.innerHeight;
-const walls = [
+function W(){ return window.innerWidth; }
+function H(){ return window.innerHeight; }
+World.add(world, [
   Bodies.rectangle(W()/2, -thickness/2, W(), thickness, { isStatic: true }),
   Bodies.rectangle(W()/2, H()+thickness/2, W(), thickness, { isStatic: true }),
   Bodies.rectangle(-thickness/2, H()/2, thickness, H(), { isStatic: true }),
   Bodies.rectangle(W()+thickness/2, H()/2, thickness, H(), { isStatic: true })
-];
-World.add(world, walls);
+]);
 
-const BRICK_W = 100, BRICK_H = 30;
-let bricks = [];
+// Shapes
+let shapes = [];
 
 function spawnBrick(x){
-  const startX = x || BRICK_W/2 + Math.random() * (W() - BRICK_W);
-  const startY = 60;
-  const color = "#7b2cff";
-  const body = Bodies.rectangle(startX, startY, BRICK_W, BRICK_H, {
-    restitution: 0.15,
-    friction: 0.6,
-    density: 0.002,
-    render: {
-      fillStyle: color
-    }
-  });
-  World.add(world, body);
-  bricks.push(body);
+  const body = Bodies.rectangle(x||randX(), 60, 100, 30, baseOptions());
+  World.add(world, body); shapes.push(body);
 }
-spawnBrick(W()/2);
+function spawnSquare(x){
+  const body = Bodies.rectangle(x||randX(), 60, 60, 60, baseOptions());
+  World.add(world, body); shapes.push(body);
+}
+function spawnCircle(x){
+  const body = Bodies.circle(x||randX(), 60, 35, baseOptions());
+  World.add(world, body); shapes.push(body);
+}
+function spawnTriangle(x){
+  const verts = Vertices.fromPath("0 0 40 80 -40 80");
+  const body = Bodies.fromVertices(x||randX(), 60, verts, baseOptions(), true);
+  World.add(world, body); shapes.push(body);
+}
+function baseOptions(){
+  return {
+    restitution:0.15, friction:0.6, density:0.002,
+    render:{ fillStyle: randomColor() }
+  };
+}
+function randX(){ return 100 + Math.random()*(W()-200); }
+function randomColor(){
+  const colors = ["#ff4757","#1e90ff","#2ed573","#ffa502","#7b2cff"];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
 
-document.getElementById('spawnBtn').addEventListener('click', () => spawnBrick());
+// Spawn buttons
+document.getElementById('spawnBrick').addEventListener('click', ()=>spawnBrick());
+document.getElementById('spawnSquare').addEventListener('click', ()=>spawnSquare());
+document.getElementById('spawnCircle').addEventListener('click', ()=>spawnCircle());
+document.getElementById('spawnTriangle').addEventListener('click', ()=>spawnTriangle());
 
+// Mouse constraint for dragging
 const mouse = Mouse.create(render.canvas);
 const mouseConstraint = MouseConstraint.create(engine, {
-  mouse: mouse,
-  constraint: { stiffness: 0.2, render: { visible: false } }
+  mouse,
+  constraint:{ stiffness:0.2, render:{visible:false} }
 });
 World.add(world, mouseConstraint);
 render.mouse = mouse;
 
-// Long press detection
-let pressTimer = null;
-let selectedBrick = null;
-const colorPicker = document.getElementById('colorPicker');
+// Long press → color picker
+let pressTimer=null, selected=null;
+const colorPicker=document.getElementById('colorPicker');
 
-Events.on(mouseConstraint, "mousedown", e => {
-  if (e.body && bricks.includes(e.body)) {
-    selectedBrick = e.body;
-    pressTimer = setTimeout(() => {
-      // Show color picker at mouse pos
-      colorPicker.style.left = mouse.position.x + "px";
-      colorPicker.style.top = mouse.position.y + "px";
-      colorPicker.style.display = "block";
-      colorPicker.value = rgbToHex(selectedBrick.render.fillStyle || "#7b2cff");
+Events.on(mouseConstraint,"mousedown", e=>{
+  if (e.body && shapes.includes(e.body)){
+    selected=e.body;
+    pressTimer=setTimeout(()=>{
+      colorPicker.style.left=mouse.position.x+"px";
+      colorPicker.style.top=mouse.position.y+"px";
+      colorPicker.style.display="block";
+      colorPicker.value=rgbToHex(selected.render.fillStyle||"#7b2cff");
       colorPicker.click();
-    }, 2000); // 2 sec hold
+    },2000);
   }
 });
-
-Events.on(mouseConstraint, "mouseup", () => {
-  clearTimeout(pressTimer);
+Events.on(mouseConstraint,"mouseup",()=>clearTimeout(pressTimer));
+colorPicker.addEventListener("input",()=>{
+  if(selected){ selected.render.fillStyle=colorPicker.value; colorPicker.style.display="none"; }
 });
 
-colorPicker.addEventListener("input", () => {
-  if (selectedBrick) {
-    selectedBrick.render.fillStyle = colorPicker.value;
-    colorPicker.style.display = "none";
-  }
-});
-
-// Helper to convert rgb() to hex
 function rgbToHex(rgb){
-  if (!rgb) return "#7b2cff";
-  if (rgb.startsWith("#")) return rgb;
-  const result = rgb.match(/\d+/g);
-  if (!result) return "#7b2cff";
-  return "#" + result.slice(0,3).map(x=>{
-    const hex = parseInt(x).toString(16);
-    return hex.length === 1 ? "0"+hex : hex;
+  if(!rgb) return "#7b2cff";
+  if(rgb.startsWith("#")) return rgb;
+  const m=rgb.match(/\d+/g); if(!m) return "#7b2cff";
+  return "#"+m.slice(0,3).map(x=>{
+    const hex=parseInt(x).toString(16);
+    return hex.length===1?"0"+hex:hex;
   }).join("");
 }
 
-// Resize canvas + walls
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  Matter.Body.setPosition(walls[0], { x: W()/2, y: -thickness/2 });
-  Matter.Body.setPosition(walls[1], { x: W()/2, y: H()+thickness/2 });
-  Matter.Body.setPosition(walls[2], { x: -thickness/2, y: H()/2 });
-  Matter.Body.setPosition(walls[3], { x: W()+thickness/2, y: H()/2 });
+// Resize
+window.addEventListener('resize',()=>{
+  canvas.width=W(); canvas.height=H();
 });
 </script>
 </body>
