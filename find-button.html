@@ -1,151 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Big Stage Bricks</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-<style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: #e0e0e0;
-    font-family: sans-serif;
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: manipulation; /* stop double-tap zoom */
-  }
-  .brick {
-    position: absolute;
-    width: 150px;
-    height: 50px;
-    border: 2px solid #333;
-    background: #fff;
-    text-align: center;
-    line-height: 50px;
-    font-weight: bold;
-    color: #333;
-    pointer-events: none;
-  }
-  button {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 999;
-    padding: 10px 15px;
-    font-size: 16px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Brick Physics Ads</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      font-family: sans-serif;
+      user-select: none;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .brick {
+      position: absolute;
+      width: 150px;
+      height: 50px;
+      background: #444;
+      border: 2px solid #888;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
+  <div id="controls">
+    <button id="spawnBtn">Spawn Brick</button>
+  </div>
 
-<button id="spawnBtn">Spawn Brick</button>
+  <canvas id="world"></canvas>
 
-<script>
-const { Engine, Render, Runner, Bodies, World, Events, Mouse, MouseConstraint } = Matter;
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script>
+    const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Events } = Matter;
 
-// Physics engine
-const engine = Engine.create();
-engine.gravity.y = 1;
-const world = engine.world;
+    // Engine + World
+    const engine = Engine.create();
+    const world = engine.world;
 
-// Big stage size
-const STAGE_WIDTH = 3000;
-const STAGE_HEIGHT = 2000;
+    // Stage size
+    const stageWidth = window.innerWidth * 2;
+    const stageHeight = window.innerHeight * 2;
 
-const render = Render.create({
-    element: document.body,
-    engine: engine,
-    options: { 
-      width: window.innerWidth, 
-      height: window.innerHeight, 
-      wireframes: false, 
-      background: '#e0e0e0' 
-    }
-});
-
-Render.run(render);
-const runner = Runner.create();
-Runner.run(runner, engine);
-
-// Stage boundaries (walls)
-const walls = [
-  Bodies.rectangle(STAGE_WIDTH/2, 0, STAGE_WIDTH, 20, { isStatic: true }), // top
-  Bodies.rectangle(STAGE_WIDTH/2, STAGE_HEIGHT, STAGE_WIDTH, 20, { isStatic: true }), // bottom
-  Bodies.rectangle(0, STAGE_HEIGHT/2, 20, STAGE_HEIGHT, { isStatic: true }), // left
-  Bodies.rectangle(STAGE_WIDTH, STAGE_HEIGHT/2, 20, STAGE_HEIGHT, { isStatic: true }) // right
-];
-World.add(world, walls);
-
-// Brick list
-let bricks = [];
-
-// Function to spawn a brick
-function spawnBrick() {
-    const x = Math.random() * (STAGE_WIDTH - 200) + 100;
-    const y = 100;
-
-    const brickBody = Bodies.rectangle(x, y, 150, 50, { restitution: 0.1, friction: 0.6 });
-    World.add(world, brickBody);
-
-    const brickEl = document.createElement('div');
-    brickEl.className = 'brick';
-    brickEl.textContent = "BRICK";
-    document.body.appendChild(brickEl);
-
-    bricks.push({ body: brickBody, el: brickEl });
-}
-
-// Spawn initial brick
-spawnBrick();
-
-// Button to spawn more
-document.getElementById('spawnBtn').addEventListener('click', spawnBrick);
-
-// Mouse control for dragging bricks
-const mouse = Mouse.create(render.canvas);
-const mouseConstraint = MouseConstraint.create(engine, {
-    mouse: mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } }
-});
-World.add(world, mouseConstraint);
-
-// Prevent double-tap zoom
-document.addEventListener('dblclick', e => e.preventDefault());
-
-// Camera panning
-let offsetX = 0, offsetY = 0;
-let isPanning = false, startX, startY;
-
-render.canvas.addEventListener('mousedown', e => {
-    if (!mouseConstraint.mouse.button) { // right/middle click pan only
-        isPanning = true;
-        startX = e.clientX;
-        startY = e.clientY;
-    }
-});
-window.addEventListener('mouseup', () => { isPanning = false; });
-window.addEventListener('mousemove', e => {
-    if (isPanning) {
-        offsetX += (e.clientX - startX);
-        offsetY += (e.clientY - startY);
-        startX = e.clientX;
-        startY = e.clientY;
-        Render.lookAt(render, {
-            min: { x: -offsetX, y: -offsetY },
-            max: { x: -offsetX + window.innerWidth, y: -offsetY + window.innerHeight }
-        });
-    }
-});
-
-// Update brick DOM positions
-Events.on(engine, 'afterUpdate', () => {
-    bricks.forEach(b => {
-        b.el.style.left = b.body.position.x - 75 - offsetX + 'px';
-        b.el.style.top = b.body.position.y - 25 - offsetY + 'px';
-        b.el.style.transform = `rotate(${b.body.angle}rad)`;
+    // Renderer
+    const render = Render.create({
+      element: document.body,
+      engine: engine,
+      canvas: document.getElementById('world'),
+      options: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        background: '#111',
+        wireframes: false
+      }
     });
-});
-</script>
+    Render.run(render);
 
+    // Runner
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // Walls
+    const thickness = 100;
+    World.add(world, [
+      Bodies.rectangle(stageWidth/2, -thickness/2, stageWidth, thickness, { isStatic: true }), // top
+      Bodies.rectangle(stageWidth/2, stageHeight+thickness/2, stageWidth, thickness, { isStatic: true }), // bottom
+      Bodies.rectangle(-thickness/2, stageHeight/2, thickness, stageHeight, { isStatic: true }), // left
+      Bodies.rectangle(stageWidth+thickness/2, stageHeight/2, thickness, stageHeight, { isStatic: true }) // right
+    ]);
+
+    // Bricks array
+    const bricks = [];
+
+    function spawnBrick(x = 200, y = 100) {
+      const brickBody = Bodies.rectangle(x, y, 150, 50, { restitution: 0.2, friction: 0.8 });
+      const brickEl = document.createElement('div');
+      brickEl.className = 'brick';
+      brickEl.textContent = 'BRICK';
+      document.body.appendChild(brickEl);
+      World.add(world, brickBody);
+      bricks.push({ body: brickBody, el: brickEl });
+    }
+
+    // Spawn initial brick
+    spawnBrick();
+
+    // Spawn more on button click
+    document.getElementById('spawnBtn').addEventListener('click', () => {
+      spawnBrick(200 + Math.random() * 400, 100);
+    });
+
+    // Mouse control (dragging)
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse,
+      constraint: { stiffness: 0.2, render: { visible: false } }
+    });
+    World.add(world, mouseConstraint);
+    render.mouse = mouse;
+
+    // Sync DOM with physics
+    Events.on(engine, 'afterUpdate', () => {
+      bricks.forEach(b => {
+        b.el.style.left = b.body.position.x - 75 + 'px';
+        b.el.style.top = b.body.position.y - 25 + 'px';
+        b.el.style.transform = `rotate(${b.body.angle}rad)`;
+      });
+    });
+
+    // Prevent double-click zoom
+    window.addEventListener('dblclick', e => e.preventDefault());
+  </script>
 </body>
 </html>
