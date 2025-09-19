@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Projects Showcase</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+      background: #ffeaa7;
+      color: #2d3436;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .slider-container {
+      position: relative;
+      width: 90%;
+      max-width: 700px;   /* reduced max width */
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      background: #fff;
+    }
+
+    .slider-wrapper {
+      display: flex;
+      transition: transform 0.6s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+
+    .slide {
+      min-width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      background: #fff; /* keep background neutral */
+      padding: 10px;
+    }
+
+    .slide h2 {
+      margin: 10px 0;
+      font-size: 1.5em;
+      color: #2d3436;
+    }
+
+    .slide p {
+      font-size: 1em;
+      line-height: 1.4;
+      margin: 10px 0 0;
+      color: #555;
+    }
+
+    .slide a img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      display: block;
+    }
+
+    .slide a img:hover {
+      transform: scale(1.05);
+    }
+
+    .controls {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .btn {
+      background: #ffeaa7;
+      border: 2px solid #2d3436;
+      color: #2d3436;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+      pointer-events: all;
+    }
+
+    .btn:hover {
+      background: #fdcb6e;
+      transform: scale(1.15);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="slider-container">
+    <div class="slider-wrapper" id="slider">
+      <div class="slide">
+        <h2>Project 1 🎮</h2>
+        <a href="https://aniketxraj.me/rage-quiter.html" target="_blank">
+          <img src="https://aniketxraj.me/RAGE.jpg" alt="Project 1 image">
+        </a>
+        <p>This is my first project. It's colorful, playful, and fun to explore!</p>
+      </div>
+      <div class="slide">
+        <h2>Project 2 🚀</h2>
+        <a href="https://aniketxraj.me/2048.html" target="_blank">
+          <img src="https://aniketxraj.me/banner.jpg" alt="Project 2 image">
+        </a>
+        <p>Blast off with this project—it's quirky and full of surprises!</p>
+      </div>
+      <div class="slide">
+        <h2>Project 3 🎨</h2>
+        <a href="https://example.com/project3" target="_blank">
+          <img src="https://via.placeholder.com/700x350/ffcc99/333" alt="Project 3 image">
+        </a>
+        <p>A creative project showcase. Fun borders, silly fonts, and bright vibes!</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="moveSlide(-1)">⟨</button>
+      <button class="btn" onclick="moveSlide(1)">⟩</button>
+    </div>
+  </div>
+
+  <script>
+    let index = 0;
+    const slider = document.getElementById('slider');
+    const totalSlides = document.querySelectorAll('.slide').length;
+
+    function moveSlide(direction) {
+      index += direction;
+      if (index < 0) index = totalSlides - 1;
+      if (index >= totalSlides) index = 0;
+      slider.style.transform = `translateX(${-index * 100}%)`;
+    }
+  </script>
+
+</body>
+</html>
