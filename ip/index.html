@@ -1,0 +1,131 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Check Your Public IPv4 Address Online | Fast & Free</title>
+  <meta name="description" content="Instantly find your public IPv4 address online. Free, secure, and accurate. Check your network's IPv4 now!" />
+  <meta name="keywords" content="public IPv4, check IP, my IP, IPv4 address, online IP checker, public IP, IP finder" />
+  <meta name="robots" content="index, follow" />  <style>
+    :root{font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:linear-gradient(135deg,#0f172a,#020617);color:#e6eef8;line-height:1.6;}
+    .card{width:min(720px,92vw);background:rgba(255,255,255,0.03);backdrop-filter:blur(6px);border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    h1{margin:0 0 12px;font-size:2rem}
+    h2{margin:18px 0 6px;font-size:1.3rem}
+    p.lead{margin:0 0 18px;color:#bcd4f0}
+    .ip{font-size:2.4rem;font-weight:700;letter-spacing:0.6px;margin:8px 0}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{background:rgba(255,255,255,0.04);padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-size:0.9rem}
+    .actions{margin-top:18px;display:flex;gap:8px}
+    button{background:#0ea5e9;border:none;padding:10px 12px;border-radius:8px;color:#012;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#d7eefc}
+    .hint{margin-top:14px;color:#98bfe6;font-size:0.9rem}
+    footer{margin-top:18px;color:#7fa8df;font-size:0.85rem}
+    .small{font-size:0.85rem;color:#9fbedf}
+    .error{color:#ffd2d2;background:rgba(255,210,210,0.06);padding:10px;border-radius:8px;margin-top:12px;border:1px solid rgba(255,150,150,0.06)}
+  </style></head>
+<body>
+  <main class="card" role="main">
+    <h1>Check Your Public IPv4 Address</h1>
+    <p class="lead">Instantly find your public IPv4 address online. This tool is free, secure, and works on any device with internet access.</p><section>
+  <div id="result">
+    <div class="ip" id="ip">—</div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div class="actions">
+    <button id="refresh">Refresh</button>
+    <button id="copy" class="ghost">Copy IP</button>
+    <button id="raw" class="ghost">Show raw JSON</button>
+  </div>
+
+  <div id="rawBox" style="display:none;margin-top:12px;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);font-family:monospace;white-space:pre-wrap;max-height:260px;overflow:auto"></div>
+  <div id="error" style="display:none" class="error"></div>
+</section>
+
+<h2>What is a Public IPv4 Address?</h2>
+<p>Your public IPv4 address is the address your device presents to the internet. It’s different from your local network IP and is used to communicate with websites, services, and servers globally.</p>
+
+<h2>Why Check Your Public IP?</h2>
+<ul>
+  <li>Ensure your network is functioning properly.</li>
+  <li>Verify VPN or proxy is working.</li>
+  <li>Debug network or connectivity issues.</li>
+  <li>Use it for secure remote access setups.</li>
+</ul>
+
+<p class="hint">APIs used: <span class="small">api.ipify.org → ifconfig.co → icanhazip.com</span></p>
+<footer>Note: This page detects your public IP (not your device's local IP). Requires internet access and reachable public APIs.</footer>
+
+  </main>  <script>
+    const ipv4Regex = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
+    const endpoints = [
+      { url: 'https://api.ipify.org?format=json', parse: r => r.ip },
+      { url: 'https://ifconfig.co/json', parse: r => r.ip },
+      { url: 'https://icanhazip.com/', parse: r => r.trim() }
+    ];
+
+    const ipEl = document.getElementById('ip');
+    const metaEl = document.getElementById('meta');
+    const errEl = document.getElementById('error');
+    const rawBox = document.getElementById('rawBox');
+
+    async function fetchWithTimeout(resource, options = {}){
+      const { timeout = 5000 } = options;
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try{
+        const res = await fetch(resource, {...options, signal: controller.signal});
+        clearTimeout(id);
+        return res;
+      }catch(e){
+        clearTimeout(id);
+        throw e;
+      }
+    }
+
+    async function getPublicIPv4(){
+      errEl.style.display = 'none';
+      rawBox.style.display = 'none';
+      rawBox.textContent = '';
+      metaEl.textContent = '';
+
+      for(const ep of endpoints){
+        try{
+          const res = await fetchWithTimeout(ep.url, { timeout: 6000, headers: { 'Accept': 'application/json, text/plain' } });
+          if(!res.ok) throw new Error('HTTP ' + res.status);
+          const contentType = res.headers.get('content-type') || '';
+          let body;
+          if(contentType.includes('application/json')){
+            body = await res.json();
+          }else{
+            body = await res.text();
+          }
+
+          const candidate = ep.parse(body);
+          let ipmatch = candidate.match(/(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}/);
+          let ip = ipmatch ? ipmatch[0] : candidate;
+          ip = ip.trim();
+
+          if(ipv4Regex.test(ip)){
+            ipEl.textContent = ip;
+            rawBox.textContent = JSON.stringify({source: ep.url, raw: body}, null, 2);
+            metaEl.innerHTML = '';
+            const s = document.createElement('div'); s.className='chip'; s.textContent = 'source: ' + ep.url.replace(/^https?:\/\//,''); metaEl.appendChild(s);
+            if(typeof body === 'object'){ if(body.city || body.region || body.country){ const loc = document.createElement('div'); loc.className='chip'; loc.textContent = (body.city?body.city+', ':'') + (body.region?body.region+', ':'') + (body.country?body.country:''); metaEl.appendChild(loc); } if(body.org){ const org = document.createElement('div'); org.className='chip'; org.textContent = body.org; metaEl.appendChild(org); } }
+            return;
+          }
+        }catch(err){ console.warn('failed', ep.url, err && err.name ? err.name : err); }
+      }
+      ipEl.textContent = 'Not found';
+      errEl.style.display='block';
+      errEl.textContent = 'Could not determine a public IPv4 address. Either you are offline, APIs blocked by CORS, or the network returns IPv6 only.';
+    }
+
+    document.getElementById('refresh').addEventListener('click', ()=>{ ipEl.textContent = '…'; getPublicIPv4(); });
+    document.getElementById('copy').addEventListener('click', ()=>{ const ip = ipEl.textContent; if(!ipv4Regex.test(ip)) return alert('No IPv4 to copy'); navigator.clipboard.writeText(ip).then(()=>{ alert('Copied: ' + ip); }).catch(()=>{ prompt('Copy this IP manually:', ip); }); });
+    document.getElementById('raw').addEventListener('click', ()=>{ rawBox.style.display = rawBox.style.display === 'none' ? 'block' : 'none'; });
+    (function init(){ ipEl.textContent = 'Checking…'; getPublicIPv4(); })();
+  </script></body>
+</html>
