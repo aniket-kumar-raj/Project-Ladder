@@ -1,0 +1,71 @@
+#include <Servo.h>
+
+int soilPin = A0;
+int buzzer = 13;
+int trigPin = 11;
+int echoPin = 12;
+long duration;
+float distance;
+
+// Notes for dangerous melodic alarm (Hz)
+int ominousNotes[] = {130, 146, 164};  // Low tones
+int alertNotes[] = {523, 587, 659};    // High tones
+
+Servo myServo;      // Create servo object
+
+void setup() {
+  pinMode(buzzer, OUTPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+
+  myServo.attach(10);   // Attach servo to pin 10
+  myServo.write(0);     // Start at 0 degrees
+}
+
+void loop() {
+  // Check for Serial commands
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();  // Remove whitespace/newline
+
+    if (cmd == "on") {
+      for (int pos = myServo.read(); pos <= 90; pos++) {
+        myServo.write(pos);
+        delay(15);
+      }
+    } 
+    else if (cmd == "off") {
+      for (int pos = myServo.read(); pos >= 0; pos--) {
+        myServo.write(pos);
+        delay(15);
+      }
+    }
+  }
+
+  // Ultrasonic sensor
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH, 30000);
+  distance = duration * 0.034 / 2;
+
+  // Soil sensor
+  int soilValue = analogRead(soilPin);
+
+  // **Combined Serial print**
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.print(" cm | Soil Moisture: ");
+  Serial.println(soilValue);
+
+  // Dangerous melodic buzzer
+  if (soilValue < 950) {
+    playDangerTune();
+  } else {
+    noTone(buzzer);
+  }
+}
