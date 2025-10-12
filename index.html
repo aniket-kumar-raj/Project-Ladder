@@ -7,6 +7,10 @@
 <style>
 /* Reset and base styles */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial;}
+html {
+  scroll-behavior:smooth;
+}
+
 body {
   background: linear-gradient(160deg, #f0f4f8, #d9e2ec);
   color:#222;
@@ -96,8 +100,20 @@ footer a:hover{text-decoration:underline;}
 </head>
 <body>
 
+<!-- HERO SECTION -->
+<section style="padding:100px 6%; text-align:center; border-radius:0; margin:0; background:linear-gradient(135deg,#0078d7,#00c6ff); color:#fff;">
+  <h1 style="font-size:3rem; margin-bottom:20px;">Welcome to Aniket's Hub</h1>
+  <p style="font-size:1.2rem; max-width:700px; margin:auto; line-height:1.6;">
+    Explore amazing tools, games, downloads, and blogs all in one place. Fun, useful, and interactive content awaits!
+  </p>
+  <a href="#tools" style="display:inline-block; margin-top:30px; padding:12px 25px; background:#fff; color:#0078d7; font-weight:bold; border-radius:8px; text-decoration:none; transition:0.3s;">
+    Explore Tools & Games
+  </a>
+</section>
+
+
 <!-- TOOLS & GAMES SECTION -->
-<section>
+<section id="tools">
   <h2>Tools & Games</h2>
   <div class="grid">
     <a href="https://aniketxraj.me/2048.html" class="card">
