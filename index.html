@@ -1,144 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Projects Showcase</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
-      background: #ffeaa7;
-      color: #2d3436;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Homepage - Tools & Games, Downloads, Blogs</title>
+<style>
+/* Reset and base styles */
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial;}
+body {
+  background: linear-gradient(160deg, #f0f4f8, #d9e2ec);
+  color:#222;
+  line-height:1.5;
+}
+section:nth-child(odd){background:#f8f9fa;}
+section:nth-child(even){background:#e9eff5;}
+section{padding:60px 6%; border-radius:15px; margin:30px 0;}
 
-    .slider-container {
-      position: relative;
-      width: 90%;
-      max-width: 700px;   /* reduced max width */
-      overflow: hidden;
-      border-radius: 12px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-      background: #fff;
-    }
+/* Headings */
+h2{
+  font-size:2rem;
+  margin-bottom:25px;
+  text-transform:uppercase;
+  color:#222;
+  letter-spacing:1px;
+  position:relative;
+}
+h2::after{
+  content:"";
+  position:absolute;
+  left:0;bottom:-8px;
+  width:60px;height:4px;
+  background:#0078d7;
+  border-radius:2px;
+}
 
-    .slider-wrapper {
-      display: flex;
-      transition: transform 0.6s cubic-bezier(.68,-0.55,.27,1.55);
-    }
+/* Card Grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:25px;
+}
 
-    .slide {
-      min-width: 100%;
-      box-sizing: border-box;
-      text-align: center;
-      background: #fff; /* keep background neutral */
-      padding: 10px;
-    }
+/* Cards */
+.card{
+  background:#fff;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+  transition:transform 0.35s, box-shadow 0.35s;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  text-decoration:none;
+  color:inherit;
+}
+.card:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+.card img{
+  width:100%;
+  aspect-ratio:2/1;
+  object-fit:cover;
+  border-radius:10px 10px 0 0;
+}
+.card-content{
+  padding:15px;
+  flex:1;
+}
+.card-content h3{
+  font-size:1.2rem;
+  margin-bottom:6px;
+  color:#111;
+}
+.card-content p{
+  font-size:0.92rem;
+  color:#555;
+}
 
-    .slide h2 {
-      margin: 10px 0;
-      font-size: 1.5em;
-      color: #2d3436;
-    }
+/* Footer */
+footer{
+  background:#111;
+  color:#ccc;
+  text-align:center;
+  padding:40px 10px;
+  font-size:0.9rem;
+}
+footer a{color:#00aaff;text-decoration:none;}
+footer a:hover{text-decoration:underline;}
 
-    .slide p {
-      font-size: 1em;
-      line-height: 1.4;
-      margin: 10px 0 0;
-      color: #555;
-    }
-
-    .slide a img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: transform 0.3s;
-      display: block;
-    }
-
-    .slide a img:hover {
-      transform: scale(1.05);
-    }
-
-    .controls {
-      position: absolute;
-      top: 50%;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-
-    .btn {
-      background: #ffeaa7;
-      border: 2px solid #2d3436;
-      color: #2d3436;
-      font-size: 1.5em;
-      cursor: pointer;
-      padding: 8px 14px;
-      border-radius: 50%;
-      transition: transform 0.2s, background 0.2s;
-      pointer-events: all;
-    }
-
-    .btn:hover {
-      background: #fdcb6e;
-      transform: scale(1.15);
-    }
-
-  </style>
+/* Blog section grid adjustment */
+@media(min-width:1024px){.blog-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1023px){.blog-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 
-  <div class="slider-container">
-    <div class="slider-wrapper" id="slider">
-      <div class="slide">
-        <h2>Project 1 🎮</h2>
-        <a href="https://aniketxraj.me/rage-quiter.html" target="_blank">
-          <img src="https://aniketxraj.me/RAGE.jpg" alt="Project 1 image">
-        </a>
-        <p>This is my first project. It's colorful, playful, and fun to explore!</p>
+<!-- TOOLS & GAMES SECTION -->
+<section>
+  <h2>Tools & Games</h2>
+  <div class="grid">
+    <a href="https://aniketxraj.me/2048.html" class="card">
+      <img src="https://aniketxraj.me/images/2048.webp" alt="2048 Game">
+      <div class="card-content">
+        <h3>2048</h3>
+        <p>Classic number puzzle game where you combine tiles to reach 2048.</p>
       </div>
-      <div class="slide">
-        <h2>Project 2 🚀</h2>
-        <a href="https://aniketxraj.me/2048.html" target="_blank">
-          <img src="https://aniketxraj.me/banner.jpg" alt="Project 2 image">
-        </a>
-        <p>Blast off with this project—it's quirky and full of surprises!</p>
+    </a>
+    <a href="https://aniketxraj.me/rage-quiter.html" class="card">
+      <img src="https://aniketxraj.me/images/rage.webp" alt="Rage Quiter">
+      <div class="card-content">
+        <h3>Rage Quiter</h3>
+        <p>Exciting game to test your reflexes and patience.</p>
       </div>
-      <div class="slide">
-        <h2>Project 3 🎨</h2>
-        <a href="https://example.com/project3" target="_blank">
-          <img src="https://via.placeholder.com/700x350/ffcc99/333" alt="Project 3 image">
-        </a>
-        <p>A creative project showcase. Fun borders, silly fonts, and bright vibes!</p>
+    </a>
+    <a href="https://aniketxraj.me/playground.html" class="card">
+      <img src="https://aniketxraj.me/images/playground.webp" alt="Playground">
+      <div class="card-content">
+        <h3>Playground</h3>
+        <p>A fun interactive space for experimenting and small games.</p>
       </div>
-    </div>
-
-    <div class="controls">
-      <button class="btn" onclick="moveSlide(-1)">⟨</button>
-      <button class="btn" onclick="moveSlide(1)">⟩</button>
-    </div>
+    </a>
+    <a href="https://aniketxraj.me/ip/" class="card">
+      <img src="https://aniketxraj.me/images/ip.webp" alt="IP Tool">
+      <div class="card-content">
+        <h3>IP Tool</h3>
+        <p>Quickly check your public IP address and related info.</p>
+      </div>
+    </a>
+    <a href="https://dyesel.netlify.app" class="card">
+      <img src="https://dyesel.netlify.app/favicon.ico" alt="Dyesel Web Server">
+      <div class="card-content">
+        <h3>Dyesel</h3>
+        <p>Lightweight offline Windows web server to run servers from a local folder.</p>
+      </div>
+    </a>
   </div>
+</section>
 
-  <script>
-    let index = 0;
-    const slider = document.getElementById('slider');
-    const totalSlides = document.querySelectorAll('.slide').length;
+<!-- DOWNLOADS SECTION -->
+<section>
+  <h2>Downloads</h2>
+  <div class="grid">
+    <a href="https://dyesel.netlify.app" class="card">
+      <img src="https://aniketxraj.me/images/dyesel.webp" alt="Dyesel Web Server">
+      <div class="card-content">
+        <h3>Dyesel</h3>
+        <p>Download Dyesel Web Server for offline local hosting.</p>
+      </div>
+    </a>
+  </div>
+</section>
 
-    function moveSlide(direction) {
-      index += direction;
-      if (index < 0) index = totalSlides - 1;
-      if (index >= totalSlides) index = 0;
-      slider.style.transform = `translateX(${-index * 100}%)`;
-    }
-  </script>
+<!-- BLOGS SECTION -->
+<section>
+  <h2>Blogs</h2>
+  <div class="grid blog-grid">
+    <a href="https://aniketxraj.me/How-to-skip-any-level-in-neal-fun.html" class="card">
+      <img src="https://aniketxraj.me/images/neal-fun-skip.webp" alt="Skip Neal.fun Levels">
+      <div class="card-content">
+        <h3>How to Skip Any Level in Neal.fun</h3>
+        <p>Step-by-step guide to skip levels in the "I am not a robot" game.</p>
+      </div>
+    </a>
+    <a href="https://aniketxraj.me/best-games-for-low-end-pc/" class="card">
+      <img src="https://aniketxraj.me/images/Best-games-for-low-end-pc.webp" alt="Best Low-End Games">
+      <div class="card-content">
+        <h3>Best Games for Low-End PC</h3>
+        <p>Top game recommendations for PCs with lower specifications.</p>
+      </div>
+    </a>
+    <a href="https://aniketxraj.me/planets-humans-can-survive/" class="card">
+      <img src="https://aniketxraj.me/images/Planets-humans-can-survive-on.webp" alt="Survivable Planets">
+      <div class="card-content">
+        <h3>Planets Humans Can Survive</h3>
+        <p>Exploring planets suitable for human life beyond Earth.</p>
+      </div>
+    </a>
+    <a href="https://aniketxraj.me/Things-to-do-when-bored" class="card">
+      <img src="https://aniketxraj.me/images/things-to-do-when-bored.webp" alt="Boredom Activities">
+      <div class="card-content">
+        <h3>Things to Do When Bored</h3>
+        <p>Creative ideas and activities to beat boredom.</p>
+      </div>
+    </a>
+    <a href="https://aniketxraj.me/best-laptops-2025" class="card">
+      <img src="https://aniketxraj.me/images/Best-Laptop-to-Buy-in-2025.webp" alt="Best Laptops 2025">
+      <div class="card-content">
+        <h3>Best Laptops 2025</h3>
+        <p>Recommended laptops for performance, budget, and gaming in 2025.</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2025 aniketxraj.me | <a href="https://aniketxraj.me/about/">About</a> | <a href="https://aniketxraj.me/contact">Contact</a></p>
+</footer>
 
 </body>
 </html>
