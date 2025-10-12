@@ -3,14 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Homepage - Tools & Games, Downloads, Blogs</title>
+<title>Homepage - Tools, Games, Downloads & Blogs | Aniket's Hub</title>
+<meta name="description" content="Discover amazing tools, fun games, downloads, and insightful blogs at Aniket's Hub. Interactive content for everyone!">
+<meta name="keywords" content="tools, games, downloads, blogs, interactive, Aniket Hub, online tools, free downloads">
+<meta name="author" content="Aniket Kumar Raj">
+
+<!-- Open Graph / Social -->
+<meta property="og:title" content="Aniket's Hub - Tools, Games, Downloads & Blogs">
+<meta property="og:description" content="Explore amazing tools, fun games, downloads, and blogs all in one place. Fun, useful, and interactive content awaits!">
+<meta property="og:url" content="https://aniketxraj.me">
+<meta property="og:type" content="website">
+
 <style>
 /* Reset and base styles */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial;}
-html {
-  scroll-behavior:smooth;
-}
-
+html {scroll-behavior:smooth;}
 body {
   background: linear-gradient(160deg, #f0f4f8, #d9e2ec);
   color:#222;
@@ -90,8 +97,34 @@ footer{
   padding:40px 10px;
   font-size:0.9rem;
 }
-footer a{color:#00aaff;text-decoration:none;}
-footer a:hover{text-decoration:underline;}
+footer a{
+  color:#00c6ff;
+  text-decoration:none;
+}
+footer a:focus, footer a:hover{
+  text-decoration:underline;
+  outline:2px solid #00c6ff;
+  outline-offset:2px;
+}
+
+/* Hero button accessible */
+.hero-button{
+  display:inline-block;
+  margin-top:30px;
+  padding:12px 25px;
+  background:#fff;
+  color:#0078d7;
+  font-weight:bold;
+  border-radius:8px;
+  text-decoration:none;
+  transition:0.3s;
+  border:2px solid #0078d7;
+}
+.hero-button:focus, .hero-button:hover{
+  background:#0078d7;
+  color:#fff;
+  outline:none;
+}
 
 /* Blog section grid adjustment */
 @media(min-width:1024px){.blog-grid{grid-template-columns:repeat(3,1fr);}}
@@ -101,51 +134,48 @@ footer a:hover{text-decoration:underline;}
 <body>
 
 <!-- HERO SECTION -->
-<section style="padding:100px 6%; text-align:center; border-radius:0; margin:0; background:linear-gradient(135deg,#0078d7,#00c6ff); color:#fff;">
+<section style="padding:100px 6%; text-align:center; border-radius:0; margin:0; background:linear-gradient(135deg,#0078d7,#005ea3); color:#fff;">
   <h1 style="font-size:3rem; margin-bottom:20px;">Welcome to Aniket's Hub</h1>
   <p style="font-size:1.2rem; max-width:700px; margin:auto; line-height:1.6;">
     Explore amazing tools, games, downloads, and blogs all in one place. Fun, useful, and interactive content awaits!
   </p>
-  <a href="#tools" style="display:inline-block; margin-top:30px; padding:12px 25px; background:#fff; color:#0078d7; font-weight:bold; border-radius:8px; text-decoration:none; transition:0.3s;">
-    Explore Tools & Games
-  </a>
+  <a href="#tools" class="hero-button" aria-label="Explore Tools and Games Section">Explore Tools & Games</a>
 </section>
-
 
 <!-- TOOLS & GAMES SECTION -->
 <section id="tools">
   <h2>Tools & Games</h2>
   <div class="grid">
-    <a href="https://aniketxraj.me/2048.html" class="card">
-      <img src="https://aniketxraj.me/images/2048.webp" alt="2048 Game">
+    <a href="https://aniketxraj.me/2048.html" class="card" aria-label="Play 2048 Game Online">
+      <img src="https://aniketxraj.me/images/2048.webp" alt="2048 Game Screenshot">
       <div class="card-content">
         <h3>2048</h3>
         <p>Classic number puzzle game where you combine tiles to reach 2048.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/rage-quiter.html" class="card">
-      <img src="https://aniketxraj.me/images/rage.webp" alt="Rage Quiter">
+    <a href="https://aniketxraj.me/rage-quiter.html" class="card" aria-label="Play Rage Quiter Game Online">
+      <img src="https://aniketxraj.me/images/rage.webp" alt="Rage Quiter Game Screenshot">
       <div class="card-content">
         <h3>Rage Quiter</h3>
         <p>Exciting game to test your reflexes and patience.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/playground.html" class="card">
-      <img src="https://aniketxraj.me/images/playground.webp" alt="Playground">
+    <a href="https://aniketxraj.me/playground.html" class="card" aria-label="Visit Playground Interactive Space">
+      <img src="https://aniketxraj.me/images/playground.webp" alt="Playground Interactive Space">
       <div class="card-content">
         <h3>Playground</h3>
         <p>A fun interactive space for experimenting and small games.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/ip/" class="card">
-      <img src="https://aniketxraj.me/images/ip.webp" alt="IP Tool">
+    <a href="https://aniketxraj.me/ip/" class="card" aria-label="Check Public IP Address Tool">
+      <img src="https://aniketxraj.me/images/ip.webp" alt="IP Tool Screenshot">
       <div class="card-content">
         <h3>IP Tool</h3>
         <p>Quickly check your public IP address and related info.</p>
       </div>
     </a>
-    <a href="https://dyesel.netlify.app" class="card">
-      <img src="https://dyesel.netlify.app/favicon.ico" alt="Dyesel Web Server">
+    <a href="https://dyesel.netlify.app" class="card" aria-label="Download Dyesel Web Server">
+      <img src="https://dyesel.netlify.app/favicon.ico" alt="Dyesel Web Server Icon">
       <div class="card-content">
         <h3>Dyesel</h3>
         <p>Lightweight offline Windows web server to run servers from a local folder.</p>
@@ -158,8 +188,8 @@ footer a:hover{text-decoration:underline;}
 <section>
   <h2>Downloads</h2>
   <div class="grid">
-    <a href="https://dyesel.netlify.app" class="card">
-      <img src="https://aniketxraj.me/images/dyesel.webp" alt="Dyesel Web Server">
+    <a href="https://dyesel.netlify.app" class="card" aria-label="Download Dyesel Web Server for Local Hosting">
+      <img src="https://aniketxraj.me/images/dyesel.webp" alt="Dyesel Web Server Download">
       <div class="card-content">
         <h3>Dyesel</h3>
         <p>Download Dyesel Web Server for offline local hosting.</p>
@@ -172,36 +202,36 @@ footer a:hover{text-decoration:underline;}
 <section>
   <h2>Blogs</h2>
   <div class="grid blog-grid">
-    <a href="https://aniketxraj.me/How-to-skip-any-level-in-neal-fun.html" class="card">
-      <img src="https://aniketxraj.me/images/neal-fun-skip.webp" alt="Skip Neal.fun Levels">
+    <a href="https://aniketxraj.me/How-to-skip-any-level-in-neal-fun.html" class="card" aria-label="Read Blog How to Skip Any Level in Neal.fun">
+      <img src="https://aniketxraj.me/images/neal-fun-skip.webp" alt="Skip Neal.fun Levels Screenshot">
       <div class="card-content">
         <h3>How to Skip Any Level in Neal.fun</h3>
         <p>Step-by-step guide to skip levels in the "I am not a robot" game.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/best-games-for-low-end-pc/" class="card">
-      <img src="https://aniketxraj.me/images/Best-games-for-low-end-pc.webp" alt="Best Low-End Games">
+    <a href="https://aniketxraj.me/best-games-for-low-end-pc/" class="card" aria-label="Read Blog Best Games for Low-End PC">
+      <img src="https://aniketxraj.me/images/Best-games-for-low-end-pc.webp" alt="Best Low-End PC Games">
       <div class="card-content">
         <h3>Best Games for Low-End PC</h3>
         <p>Top game recommendations for PCs with lower specifications.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/planets-humans-can-survive/" class="card">
-      <img src="https://aniketxraj.me/images/Planets-humans-can-survive-on.webp" alt="Survivable Planets">
+    <a href="https://aniketxraj.me/planets-humans-can-survive/" class="card" aria-label="Read Blog Planets Humans Can Survive On">
+      <img src="https://aniketxraj.me/images/Planets-humans-can-survive-on.webp" alt="Planets Suitable for Human Life">
       <div class="card-content">
         <h3>Planets Humans Can Survive</h3>
         <p>Exploring planets suitable for human life beyond Earth.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/Things-to-do-when-bored" class="card">
-      <img src="https://aniketxraj.me/images/things-to-do-when-bored.webp" alt="Boredom Activities">
+    <a href="https://aniketxraj.me/Things-to-do-when-bored" class="card" aria-label="Read Blog Things to Do When Bored">
+      <img src="https://aniketxraj.me/images/things-to-do-when-bored.webp" alt="Creative Ideas to Beat Boredom">
       <div class="card-content">
         <h3>Things to Do When Bored</h3>
         <p>Creative ideas and activities to beat boredom.</p>
       </div>
     </a>
-    <a href="https://aniketxraj.me/best-laptops-2025" class="card">
-      <img src="https://aniketxraj.me/images/Best-Laptop-to-Buy-in-2025.webp" alt="Best Laptops 2025">
+    <a href="https://aniketxraj.me/best-laptops-2025" class="card" aria-label="Read Blog Best Laptops 2025">
+      <img src="https://aniketxraj.me/images/Best-Laptop-to-Buy-in-2025.webp" alt="Best Laptops to Buy in 2025">
       <div class="card-content">
         <h3>Best Laptops 2025</h3>
         <p>Recommended laptops for performance, budget, and gaming in 2025.</p>
@@ -212,7 +242,11 @@ footer a:hover{text-decoration:underline;}
 
 <!-- FOOTER -->
 <footer>
-  <p>&copy; 2025 aniketxraj.me | <a href="https://aniketxraj.me/about/">About</a> | <a href="https://aniketxraj.me/contact">Contact</a> | <a href="https://aniketxraj.me/privacy-policy.html">Privacy Policy</p>
+  <p>&copy; 2025 aniketxraj.me | 
+    <a href="https://aniketxraj.me/about/" aria-label="About Aniket's Hub">About</a> | 
+    <a href="https://aniketxraj.me/contact" aria-label="Contact Aniket">Contact</a> | 
+    <a href="https://aniketxraj.me/privacy-policy.html" aria-label="Privacy Policy of Aniket's Hub">Privacy Policy</a>
+  </p>
 </footer>
 
 </body>
