@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drone Open World - Patna</title>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython.min.js"></script>
+<style>
+body { margin:0; overflow:hidden; background: skyblue; }
+canvas { position:absolute; top:0; left:0; pointer-events:none; width:100%; height:100%; }
+#speedDisplay { position:absolute; top:10px; left:10px; font-family: monospace; font-size:20px; color:black; z-index:1000; }
+</style>
+</head>
+<body onload="brython()">
+
+<div id="speedDisplay">Speed: 0</div>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+var canvas = document.getElementById("gameCanvas");
+var ctx = canvas.getContext("2d");
+
+// Resize canvas to full window
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Map tiles
+var tileSize = 256;
+var zoom = 12; // city-level zoom
+var tileCache = {};
+
+// Convert lon/lat <-> tile
+function long2tile(lon, zoom){ return (lon+180)/360*Math.pow(2,zoom); }
+function lat2tile(lat, zoom){ return (1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,zoom); }
+
+// Draw map smoothly using pixel offsets
+function draw_map(world_x, world_y, angle){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(-angle);
+
+    var centerLat = 25.5941 - world_y*0.0001; // Patna latitude
+    var centerLon = 85.1376 + world_x*0.0001; // Patna longitude
+
+    var centerTileX = long2tile(centerLon, zoom);
+    var centerTileY = lat2tile(centerLat, zoom);
+
+    var offsetX = (centerTileX - Math.floor(centerTileX))*tileSize;
+    var offsetY = (centerTileY - Math.floor(centerTileY))*tileSize;
+
+    var tilesX = Math.ceil(canvas.width/tileSize/2)+2;
+    var tilesY = Math.ceil(canvas.height/tileSize/2)+2;
+
+    for(var dx=-tilesX; dx<=tilesX; dx++){
+        for(var dy=-tilesY; dy<=tilesY; dy++){
+            var tx = Math.floor(centerTileX)+dx;
+            var ty = Math.floor(centerTileY)+dy;
+            var key = zoom+"_"+tx+"_"+ty;
+            if(!tileCache[key]){
+                var img = new Image();
+                img.src = `https://tile.openstreetmap.org/${zoom}/${tx}/${ty}.png`;
+                tileCache[key] = img;
+            }
+            ctx.drawImage(tileCache[key], (dx*tileSize)-offsetX, (dy*tileSize)-offsetY, tileSize, tileSize);
+        }
+    }
+
+    ctx.restore();
+}
+
+// Drone image
+var droneImg = new Image();
+droneImg.src = "drone.png";
+
+function draw_plane(speed, tilt=0){
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(tilt);
+    if(droneImg.complete){
+        var w = 60; // width of drone
+        var h = droneImg.height * (w / droneImg.width); // maintain aspect ratio
+        ctx.drawImage(droneImg, -w/2, -h/2, w, h);
+    } else {
+        // fallback triangle
+        ctx.beginPath();
+        ctx.moveTo(0,-25);
+        ctx.lineTo(-15,15);
+        ctx.lineTo(0,10);
+        ctx.lineTo(15,15);
+        ctx.closePath();
+        ctx.fillStyle="white";
+        ctx.fill();
+        ctx.strokeStyle="black";
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    document.getElementById("speedDisplay").innerText = "Speed: " + speed.toFixed(2);
+}
+
+</script>
+
+<script type="text/python">
+from browser import window
+
+world_x, world_y = 0, 0
+world_angle = 0
+speed = 0
+accel = 0.2
+friction = 0.01
+max_turn = 0.015
+turn_smooth = 0.1
+tilt = 0
+tilt_smooth = 0.1
+
+keys = {"w":False,"a":False,"s":False,"d":False,
+        "arrowup":False,"arrowleft":False,"arrowdown":False,"arrowright":False}
+
+target_angle_change = 0
+target_tilt = 0
+
+def key_down(ev):
+    k = ev.key.lower()
+    if k in keys: keys[k]=True
+
+def key_up(ev):
+    k = ev.key.lower()
+    if k in keys: keys[k]=False
+
+def game_loop(ev=None):
+    global world_x, world_y, world_angle, speed, target_angle_change, tilt, target_tilt
+
+    forward = keys["w"] or keys["arrowup"]
+    backward = keys["s"] or keys["arrowdown"]
+    moving = forward or backward
+
+    # Acceleration / deceleration
+    if forward: speed += accel
+    elif backward: speed -= accel
+
+    # Friction
+    if not moving:
+        speed *= (1-friction)
+        if abs(speed)<0.01: speed=0
+
+    # Desired turn
+    desired_turn = 0
+    if abs(speed) > 0.01:
+        turn_intensity = max_turn * (abs(speed)/5)
+        if keys["a"] or keys["arrowleft"]:
+            desired_turn = -turn_intensity
+            speed -= 0.01*abs(speed)
+            target_tilt = -0.3
+        elif keys["d"] or keys["arrowright"]:
+            desired_turn = turn_intensity
+            speed -= 0.01*abs(speed)
+            target_tilt = 0.3
+        else:
+            target_tilt = 0
+    else:
+        target_tilt = 0
+
+    # Smooth turn and tilt
+    target_angle_change += (desired_turn - target_angle_change) * turn_smooth
+    world_angle += target_angle_change
+    tilt += (target_tilt - tilt) * tilt_smooth
+
+    # Move plane
+    world_x += speed * window.Math.sin(world_angle)
+    world_y -= speed * window.Math.cos(world_angle)
+
+    # Draw map and drone
+    window.draw_map(world_x, world_y, world_angle)
+    window.draw_plane(speed, tilt)
+
+    window.requestAnimationFrame(game_loop)
+
+window.bind("keydown", key_down)
+window.bind("keyup", key_up)
+window.requestAnimationFrame(game_loop)
+</script>
+
+</body>
+</html>
