@@ -1,38 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Main page -->
   <url>
     <loc>https://aniketxraj.me/</loc>
     <lastmod>2025-08-23</lastmod>
     <priority>1.0</priority>
   </url>
+
+  <!-- Existing pages -->
   <url>
     <loc>https://aniketxraj.me/Things-to-do-when-bored</loc>
     <lastmod>2025-08-23</lastmod>
     <priority>0.8</priority>
   </url>
+
   <url>
     <loc>https://aniketxraj.me/best-games-for-low-end-pc</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.8</priority>
   </url>
+
   <url>
     <loc>https://aniketxraj.me/best-laptops-2025</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.8</priority>
   </url>
+
   <url>
     <loc>https://aniketxraj.me/planets-humans-can-survive</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.8</priority>
   </url>
+
   <url>
     <loc>https://aniketxraj.me/best-website-to-download-optimized-game</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.8</priority>
   </url>
-    <url>
+
+  <url>
     <loc>https://aniketxraj.me/interesting-websites-when-bored</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.8</priority>
   </url>
+
+  <!-- New additions (previously "Crawled - not indexed") -->
+  <url>
+    <loc>https://aniketxraj.me/How-to-skip-any-level-in-neal-fun.html</loc>
+    <lastmod>2025-11-02</lastmod>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/rage-quiter.html</loc>
+    <lastmod>2025-10-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/ip/</loc>
+    <lastmod>2025-10-13</lastmod>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/2048.html</loc>
+    <lastmod>2025-10-13</lastmod>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/contact/</loc>
+    <lastmod>2025-10-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/about/</loc>
+    <lastmod>2025-10-03</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://aniketxraj.me/aniket-kumar-raj.html</loc>
+    <lastmod>2025-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
