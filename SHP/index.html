@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Projects Hub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  body { margin:0; font-family:'Inter', sans-serif; background:#f5f5f5; color:#111; transition:0.3s; }
+  .dark-mode { background:#1e1e2f; color:#eee; }
+  header { display:flex; justify-content: space-between; align-items:center; padding:16px 24px; background:#4b8bbe; color:white; position:sticky; top:0; box-shadow:0 2px 6px rgba(0,0,0,0.2); z-index:100; }
+  header h1 { margin:0; font-size:1.6rem; }
+  .toggle-dark { cursor:pointer; background:rgba(255,255,255,0.2); border:none; padding:8px 12px; border-radius:6px; font-weight:600; color:white; }
+  .toggle-dark:hover { background:rgba(255,255,255,0.35); }
+
+  main { padding:24px; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap:20px; max-width:1200px; margin:0 auto; }
+
+  .project-card { background:white; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; display:flex; flex-direction:column; }
+  .dark-mode .project-card { background:#2c2c3b; box-shadow:0 4px 12px rgba(0,0,0,0.4); }
+  .project-card:hover { transform: translateY(-6px); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+  .project-card h2 { margin-top:0; margin-bottom:12px; font-size:1.4rem; }
+  .project-card p { flex-grow:1; font-size:0.95rem; line-height:1.5; margin-bottom:16px; }
+  .project-card ul { padding-left:20px; margin:8px 0; }
+  .project-card ul li { margin-bottom:6px; }
+  .project-card button { background:#4b8bbe; color:white; border:none; padding:10px; border-radius:6px; font-weight:600; cursor:pointer; transition:0.2s; }
+  .project-card button:hover { background:#3677a6; }
+  .dark-mode .project-card button { background:#7aa7d9; color:#111; }
+  .dark-mode .project-card button:hover { background:#5590c5; }
+
+  footer { text-align:center; padding:20px; font-size:0.85rem; color:#666; }
+  .dark-mode footer { color:#aaa; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Student Projects Hub</h1>
+  <button class="toggle-dark">&#x1F319; Dark Mode</button>
+</header>
+
+<main>
+  <div class="project-card">
+    <h2>PDF &rarr; Speech</h2>
+    <p>
+      <strong>Time-saving & neck-saving:</strong> Listen to notes instead of reading. Perfect for multitasking, hands-free study, or reviewing while doing other work.<br>
+      <strong>Features:</strong>
+      <ul>
+        <li>Adjustable reading speed</li>
+        <li>Word-by-word speech</li>
+        <li>OCR support for images</li>
+        <li>Supports PDFs & typed text</li>
+        <li>Offline functionality</li>
+      </ul>
+      Convert PDFs or typed text into spoken audio. Helps students revise efficiently and saves hours of reading.
+    </p>
+    <button onclick="window.open('pdf-to-speech.html','_blank')">Open Project</button>
+  </div>
+
+  <div class="project-card">
+    <h2>Huawei Airdrop</h2>
+    <p>
+      <strong>Save time & collaborate faster:</strong> Instantly share files, assignments, and media. Skip cables, emails, and cloud uploads.<br>
+      <strong>Features:</strong>
+      <ul>
+        <li>High-speed peer-to-peer transfer</li>
+        <li>Secure sharing of multiple file types</li>
+        <li>Works in groups or study sessions</li>
+        <li>Fun use cases: multitask like Iron Man, switch screens seamlessly, impress your crush ??</li>
+      </ul>
+      Designed for students to collaborate and share work effortlessly, making study and projects much more efficient.
+    </p>
+    <button onclick="window.open('huawei-airdrop.html','_blank')">Open Project</button>
+  </div>
+</main>
+
+<footer>
+  Made with &#x1F4A1; by Aniket Kumar Raj for students
+</footer>
+
+<script>
+  const toggle = document.querySelector('.toggle-dark');
+  toggle.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark-mode');
+    toggle.innerHTML = document.body.classList.contains('dark-mode') ? '&#x2600; Light Mode' : '&#x1F319; Dark Mode';
+  });
+</script>
+
+</body>
+</html>
