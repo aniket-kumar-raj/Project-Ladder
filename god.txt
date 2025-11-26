@@ -5,55 +5,65 @@ End Sub
 
 
 
-
 Dim gameRunning As Boolean
-Dim gravitySpeed As Single
+Dim velocity As Single
+Dim gravity As Single
+Dim jumpStrength As Single
 
 Sub StartGame()
-    gameRunning = True
-    gravitySpeed = 3  'fall speed
-
     Dim b As Shape
     Set b = Sheet1.Shapes("bird")
 
-    'Reset bird position
+    gameRunning = True
+    gravity = 1.5
+    jumpStrength = -12   'negative = upward
+    velocity = 0         'bird starts still
+
     b.Left = 80
     b.Top = 150
+    b.Rotation = 0
 
-    GravityLoop
+    GameLoop
 End Sub
 
 Sub BirdJump()
     If gameRunning = False Then Exit Sub
 
-    Dim b As Shape
-    Set b = Sheet1.Shapes("bird")
-
-    'Jump up
-    b.Top = b.Top - 25
+    velocity = jumpStrength   'give upward impulse
 End Sub
 
-Sub GravityLoop()
+Sub GameLoop()
     If gameRunning = False Then Exit Sub
 
     Dim b As Shape
     Set b = Sheet1.Shapes("bird")
 
-    'Gravity
-    b.Top = b.Top + gravitySpeed
+    'Apply gravity to velocity
+    velocity = velocity + gravity
 
-    'Top/bottom screen limits (Excel 2007 friendly)
+    'Move bird by velocity
+    b.Top = b.Top + velocity
+
+    'Rotate bird based on velocity
+    'Excel 2007 rotation: -50 to +70 feels good
+    If velocity < 0 Then
+        b.Rotation = -25       'tilt up
+    Else
+        b.Rotation = WorksheetFunction.Min(velocity * 3, 60)
+    End If
+
+    'Check out-of-bounds
     If b.Top < 0 Or b.Top > 350 Then
         GameOver
         Exit Sub
     End If
 
-    'Loop again
-    Application.OnTime Now + TimeValue("00:00:00.03"), "GravityLoop"
+    'Run next frame
+    Application.OnTime Now + TimeValue("00:00:00.02"), "GameLoop"
 End Sub
 
 Sub GameOver()
     gameRunning = False
-    MsgBox "Bird fell or flew away. Restarting..."
+    MsgBox "Bird crashed! Restarting..."
     StartGame
 End Sub
