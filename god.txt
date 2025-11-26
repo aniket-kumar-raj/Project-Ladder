@@ -1,0 +1,59 @@
+Private Sub Workbook_Open()
+    Application.OnKey " ", "BirdJump"
+    StartGame
+End Sub
+
+
+
+
+Dim gameRunning As Boolean
+Dim gravitySpeed As Single
+
+Sub StartGame()
+    gameRunning = True
+    gravitySpeed = 3  'fall speed
+
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+
+    'Reset bird position
+    b.Left = 80
+    b.Top = 150
+
+    GravityLoop
+End Sub
+
+Sub BirdJump()
+    If gameRunning = False Then Exit Sub
+
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+
+    'Jump up
+    b.Top = b.Top - 25
+End Sub
+
+Sub GravityLoop()
+    If gameRunning = False Then Exit Sub
+
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+
+    'Gravity
+    b.Top = b.Top + gravitySpeed
+
+    'Top/bottom screen limits (Excel 2007 friendly)
+    If b.Top < 0 Or b.Top > 350 Then
+        GameOver
+        Exit Sub
+    End If
+
+    'Loop again
+    Application.OnTime Now + TimeValue("00:00:00.03"), "GravityLoop"
+End Sub
+
+Sub GameOver()
+    gameRunning = False
+    MsgBox "Bird fell or flew away. Restarting..."
+    StartGame
+End Sub
