@@ -184,3 +184,67 @@ Sub GameOver()
     MsgBox "Bird crashed!", vbExclamation
 End Sub
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####CELL######
+Option Explicit
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim msgs As Variant
+    msgs = Array("Gotcha!", "LOL 😆", "Try again!", "Haha!", "Oops!")
+    
+    ' Randomly pick a message
+    If Not Intersect(Target, Me.UsedRange) Is Nothing Then
+        Application.EnableEvents = False
+        Target.Value = msgs(Int(Rnd() * UBound(msgs)))
+        Application.EnableEvents = True
+    End If
+End Sub
+
+
+
+
+
+
+
+
+#########VIRUS##########
+x = 0
+Do While x < 100
+    x = x + 1
+    WScript.Sleep 60
+    MsgBox "Installing virus... " & x & "% completed", vbInformation, "System"
+Loop
+
+MsgBox "Just kidding. You're safe... or are you? 😈", vbOKOnly, "LOL"
+
+
+
+
+
+
+
+
+
+#################HARM########
+Dim msgs, m
+msgs = Array("Stop touching my laptop!", "Windows Error: You", "LOL", "Who are you?", "Bruh.", "Nice try")
+
+Randomize
+
+Do
+    m = msgs(Int(Rnd * UBound(msgs)))
+    MsgBox m, vbExclamation, "System"
+    WScript.Sleep 500
+Loop
