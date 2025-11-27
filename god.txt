@@ -5,65 +5,182 @@ End Sub
 
 
 
+Option Explicit
+
+' ==============================
+' Flappy Bird with Rocks - Excel 2007
+' ==============================
+
+' Game variables
 Dim gameRunning As Boolean
 Dim velocity As Single
 Dim gravity As Single
 Dim jumpStrength As Single
+Dim nextFrame As Date
+Dim birdRotation As Single
 
+Dim rocks As Collection
+Dim rockSpeed As Single
+Dim frameCounter As Long
+
+' ------------------------------
+' Start the game
+' ------------------------------
 Sub StartGame()
     Dim b As Shape
     Set b = Sheet1.Shapes("bird")
-
+    
+    ' Cancel previous loop
+    On Error Resume Next
+    Application.OnTime earliesttime:=nextFrame, procedure:="GameLoop", schedule:=False
+    On Error GoTo 0
+    
+    ' Clear all old rocks except the template
+    Dim sh As Shape
+    For Each sh In Sheet1.Shapes
+        If Left(sh.Name, 4) = "rock" And sh.Name <> "rockTemplate" Then
+            sh.Delete
+        End If
+    Next sh
+    
+    ' Initialize bird variables
     gameRunning = True
-    gravity = 1.5
-    jumpStrength = -12   'negative = upward
-    velocity = 0         'bird starts still
-
+    gravity = 1
+    jumpStrength = -8
+    velocity = 0
+    birdRotation = 0
+    
+    ' Reset bird
     b.Left = 80
     b.Top = 150
     b.Rotation = 0
-
-    GameLoop
+    
+    ' Initialize rocks
+    Set rocks = New Collection
+    rockSpeed = 5
+    frameCounter = 0
+    
+    ' Start loop
+    ScheduleNextFrame
 End Sub
 
+' ------------------------------
+' Bird flap
+' ------------------------------
 Sub BirdJump()
-    If gameRunning = False Then Exit Sub
-
-    velocity = jumpStrength   'give upward impulse
+    If gameRunning Then
+        velocity = jumpStrength   ' upward impulse
+        birdRotation = -25        ' tilt nose up
+    End If
 End Sub
 
-Sub GameLoop()
-    If gameRunning = False Then Exit Sub
+' ------------------------------
+' Schedule next frame
+' ------------------------------
+Sub ScheduleNextFrame()
+    If gameRunning Then
+        nextFrame = Now + 0.05 / 86400   ' ~20 fps
+        Application.OnTime nextFrame, "GameLoop"
+    End If
+End Sub
 
+' ------------------------------
+' Main game loop
+' ------------------------------
+Sub GameLoop()
     Dim b As Shape
     Set b = Sheet1.Shapes("bird")
-
-    'Apply gravity to velocity
+    
+    DoEvents   ' allow button clicks
+    
+    ' Update bird physics
     velocity = velocity + gravity
-
-    'Move bird by velocity
     b.Top = b.Top + velocity
-
-    'Rotate bird based on velocity
-    'Excel 2007 rotation: -50 to +70 feels good
+    
+    ' Smooth tilt
     If velocity < 0 Then
-        b.Rotation = -25       'tilt up
+        birdRotation = birdRotation * 0.8
     Else
-        b.Rotation = WorksheetFunction.Min(velocity * 3, 60)
+        birdRotation = WorksheetFunction.Min(birdRotation + 5, 60)
     End If
-
-    'Check out-of-bounds
-    If b.Top < 0 Or b.Top > 350 Then
+    b.Rotation = birdRotation
+    
+    ' Check floor/ceiling
+    If b.Top < 0 Then b.Top = 0
+    If b.Top > 350 Then
+        b.Top = 350
         GameOver
         Exit Sub
     End If
-
-    'Run next frame
-    Application.OnTime Now + TimeValue("00:00:00.02"), "GameLoop"
+    
+    ' Move rocks
+    MoveRocks
+    
+    ' Schedule next frame
+    ScheduleNextFrame
 End Sub
 
+' ------------------------------
+' Move rocks left and spawn new ones
+' ------------------------------
+Sub MoveRocks()
+    Dim i As Long
+    For i = rocks.Count To 1 Step -1
+        Dim r As Shape
+        Set r = rocks(i)
+        r.Left = r.Left - rockSpeed
+        
+        ' Remove if off screen
+        If r.Left + r.Width < 0 Then
+            r.Delete
+            rocks.Remove i
+        Else
+            ' Collision with bird
+            Dim b As Shape
+            Set b = Sheet1.Shapes("bird")
+            If IntersectShapes(b, r) Then
+                GameOver
+                Exit Sub
+            End If
+        End If
+    Next i
+    
+    ' Spawn new rock every 30 frames
+    frameCounter = frameCounter + 1
+    If frameCounter Mod 30 = 0 Then
+        SpawnRock
+    End If
+End Sub
+
+' ------------------------------
+' Spawn a new rock at random height
+' ------------------------------
+Sub SpawnRock()
+    Dim r As Shape
+    Set r = Sheet1.Shapes("rockTemplate").Duplicate
+    r.Name = "rock_" & Format(Now, "hhmmss") & "_" & rocks.Count  ' unique name
+    r.Left = 500                        ' right edge
+    r.Top = Int(Rnd() * 300)            ' random vertical
+    r.Visible = True
+    rocks.Add r                         ' only duplicates go in collection
+End Sub
+
+' ------------------------------
+' Collision detection
+' ------------------------------
+Function IntersectShapes(s1 As Shape, s2 As Shape) As Boolean
+    If s1.Left + s1.Width < s2.Left Then Exit Function
+    If s1.Left > s2.Left + s2.Width Then Exit Function
+    If s1.Top + s1.Height < s2.Top Then Exit Function
+    If s1.Top > s2.Top + s2.Height Then Exit Function
+    IntersectShapes = True
+End Function
+
+' ------------------------------
+' Game over
+' ------------------------------
 Sub GameOver()
     gameRunning = False
-    MsgBox "Bird crashed! Restarting..."
-    StartGame
+    MsgBox "Bird crashed!", vbExclamation
 End Sub
+
