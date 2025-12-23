@@ -248,3 +248,246 @@ Do
     MsgBox m, vbExclamation, "System"
     WScript.Sleep 500
 Loop
+
+
+
+
+
+Aniket Enchanted edition of 23 dec 2025
+
+
+
+Option Explicit
+
+' ==============================
+' Flappy Bird with Rocks - Excel 2007
+' ==============================
+
+' ------------------------------
+' Game variables (MUST be on top)
+' ------------------------------
+Dim gameRunning As Boolean
+Dim velocity As Single
+Dim gravity As Single
+Dim jumpStrength As Single
+Dim nextFrame As Date
+Dim birdRotation As Single
+
+Dim rocks As Collection
+Dim rockSpeed As Single
+Dim frameCounter As Long
+
+' ------------------------------
+' SOUND (from same folder)
+' ------------------------------
+Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" _
+(ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+
+Sub PlayJumpSound()
+    Dim soundPath As String
+    soundPath = ThisWorkbook.Path & "\flappy.wav"
+    sndPlaySound32 soundPath, 1
+End Sub
+
+' ------------------------------
+' COUNTDOWN (3 2 1 GO)
+' ------------------------------
+Sub ShowCountdown()
+    Dim c As Shape
+    Dim i As Integer
+    Dim t As Double
+    
+    On Error Resume Next
+    Set c = Sheet1.Shapes("countdownLabel")
+    On Error GoTo 0
+    
+    If c Is Nothing Then
+        Set c = Sheet1.Shapes.AddTextbox(msoTextOrientationHorizontal, 120, 120, 250, 120)
+        c.Name = "countdownLabel"
+    End If
+    
+    With c
+        .TextFrame.HorizontalAlignment = xlHAlignCenter
+        .TextFrame.VerticalAlignment = xlVAlignCenter
+        .Fill.ForeColor.RGB = RGB(0, 0, 0)
+        .Fill.Transparency = 0.25
+        .Line.Visible = msoFalse
+        .TextFrame.Characters.Font.Size = 48
+        .TextFrame.Characters.Font.Color = RGB(255, 255, 255)
+        .Visible = True
+    End With
+    
+    ' 3 → 2 → 1
+    For i = 3 To 1 Step -1
+        c.TextFrame.Characters.Text = i
+        DoEvents
+        t = Timer
+        While Timer < t + 1
+            DoEvents
+        Wend
+    Next i
+    
+    ' GO!
+    c.TextFrame.Characters.Text = "GO!"
+    DoEvents
+    t = Timer
+    While Timer < t + 1
+        DoEvents
+    Wend
+    
+    c.Visible = False
+End Sub
+
+' ------------------------------
+' Start game
+' ------------------------------
+Sub StartGame()
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+    
+    ' Stop previous loop
+    On Error Resume Next
+    Application.OnTime nextFrame, "GameLoop", , False
+    On Error GoTo 0
+    
+    ' Clear old rocks
+    Dim sh As Shape
+    For Each sh In Sheet1.Shapes
+        If Left(sh.Name, 4) = "rock" And sh.Name <> "rockTemplate" Then
+            sh.Delete
+        End If
+    Next sh
+    
+    ' Reset variables
+    gameRunning = True
+    gravity = 1
+    jumpStrength = -8
+    velocity = 0
+    birdRotation = 0
+    rockSpeed = 5
+    frameCounter = 0
+    Set rocks = New Collection
+    
+    ' Reset bird
+    b.Left = 80
+    b.Top = 150
+    b.Rotation = 0
+    
+    ' Countdown first
+    ShowCountdown
+    
+    ' Start loop
+    ScheduleNextFrame
+End Sub
+
+' ------------------------------
+' Bird jump
+' ------------------------------
+Sub BirdJump()
+    If gameRunning Then
+        velocity = jumpStrength
+        birdRotation = -25
+        PlayJumpSound
+    End If
+End Sub
+
+' ------------------------------
+' Schedule next frame
+' ------------------------------
+Sub ScheduleNextFrame()
+    If gameRunning Then
+        nextFrame = Now + 0.05 / 86400   ' ~20 FPS
+        Application.OnTime nextFrame, "GameLoop"
+    End If
+End Sub
+
+' ------------------------------
+' Main game loop
+' ------------------------------
+Sub GameLoop()
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+    
+    DoEvents
+    
+    ' Physics
+    velocity = velocity + gravity
+    b.Top = b.Top + velocity
+    
+    ' Rotation
+    If velocity < 0 Then
+        birdRotation = birdRotation * 0.8
+    Else
+        birdRotation = WorksheetFunction.Min(birdRotation + 5, 60)
+    End If
+    b.Rotation = birdRotation
+    
+    ' Floor / ceiling
+    If b.Top < 0 Then b.Top = 0
+    If b.Top > 350 Then
+        b.Top = 350
+        GameOver
+        Exit Sub
+    End If
+    
+    MoveRocks
+    ScheduleNextFrame
+End Sub
+
+' ------------------------------
+' Move rocks
+' ------------------------------
+Sub MoveRocks()
+    Dim i As Long
+    Dim r As Shape
+    Dim b As Shape
+    Set b = Sheet1.Shapes("bird")
+    
+    For i = rocks.Count To 1 Step -1
+        Set r = rocks(i)
+        r.Left = r.Left - rockSpeed
+        
+        If r.Left + r.Width < 0 Then
+            r.Delete
+            rocks.Remove i
+        ElseIf IntersectShapes(b, r) Then
+            GameOver
+            Exit Sub
+        End If
+    Next i
+    
+    frameCounter = frameCounter + 1
+    If frameCounter Mod 30 = 0 Then SpawnRock
+End Sub
+
+' ------------------------------
+' Spawn rock
+' ------------------------------
+Sub SpawnRock()
+    Dim r As Shape
+    Set r = Sheet1.Shapes("rockTemplate").Duplicate
+    r.Name = "rock_" & Format(Timer * 100, "0")
+    r.Left = 500
+    r.Top = Int(Rnd() * 300)
+    r.Visible = True
+    rocks.Add r
+End Sub
+
+' ------------------------------
+' Collision detection
+' ------------------------------
+Function IntersectShapes(s1 As Shape, s2 As Shape) As Boolean
+    If s1.Left + s1.Width < s2.Left Then Exit Function
+    If s1.Left > s2.Left + s2.Width Then Exit Function
+    If s1.Top + s1.Height < s2.Top Then Exit Function
+    If s1.Top > s2.Top + s2.Height Then Exit Function
+    IntersectShapes = True
+End Function
+
+' ------------------------------
+' Game over
+' ------------------------------
+Sub GameOver()
+    gameRunning = False
+    MsgBox "Bird crashed!", vbExclamation
+End Sub
