@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Link Vault</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 500px; text-align: center; }
+        h2 { color: #4CAF50; margin-bottom: 20px; }
+        input[type="password"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #333; border-radius: 6px; background: #2c2c2c; color: white; box-sizing: border-box; }
+        button { background: #4CAF50; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { background: #45a049; }
+        .hidden { display: none; }
+        .link-card { background: #2c2c2c; border: 1px solid #383838; padding: 15px; margin-top: 15px; border-radius: 8px; text-align: left; }
+        .link-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; display: block; color: #bbb; }
+        .url-text { font-family: monospace; font-size: 12px; background: #121212; padding: 8px; border-radius: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 10px; border: 1px solid #444; }
+        .copy-btn { background: #2196F3; font-size: 12px; padding: 8px; width: auto; display: inline-block; }
+        .copy-btn:hover { background: #1e88e5; }
+        #error-msg { color: #ff5252; font-size: 14px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="lock-screen">
+        <h2>Vault Locked , reserved for creator</h2>
+        <input type="password" id="pass-input" placeholder="Enter password...">
+        <button onclick="unlock()">Unlock Vault</button>
+        <p id="error-msg" class="hidden">Incorrect Password!</p>
+    </div>
+
+    <div id="vault-content" class="hidden">
+        <h2>Saved Links</h2>
+        
+        <div class="link-card">
+            <span class="link-title">Digital Tablet Counting Machine</span>
+            <span class="url-text" id="link1">https://youtube.com/shorts/E15THBUz7bc?si=VcuyKQind0CuF65P</span>
+            <button class="copy-btn" onclick="copyToClipboard('link1')">Copy Link</button>
+        </div>
+
+        <div class="link-card">
+            <span class="link-title">Smart Gloves Technology</span>
+            <span class="url-text" id="link2">https://youtube.com/shorts/mMipOY0GrJw?si=LI7CJt7oEoPNmaDV</span>
+            <button class="copy-btn" onclick="copyToClipboard('link2')">Copy Link</button>
+        </div>
+
+        <div class="link-card">
+            <span class="link-title">Huawei Air Gesture Feature</span>
+            <span class="url-text" id="link3">https://youtube.com/shorts/6oagckH0-Fc?si=6HPQa-NOCfh97Ch2</span>
+            <button class="copy-btn" onclick="copyToClipboard('link3')">Copy Link</button>
+        </div>
+
+        <button style="margin-top: 25px; background: #555;" onclick="location.reload()">Lock Vault</button>
+    </div>
+</div>
+
+<script>
+    function unlock() {
+        const pass = document.getElementById('pass-input').value;
+        const correctPass = "green horse";
+        
+        if (pass === correctPass) {
+            document.getElementById('lock-screen').classList.add('hidden');
+            document.getElementById('vault-content').classList.remove('hidden');
+        } else {
+            document.getElementById('error-msg').classList.remove('hidden');
+        }
+    }
+
+    function copyToClipboard(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Link copied to clipboard!");
+        });
+    }
+
+    // Allow "Enter" key to trigger unlock
+    document.getElementById('pass-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            unlock();
+        }
+    });
+</script>
+
+</body>
+</html>
