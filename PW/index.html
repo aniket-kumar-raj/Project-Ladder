@@ -1,28 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sender - HandDrop</title>
+    <title>HandDrop - Sender</title>
     <style>
-        body { background: #111; color: white; font-family: sans-serif; text-align: center; }
-        .gallery img { width: 100px; border: 3px solid transparent; cursor: pointer; margin: 10px; transition: 0.2s; }
-        .gallery img.selected { border-color: #00ff00; transform: scale(1.1); }
-        video { border: 1px solid #444; width: 200px; height: 150px; border-radius: 8px; }
-        #status { font-size: 20px; color: yellow; margin: 10px; font-weight: bold; }
+        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        /* Phone Gallery UI */
+        .phone-mockup { width: 280px; height: 500px; background: #111; border: 8px solid #333; border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,255,0,0.1); }
+        .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); height: 100%; }
+        .slider-container img { width: 280px; height: 500px; object-fit: cover; flex-shrink: 0; }
+
+        /* Navigation Arrows */
+        .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: none; color: white; font-size: 30px; padding: 15px; cursor: pointer; z-index: 10; border-radius: 50%; }
+        .arrow:hover { background: rgba(0,255,0,0.4); }
+        #prev { left: 10px; }
+        #next { right: 10px; }
+
+        /* Camera overlay */
+        video { position: fixed; bottom: 20px; left: 20px; width: 120px; height: 90px; border: 2px solid #00ff00; border-radius: 10px; transform: scaleX(-1); }
+        #status-bar { position: absolute; top: 20px; width: 100%; text-align: center; font-weight: bold; color: #00ff00; text-shadow: 0 0 10px #000; z-index: 5; }
     </style>
 </head>
 <body>
 
-    <h2>1. Select Photo</h2>
-    <div class="gallery">
-        <img src="pic1.jpg" id="p1" onclick="selectPic('pic1.jpg', 'p1')" class="selected">
-        <img src="pic2.jpg" id="p2" onclick="selectPic('pic2.jpg', 'p2')">
-        <img src="pic3.jpg" id="p3" onclick="selectPic('pic3.jpg', 'p3')">
+    <div id="status-bar">SYSTEM READY</div>
+
+    <div class="phone-mockup">
+        <button class="arrow" id="prev" onclick="moveSlide(-1)">&#10094;</button>
+        <button class="arrow" id="next" onclick="moveSlide(1)">&#10095;</button>
+        
+        <div class="slider-container" id="slider">
+            <img src="pic1.jpg">
+            <img src="pic2.jpg">
+            <img src="pic3.jpg">
+        </div>
     </div>
 
-    <hr>
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" width="160" height="120" style="display:none"></canvas>
-    <div id="status">READY</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -42,19 +57,20 @@
     const db = getDatabase(app);
     const dbRef = ref(db, 'handshake');
 
-    let currentPhoto = "pic1.jpg";
+    let currentIndex = 0;
+    const photos = ["pic1.jpg", "pic2.jpg", "pic3.jpg"];
+    const slider = document.getElementById("slider");
 
-    // Make selectPic accessible to HTML
-    window.selectPic = (name, id) => {
-        currentPhoto = name;
-        document.querySelectorAll('img').forEach(img => img.classList.remove('selected'));
-        document.getElementById(id).classList.add('selected');
+    window.moveSlide = (direction) => {
+        currentIndex = (currentIndex + direction + photos.length) % photos.length;
+        slider.style.transform = `translateX(-${currentIndex * 280}px)`;
     };
 
+    // Camera Logic
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const statusText = document.getElementById("status");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const statusBar = document.getElementById("status-bar");
 
     navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
 
@@ -62,17 +78,19 @@
         ctx.drawImage(video, 0, 0, 160, 120);
         const pix = ctx.getImageData(0, 0, 160, 120).data;
         let count = 0;
-        for (let i = 0; i < pix.length; i += 8) {
+        for (let i = 0; i < pix.length; i += 12) { // Even faster skip for old CPU
             const r=pix[i], g=pix[i+1], b=pix[i+2], sum=r+g+b;
             if (r/sum > 0.4 && g/sum > 0.25 && sum > 150) count++;
         }
 
-        if (count > 800) {
-            statusText.innerText = "SENDER ACTIVE: " + currentPhoto;
-            update(dbRef, { lastImage: currentPhoto, isSenderActive: true });
+        if (count > 500) {
+            statusBar.innerText = "HOLDING SIGNAL...";
+            statusBar.style.color = "#00ff00";
+            update(dbRef, { lastImage: photos[currentIndex], isSenderActive: true });
         } else {
-            statusText.innerText = "PALM NOT DETECTED";
-            update(dbRef, { isSenderActive: faurllse });
+            statusBar.innerText = "READY TO SEND";
+            statusBar.style.color = "white";
+            update(dbRef, { isSenderActive: false });
         }
     }
     setInterval(detect, 250);
