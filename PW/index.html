@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sender - HandDrop</title>
+    <style>
+        body { background: #111; color: white; font-family: sans-serif; text-align: center; }
+        .gallery img { width: 100px; border: 3px solid transparent; cursor: pointer; margin: 10px; transition: 0.2s; }
+        .gallery img.selected { border-color: #00ff00; transform: scale(1.1); }
+        video { border: 1px solid #444; width: 200px; height: 150px; border-radius: 8px; }
+        #status { font-size: 20px; color: yellow; margin: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>1. Select Photo</h2>
+    <div class="gallery">
+        <img src="pic1.jpg" id="p1" onclick="selectPic('pic1.jpg', 'p1')" class="selected">
+        <img src="pic2.jpg" id="p2" onclick="selectPic('pic2.jpg', 'p2')">
+        <img src="pic3.jpg" id="p3" onclick="selectPic('pic3.jpg', 'p3')">
+    </div>
+
+    <hr>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" width="160" height="120" style="display:none"></canvas>
+    <div id="status">READY</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2PiIYxqoTTEYySNOpp8zyrsbc326ODEs",
+        authDomain: "handdrop.firebaseapp.com",
+        projectId: "handdrop",
+        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        storageBucket: "handdrop.firebasestorage.app",
+        messagingSenderId: "607985375710",
+        appId: "1:607985375710:web:6692a604777858179b654f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'handshake');
+
+    let currentPhoto = "pic1.jpg";
+
+    // Make selectPic accessible to HTML
+    window.selectPic = (name, id) => {
+        currentPhoto = name;
+        document.querySelectorAll('img').forEach(img => img.classList.remove('selected'));
+        document.getElementById(id).classList.add('selected');
+    };
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const statusText = document.getElementById("status");
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
+
+    function detect() {
+        ctx.drawImage(video, 0, 0, 160, 120);
+        const pix = ctx.getImageData(0, 0, 160, 120).data;
+        let count = 0;
+        for (let i = 0; i < pix.length; i += 8) {
+            const r=pix[i], g=pix[i+1], b=pix[i+2], sum=r+g+b;
+            if (r/sum > 0.4 && g/sum > 0.25 && sum > 150) count++;
+        }
+
+        if (count > 800) {
+            statusText.innerText = "SENDER ACTIVE: " + currentPhoto;
+            update(dbRef, { lastImage: currentPhoto, isSenderActive: true });
+        } else {
+            statusText.innerText = "PALM NOT DETECTED";
+            update(dbRef, { isSenderActive: faurllse });
+        }
+    }
+    setInterval(detect, 250);
+</script>
+</body>
+</html>
