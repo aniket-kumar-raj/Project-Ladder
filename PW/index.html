@@ -3,41 +3,54 @@
 <head>
     <title>HandDrop - Sender</title>
     <style>
-        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        
-        /* Phone Gallery UI */
-        .phone-mockup { width: 280px; height: 500px; background: #111; border: 8px solid #333; border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,255,0,0.1); }
-        .slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); height: 100%; }
-        .slider-container img { width: 280px; height: 500px; object-fit: cover; flex-shrink: 0; }
-
-        /* Navigation Arrows */
-        .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: none; color: white; font-size: 30px; padding: 15px; cursor: pointer; z-index: 10; border-radius: 50%; }
-        .arrow:hover { background: rgba(0,255,0,0.4); }
-        #prev { left: 10px; }
-        #next { right: 10px; }
-
-        /* Camera overlay */
-        video { position: fixed; bottom: 20px; left: 20px; width: 120px; height: 90px; border: 2px solid #00ff00; border-radius: 10px; transform: scaleX(-1); }
-        #status-bar { position: absolute; top: 20px; width: 100%; text-align: center; font-weight: bold; color: #00ff00; text-shadow: 0 0 10px #000; z-index: 5; }
+        body { 
+            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; overflow: hidden;
+        }
+        .phone-mockup { 
+            width: 280px; height: 500px; background: #111; 
+            border: 12px solid #222; border-radius: 40px; 
+            position: relative; overflow: hidden; box-shadow: 0 0 40px rgba(0,255,0,0.2);
+        }
+        .slider-container { 
+            display: flex; transition: transform 0.4s ease; height: 100%;
+        }
+        .slider-container img { 
+            width: 280px; height: 500px; object-fit: cover; flex-shrink: 0;
+        }
+        #status-bar { 
+            position: absolute; top: 30px; width: 100%; text-align: center; 
+            font-size: 15px; letter-spacing: 2px; color: #00ff00; z-index: 30; 
+        }
+        .arrow { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(0,0,0,0.7); border: none; color: #00ff00; 
+            font-size: 28px; padding: 12px 16px; cursor: pointer; z-index: 20; 
+            border-radius: 50%;
+        }
+        video { 
+            position: fixed; bottom: 20px; left: 20px; 
+            width: 140px; height: 100px; border: 3px solid #00ff00; 
+            border-radius: 12px; z-index: 5;
+        }
     </style>
 </head>
 <body>
-
-    <div id="status-bar">SYSTEM READY</div>
-
+    <div id="status-bar">PLACE GREEN HAND IN FRONT</div>
+    
     <div class="phone-mockup">
-        <button class="arrow" id="prev" onclick="moveSlide(-1)">&#10094;</button>
-        <button class="arrow" id="next" onclick="moveSlide(1)">&#10095;</button>
+        <button class="arrow" style="left:10px" onclick="moveSlide(-1)">&#10094;</button>
+        <button class="arrow" style="right:10px" onclick="moveSlide(1)">&#10095;</button>
         
         <div class="slider-container" id="slider">
-            <img src="pic1.jpg">
-            <img src="pic2.jpg">
-            <img src="pic3.jpg">
+            <img src="pic1.jpg" crossorigin="anonymous">
+            <img src="pic2.jpg" crossorigin="anonymous">
+            <img src="pic3.jpg" crossorigin="anonymous">
         </div>
     </div>
 
     <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" width="160" height="120" style="display:none"></canvas>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -47,7 +60,7 @@
         apiKey: "AIzaSyD2PiIYxqoTTEYySNOpp8zyrsbc326ODEs",
         authDomain: "handdrop.firebaseapp.com",
         projectId: "handdrop",
-        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app",
         storageBucket: "handdrop.firebasestorage.app",
         messagingSenderId: "607985375710",
         appId: "1:607985375710:web:6692a604777858179b654f"
@@ -58,42 +71,73 @@
     const dbRef = ref(db, 'handshake');
 
     let currentIndex = 0;
-    const photos = ["pic1.jpg", "pic2.jpg", "pic3.jpg"];
     const slider = document.getElementById("slider");
+    let isSending = false;
+    const statusBar = document.getElementById("status-bar");
 
     window.moveSlide = (direction) => {
-        currentIndex = (currentIndex + direction + photos.length) % photos.length;
+        if (isSending) return;
+        currentIndex = (currentIndex + direction + 3) % 3;
         slider.style.transform = `translateX(-${currentIndex * 280}px)`;
     };
 
-    // Camera Logic
     const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    const statusBar = document.getElementById("status-bar");
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => video.srcObject = stream)
+        .catch(err => console.error("Camera error:", err));
 
-    navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
+    function detectGreen() {
+        if (isSending) return;
 
-    function detect() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 160;
+        canvas.height = 120;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
         ctx.drawImage(video, 0, 0, 160, 120);
-        const pix = ctx.getImageData(0, 0, 160, 120).data;
-        let count = 0;
-        for (let i = 0; i < pix.length; i += 12) { // Even faster skip for old CPU
-            const r=pix[i], g=pix[i+1], b=pix[i+2], sum=r+g+b;
-            if (r/sum > 0.4 && g/sum > 0.25 && sum > 150) count++;
+        const data = ctx.getImageData(0, 0, 160, 120).data;
+
+        let greenCount = 0;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+
+            if (g > 55 && g > r * 1.35 && g > b * 1.35) {
+                greenCount++;
+            }
         }
 
-        if (count > 500) {
-            statusBar.innerText = "HOLDING SIGNAL...";
-            statusBar.style.color = "#00ff00";
-            update(dbRef, { lastImage: photos[currentIndex], isSenderActive: true });
+        console.log("Sender Green Count:", greenCount);   // Check in console (F12)
+
+        if (greenCount > 220) {
+            statusBar.innerText = "SENDING IMAGE...";
+            statusBar.style.color = "#00ff88";
+            sendImage();
         } else {
-            statusBar.innerText = "READY TO SEND";
-            statusBar.style.color = "white";
+            statusBar.innerText = `Green: ${greenCount} | SHOW GREEN HAND`;
+            statusBar.style.color = "#ffffff";
             update(dbRef, { isSenderActive: false });
         }
     }
-    setInterval(detect, 250);
+
+    function sendImage() {
+        if (isSending) return;
+        isSending = true;
+
+        const photos = ["pic1.jpg", "pic2.jpg", "pic3.jpg"];
+
+        update(dbRef, { 
+            lastImage: photos[currentIndex], 
+            isSenderActive: true 
+        }).then(() => {
+            statusBar.innerText = "✅ IMAGE SENT";
+            setTimeout(() => { isSending = false; }, 1500);
+        });
+    }
+
+    setInterval(detectGreen, 250);
 </script>
 </body>
 </html>
