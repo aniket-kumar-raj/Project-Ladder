@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Receiver - HandDrop</title>
+    <title>HandDrop - Receiver</title>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        
-        #frame { width: 320px; height: 500px; border: 4px solid #222; border-radius: 40px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #050505; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        
-        #received-img { width: 100%; height: 100%; object-fit: cover; display: none; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
-        #msg { font-size: 14px; color: #555; text-transform: uppercase; letter-spacing: 2px; text-align: center; padding: 20px; }
-        
-        video { position: fixed; bottom: 20px; right: 20px; width: 120px; height: 90px; border: 2px solid lime; border-radius: 10px; opacity: 0.8; }
-        #info { position: absolute; top: 30px; font-weight: bold; font-size: 12px; letter-spacing: 1px; }
+        body { 
+            background: #000; color: white; font-family: sans-serif; 
+            margin: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; height: 100vh;
+        }
+        #frame { 
+            width: 320px; height: 520px; border: 5px solid #222; 
+            border-radius: 45px; overflow: hidden; background: #050505;
+            box-shadow: 0 0 40px rgba(0,255,0,0.15);
+        }
+        #received-img { 
+            width: 100%; height: 100%; object-fit: cover; display: none;
+        }
+        #msg { 
+            text-align: center; padding: 30px; font-size: 15px; 
+            letter-spacing: 1.5px; color: #666;
+        }
+        video { 
+            position: fixed; bottom: 20px; right: 20px; 
+            width: 130px; height: 95px; border: 3px solid lime; 
+            border-radius: 12px;
+        }
+        #info { 
+            position: absolute; top: 30px; font-size: 13px; letter-spacing: 2px;
+        }
     </style>
 </head>
 <body>
-
-    <div id="info">WAITING...</div>
-
+    <div id="info">WAITING FOR SENDER...</div>
+    
     <div id="frame">
         <img id="received-img" src="">
-        <h2 id="msg">SHOW PALM TO<br>RECEIVE IMAGE</h2>
+        <h2 id="msg">SHOW GREEN MARKER<br>TO RECEIVE IMAGE</h2>
     </div>
 
     <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" width="160" height="120" style="display:none"></canvas>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -37,7 +48,7 @@
         apiKey: "AIzaSyD2PiIYxqoTTEYySNOpp8zyrsbc326ODEs",
         authDomain: "handdrop.firebaseapp.com",
         projectId: "handdrop",
-        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app",
         storageBucket: "handdrop.firebasestorage.app",
         messagingSenderId: "607985375710",
         appId: "1:607985375710:web:6692a604777858179b654f"
@@ -47,43 +58,56 @@
     const db = getDatabase(app);
     const dbRef = ref(db, 'handshake');
 
-    let lastDataFromSender = null;
+    let lastData = null;
 
     onValue(dbRef, (snapshot) => {
-        lastDataFromSender = snapshot.val();
-        const info = document.getElementById("info");
-        if (lastDataFromSender && lastDataFromSender.isSenderActive) {
-            info.innerText = "SENDER ACTIVE";
-            info.style.color = "lime";
-        } else {
-            info.innerText = "SENDER IDLE";
-            info.style.color = "#888";
-        }
+        lastData = snapshot.val();
     });
 
     const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+    const receivedImg = document.getElementById("received-img");
+    const msg = document.getElementById("msg");
+    const info = document.getElementById("info");
 
-    navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => video.srcObject = stream);
 
-    function detect() {
+    function detectGreen() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 160;
+        canvas.height = 120;
+        const ctx = canvas.getContext('2d');
+        
         ctx.drawImage(video, 0, 0, 160, 120);
-        const pix = ctx.getImageData(0, 0, 160, 120).data;
-        let count = 0;
-        for (let i = 0; i < pix.length; i += 8) {
-            const r=pix[i], g=pix[i+1], b=pix[i+2], sum=r+g+b;
-            if (r/sum > 0.4 && g/sum > 0.25 && sum > 150) count++;
+        const data = ctx.getImageData(0, 0, 160, 120).data;
+
+        let greenCount = 0;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+
+            if (g > 55 && g > r * 1.35 && g > b * 1.35) {
+                greenCount++;
+            }
         }
 
-        if (count > 800 && lastDataFromSender && lastDataFromSender.lastImage) {
-            const imgTag = document.getElementById("received-img");
-            imgTag.src = lastDataFromSender.lastImage;
-            imgTag.style.display = "block";
-            document.getElementById("msg").style.display = "none";
+        console.log("Receiver Green Count:", greenCount);
+
+        if (greenCount > 200 && lastData && lastData.lastImage) {
+            receivedImg.src = lastData.lastImage;
+            receivedImg.style.display = "block";
+            msg.style.display = "none";
+            info.innerText = "IMAGE RECEIVED ✓";
+            info.style.color = "lime";
+        } else {
+            info.innerText = `Green: ${greenCount}`;
+            info.style.color = "#888";
         }
     }
-    setInterval(detect, 250);
+
+    setInterval(detectGreen, 250);
 </script>
 </body>
 </html>
