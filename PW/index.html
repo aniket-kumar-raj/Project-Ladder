@@ -18,7 +18,16 @@
         }
         .slider-container img { 
             width: 280px; height: 500px; object-fit: cover; flex-shrink: 0;
+            transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1), opacity 2s ease;
         }
+        
+        /* 2-second illusion animation: scales down and flies upward/outwards */
+        .slider-container img.transferring {
+            transform: scale(0.1) translateY(-600px) rotate(15deg);
+            opacity: 0;
+            filter: brightness(2) drop-shadow(0 0 20px #00ff00);
+        }
+
         #status-bar { 
             position: absolute; top: 30px; width: 100%; text-align: center; 
             font-size: 15px; letter-spacing: 2px; color: #00ff00; z-index: 30; 
@@ -109,12 +118,10 @@
             }
         }
 
-        console.log("Sender Green Count:", greenCount);   // Check in console (F12)
+        console.log("Sender Green Count:", greenCount);
 
         if (greenCount > 220) {
-            statusBar.innerText = "SENDING IMAGE...";
-            statusBar.style.color = "#00ff88";
-            sendImage();
+            sendImageWithAnimation();
         } else {
             statusBar.innerText = `Green: ${greenCount} | SHOW GREEN HAND`;
             statusBar.style.color = "#ffffff";
@@ -122,19 +129,37 @@
         }
     }
 
-    function sendImage() {
+    function sendImageWithAnimation() {
         if (isSending) return;
         isSending = true;
 
-        const photos = ["pic1.jpg", "pic2.jpg", "pic3.jpg"];
+        statusBar.innerText = "✨ TRANSFERRING TO HAND... ✨";
+        statusBar.style.color = "#00ff88";
 
-        update(dbRef, { 
-            lastImage: photos[currentIndex], 
-            isSenderActive: true 
-        }).then(() => {
-            statusBar.innerText = "✅ IMAGE SENT";
-            setTimeout(() => { isSending = false; }, 1500);
-        });
+        // Find the image element currently being viewed
+        const allImages = slider.getElementsByTagName('img');
+        const activeImage = allImages[currentIndex];
+
+        // Apply the 2-second CSS animation class
+        activeImage.classList.add('transferring');
+
+        // Wait 2000ms (2 seconds) before making changes to the database
+        setTimeout(() => {
+            const photos = ["pic1.jpg", "pic2.jpg", "pic3.jpg"];
+
+            update(dbRef, { 
+                lastImage: photos[currentIndex], 
+                isSenderActive: true 
+            }).then(() => {
+                statusBar.innerText = "✅ IMAGE SENT TO HAND";
+                
+                // Keep the success state briefly, then reset the system and image styling
+                setTimeout(() => {
+                    activeImage.classList.remove('transferring');
+                    isSending = false;
+                }, 1500);
+            });
+        }, 2000); 
     }
 
     setInterval(detectGreen, 250);
