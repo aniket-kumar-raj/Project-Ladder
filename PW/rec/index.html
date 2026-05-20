@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HandDrop - Receiver</title>
+    <style>
+        body { 
+            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; height: 100vh; overflow: hidden;
+        }
+        #frame { 
+            width: 320px; height: 520px; border: 5px solid #222; 
+            border-radius: 45px; overflow: hidden; background: #050505;
+            box-shadow: 0 0 40px rgba(0,255,0,0.15); position: relative;
+        }
+        #display-canvas {
+            width: 100%; height: 100%; display: block; background: #111;
+            transition: opacity 1s ease; /* Smooth 1-second fade out */
+            opacity: 0;
+        }
+        #msg { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; font-size: 15px; letter-spacing: 1.5px; 
+            color: #666; z-index: 10; margin: 0;
+            transition: opacity 0.5s ease;
+        }
+        video { 
+            position: fixed; bottom: 20px; right: 20px; 
+            width: 130px; height: 95px; border: 3px solid lime; 
+            border-radius: 12px;
+        }
+        #info { 
+            position: absolute; top: 30px; font-size: 13px; letter-spacing: 2px; z-index: 20;
+        }
+
+        /* Unified Calibration Control Panel */
+        .control-panel {
+            position: fixed; top: 20px; left: 20px; background: rgba(15, 15, 15, 0.95);
+            padding: 15px; border-radius: 12px; border: 1px solid #00ff00;
+            z-index: 100; font-size: 13px; width: 230px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .control-panel .control-group { margin-bottom: 15px; }
+        .control-panel .control-group:last-child { margin-bottom: 0; }
+        .control-panel label { display: block; margin-bottom: 6px; color: #aaa; font-weight: 500; }
+        .control-panel input[type="range"] {
+            width: 100%; accent-color: #00ff00; margin-bottom: 4px; cursor: pointer;
+        }
+        .mode-text { text-align: right; font-size: 11px; color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <div class="control-group">
+            <label for="intensity-slider">Green Color Sensitivity:</label>
+            <input type="range" id="intensity-slider" min="1" max="100" value="50">
+            <div id="mode-label" class="mode-text">Mode: Standard Green</div>
+        </div>
+        
+        <div class="control-group">
+            <label for="pixel-slider">Required Marker Size:</label>
+            <input type="range" id="pixel-slider" min="50" max="1500" step="25" value="200">
+            <div id="pixel-label" class="mode-text" style="color: #00ff88;">Target: 200 px</div>
+        </div>
+    </div>
+
+    <div id="info">WAITING FOR SENDER...</div>
+    
+    <div id="frame">
+        <canvas id="display-canvas" width="320" height="520"></canvas>
+        <h2 id="msg">SHOW GREEN MARKER<br>TO RECEIVE IMAGE</h2>
+    </div>
+
+    <video id="video" autoplay playsinline></video>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2PiIYxqoTTEYySNOpp8zyrsbc326ODEs",
+        authDomain: "handdrop.firebaseapp.com",
+        projectId: "handdrop",
+        databaseURL: "https://handdrop-default-rtdb.asia-southeast1.firebasedatabase.app",
+        storageBucket: "handdrop.firebasestorage.app",
+        messagingSenderId: "607985375710",
+        appId: "1:607985375710:web:6692a604777858179b654f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'handshake');
+
+    let lastData = null;
+    let isCurrentlyDisplaying = false; // Prevents triggering multiple loops at the same time
+    let handWasRemoved = true;         // Requires user to pull hand away before re-triggering
+
+    onValue(dbRef, (snapshot) => {
+        lastData = snapshot.val();
+    });
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("display-canvas");
+    const ctx = canvas.getContext("2d");
+    const msg = document.getElementById("msg");
+    const info = document.getElementById("info");
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => video.srcObject = stream);
+
+    // Dynamic Threshold Configuration Parameters
+    let config = {
+        gMin: 55,
+        ratio: 1.35,
+        pixelCount: 200
+    };
+
+    const intensitySlider = document.getElementById('intensity-slider');
+    const modeLabel = document.getElementById('mode-label');
+    const pixelSlider = document.getElementById('pixel-slider');
+    const pixelLabel = document.getElementById('pixel-label');
+
+    intensitySlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        if (value < 40) {
+            config.gMin = 75 - (value * 0.5);
+            config.ratio = 1.45;
+            modeLabel.innerText = "Mode: Bright / Neon Green";
+            modeLabel.style.color = "#00ff00";
+        } else if (value >= 40 && value <= 70) {
+            config.gMin = 55;
+            config.ratio = 1.35;
+            modeLabel.innerText = "Mode: Standard Green";
+            modeLabel.style.color = "#00ff88";
+        } else {
+            const darkFactor = (value - 70) / 30;
+            config.gMin = Math.round(55 - (darkFactor * 35));
+            config.ratio = 1.35 - (darkFactor * 0.20);
+            modeLabel.innerText = "Mode: Deep & Dark Greens";
+            modeLabel.style.color = "#00aa55";
+        }
+    });
+
+    pixelSlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        config.pixelCount = value;
+        pixelLabel.innerText = `Target: ${value} px`;
+    });
+
+    // Block-by-Block Animation with dynamic timing logic
+    function revealImageBlockByBlock(imgSrc) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = imgSrc;
+
+        img.onload = () => {
+            msg.style.opacity = "0"; // Hide the placeholder text
+            canvas.style.opacity = "1"; // Show the canvas block sequence
+            info.innerText = "IMAGE RECEIVED ✓";
+            info.style.color = "lime";
+
+            const blockSize = 18; 
+            const cols = Math.ceil(320 / blockSize);
+            const rows = Math.ceil(520 / blockSize);
+            
+            const offscreen = document.createElement('canvas');
+            offscreen.width = 320;
+            offscreen.height = 520;
+            const offCtx = offscreen.getContext('2d');
+            offCtx.drawImage(img, 0, 0, 320, 520);
+
+            let blocks = [];
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    blocks.push({x: x * blockSize, y: y * blockSize});
+                }
+            }
+
+            blocks.sort(() => Math.random() - 0.5);
+
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index >= blocks.length) {
+                    clearInterval(interval);
+                    
+                    // --- Handle 5 Second Expiry and Fade-Out ---
+                    setTimeout(() => {
+                        canvas.style.opacity = "0"; // Trigger 1-second CSS transition fade-out
+                        
+                        setTimeout(() => {
+                            // Clear canvas context, restore default messaging UI states
+                            ctx.clearRect(0, 0, 320, 520);
+                            msg.style.opacity = "1";
+                            info.innerText = "WAITING FOR SENDER...";
+                            info.style.color = "white";
+                            isCurrentlyDisplaying = false; // Reset session lock
+                        }, 1000); // Wait for CSS opacity transition timeline to complete
+                        
+                    }, 5000); // Display time before disappearing
+                    return;
+                }
+
+                const b = blocks[index];
+                ctx.drawImage(
+                    offscreen,
+                    b.x, b.y, blockSize, blockSize,
+                    b.x, b.y, blockSize, blockSize
+                );
+                index++;
+            }, 5);
+        };
+    }
+
+    function detectGreen() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 160;
+        tempCanvas.height = 120;
+        const tCtx = tempCanvas.getContext('2d');
+        
+        tCtx.drawImage(video, 0, 0, 160, 120);
+        const data = tCtx.getImageData(0, 0, 160, 120).data;
+
+        let greenCount = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            if (g > config.gMin && g > r * config.ratio && g > b * config.ratio) {
+                greenCount++;
+            }
+        }
+
+        console.log(`Receiver Green Count: ${greenCount} | Current Setup -> gMin: ${config.gMin}, ratio: ${config.ratio.toFixed(2)}, target: ${config.pixelCount}`);
+
+        // Tracks hand proximity changes to allow repetitive triggering
+        if (greenCount < (config.pixelCount * 0.4)) {
+            handWasRemoved = true; // User pulled hand far enough away, reset input state
+        }
+
+        // Trigger condition validation rule setup
+        if (greenCount > config.pixelCount && !isCurrentlyDisplaying && handWasRemoved) {
+            if (lastData && lastData.lastImage) {
+                isCurrentlyDisplaying = true;
+                handWasRemoved = false; // Lock execution track until hand leaves frame area again
+                ctx.clearRect(0, 0, 320, 520);
+                revealImageBlockByBlock(lastData.lastImage);
+            }
+        }
+    }
+
+    setInterval(detectGreen, 250);
+</script>
+</body>
+</html>
